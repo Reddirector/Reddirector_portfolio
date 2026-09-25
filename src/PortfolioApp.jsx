@@ -251,7 +251,7 @@ function ProjectModal({ project, close }) {
     setReportReady(!isResearch)
     const completeCover = () => { if (isResearch) setReportReady(true) }
     if (reduceMotion()) { completeCover(); return undefined }
-    const reveal = gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: .55, ease: 'power3.inOut', onComplete: completeCover })
+    const reveal = gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: 3, ease: 'power3.inOut', onComplete: completeCover })
     return () => reveal.kill()
   }, [project, isResearch])
   useEffect(() => {

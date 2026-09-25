@@ -202,7 +202,7 @@ p { max-width: 65ch; }
 .sae-cover h2 { margin:1.4rem 0 1.2rem; font-family:var(--font-display); font-size:clamp(4rem,13vw,10rem); font-weight:900; line-height:.78; letter-spacing:-.045em; }
 .sae-cover > span { opacity:.72; }
 .sae-cover > i { display:block; width:min(17rem,64vw); height:2px; overflow:hidden; margin-top:2.1rem; background:rgb(0 0 0 / .2); }
-.sae-cover > i b { display:block; width:100%; height:100%; background:#050505; transform:scaleX(0); transform-origin:left; animation:sae-cover-progress .55s cubic-bezier(.65,0,.35,1) forwards; }
+.sae-cover > i b { display:block; width:100%; height:100%; background:#050505; transform:scaleX(0); transform-origin:left; animation:sae-cover-progress 3s cubic-bezier(.65,0,.35,1) forwards; }
 @keyframes sae-cover-progress { to { transform:scaleX(1); } }
 .sae-report-topbar { position:sticky; top:0; z-index:10; display:flex; min-height:5.5rem; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid rgb(255 255 255 / .12); background:rgb(5 5 5 / .91); padding:1rem clamp(1.25rem,5vw,4.5rem); backdrop-filter:blur(16px); }
 .sae-report-topbar p { margin:0; color:rgb(255 255 255 / .68); font-family:var(--font-mono); font-size:.64rem; letter-spacing:.1em; text-transform:uppercase; }
