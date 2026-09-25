@@ -461,7 +461,7 @@ function Now() {
       <div><p className="section-label">03 / In progress</p><h2 className="font-display mt-4 text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.72] tracking-[-.055em]">THE<br />WORKBENCH.</h2></div>
       <div className="divide-y divide-white/20">{content.now.map((item, index) => <article className="grid gap-4 py-8 sm:grid-cols-[4rem_1fr]" key={item.name}>
         <span className="font-mono text-[.68rem] text-white/50">0{index + 1}</span>
-        <div><h3 className={`font-display text-4xl font-black tracking-tight ${item.name === 'Pentagon' ? 'flex items-center gap-3' : ''}`}>{item.name === 'Pentagon' && <svg className="pentagon-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="m16 2 13 9-5 16H8L3 11l13-9Z" fill="var(--color-interactive)" fillOpacity=".13" stroke="currentColor" strokeWidth="1.5" /><path d="m16 2 0 14m13-5-13 5m8 11-8-11M8 27l8-11M3 11l13 5" stroke="currentColor" strokeWidth="1" /></svg>}{item.name}</h3><p className="mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
+        <div><h3 className="font-display text-4xl font-black tracking-tight">{item.name}</h3><p className="mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
       </article>)}</div>
     </div>
   </Reveal>

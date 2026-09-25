@@ -83,7 +83,6 @@ p { max-width: 65ch; }
 .project-card:focus-visible { outline: 3px solid #000; outline-offset: 4px; }
 .project-card:focus-visible .interactive-indicator { background: #000; color: #fff; }
 .project-feature { height:36rem; grid-template-rows:minmax(0,1fr); transition:background-color .4s ease; }
-.pentagon-mark { width:2rem; height:2rem; flex:none; color:var(--color-interactive); }
 .project-feature > .project-stage-copy,.project-feature > .project-visual { height:100%; min-height:0; min-width:0; }
 .project-stage-copy { animation:project-stage-in .42s cubic-bezier(.2,.75,.25,1) both; }
 @keyframes project-stage-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
