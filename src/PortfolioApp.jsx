@@ -7,7 +7,10 @@ import { content } from './content'
 gsap.registerPlugin(ScrollTrigger)
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const touchDevice = () => window.matchMedia('(pointer: coarse)').matches
-const logoLetterSizes = ['peak', 'step-one', 'step-two', 'step-three', 'smallest', 'smallest', 'rise-one', 'rise-two', 'rise-three', 'rise-four', 'peak']
+const logoLetters = [
+  ['R', 30, 24], ['E', 27, 22], ['D', 24, 20], ['I', 21, 18], ['R', 18, 16],
+  ['E', 18, 16], ['C', 21, 18], ['T', 24, 20], ['O', 27, 22], ['R', 30, 24],
+]
 const featuredProjects = content.projects
   .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
@@ -108,7 +111,7 @@ function EntryGate({ enter }) {
 }
 
 function Header({ shown }) {
-  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" className="brand-lockup font-display text-2xl font-black uppercase tracking-[.01em]">{[...'REDDIRECTOR'].map((letter, index) => <span className={`brand-letter brand-letter--${logoLetterSizes[index]}`} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#work">Work</a><a className="link-line" href="#method">Method</a><a className="link-line" href="#now">Now</a><a className="link-line" href="#contact">Contact</a></nav></header>
+  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" aria-label="REDIRECTOR" className="brand-lockup font-display font-black uppercase">{logoLetters.map(([letter, desktopSize, mobileSize], index) => <span className="brand-letter" style={{ '--brand-size': `${desktopSize}px`, '--brand-size-mobile': `${mobileSize}px` }} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#work">Work</a><a className="link-line" href="#method">Method</a><a className="link-line" href="#now">Now</a><a className="link-line" href="#contact">Contact</a></nav></header>
 }
 
 function Hero({ shown }) {

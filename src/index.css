@@ -75,17 +75,8 @@ p { max-width: 65ch; }
 .entry-action { padding: .8rem 1.1rem; border: 1px solid rgb(255 255 255 / .45); color: #fff; transition: background .2s ease, color .2s ease, border-color .2s ease; }
 .entry-action:hover, .entry-action:focus-visible { border-color: var(--color-interactive); background: var(--color-interactive); color: #000; }
 .site-nav { align-items: center; }
-.brand-lockup { white-space:nowrap; }
-.brand-letter { display:inline-block; line-height:1; vertical-align:baseline; }
-.brand-letter--peak { font-size:1.16em; }
-.brand-letter--step-one { font-size:1em; }
-.brand-letter--step-two { font-size:.92em; }
-.brand-letter--step-three { font-size:.86em; }
-.brand-letter--smallest { font-size:.82em; }
-.brand-letter--rise-one { font-size:.9em; }
-.brand-letter--rise-two { font-size:.98em; }
-.brand-letter--rise-three { font-size:1.05em; }
-.brand-letter--rise-four { font-size:1.11em; }
+.brand-lockup { display:inline-flex; align-items:baseline; gap:.04em; white-space:nowrap; letter-spacing:0 !important; }
+.brand-letter { display:inline-block; flex:none; font-size:var(--brand-size); font-weight:900; line-height:.84; }
 .project-card { transition:transform .32s cubic-bezier(.2,.75,.25,1),box-shadow .32s ease; }
 .project-card:hover { transform:translateY(-4px); }
 .project-card:active { transform:translateY(-1px) scale(.997); }
@@ -175,6 +166,7 @@ p { max-width: 65ch; }
   .site-header { padding-top:1.1rem; padding-bottom:1.1rem; }
   .site-header > a { font-size:1.2rem; }
   .site-nav { gap:.62rem; font-size:.62rem; }
+  .brand-letter { font-size:var(--brand-size-mobile); }
   .contact-trace { width:2.75rem; }
   #work h2,
   #method h2,
