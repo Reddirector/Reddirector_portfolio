@@ -146,11 +146,117 @@ function Hero({ shown }) {
   </section>
 }
 
+function SAEResearchReport() {
+  return <div className="sae-report">
+    <main className="sae-report-main">
+      <header className="sae-report-hero">
+        <p className="sae-report-kicker">Independent reproduction · Mechanistic interpretability</p>
+        <h2 id="project-title">TOWARDS<br /><span>MONOSEMANTICITY.</span></h2>
+        <p id="project-detail" className="sae-report-intro">A research record for testing whether sparse, overcomplete dictionaries make a model’s internal activations easier to inspect than the neuron basis alone.</p>
+        <div className="sae-report-links">
+          <a href="https://www.transformer-circuits.pub/2023/monosemantic-features/index.html" target="_blank" rel="noreferrer">Read the original paper <span aria-hidden="true">↗</span></a>
+          <a href="https://reddirector.github.io/Towards_Monosemanticity_Reproduction/" target="_blank" rel="noreferrer">Open the reproduction project <span aria-hidden="true">↗</span></a>
+        </div>
+      </header>
+
+      <section className="sae-report-metrics" aria-label="Reproduction snapshot">
+        <article><span>Architecture</span><strong>GELU-1L</strong><small>as listed in the project</small></article>
+        <article><span>SAE width</span><strong>2,048 <i>→</i> 4,096</strong><small>project-reported dimensions</small></article>
+        <article><span>Validation</span><strong>0.897562</strong><small>cosine similarity</small></article>
+        <article><span>Inactive features</span><strong>0.10%</strong><small>dead-feature rate reported</small></article>
+      </section>
+      <p className="sae-report-note">These are the figures currently published with this portfolio project—not results copied from Anthropic’s paper. The exact run configuration and metric protocol still need to be attached below.</p>
+
+      <section className="sae-report-section">
+        <div className="sae-report-section-label"><span>01</span><p>Research question</p></div>
+        <div className="sae-report-section-body">
+          <h3>Can a larger sparse basis reveal structure hidden by superposition?</h3>
+          <p>Neurons can respond to several unrelated patterns at once (polysemanticity). The paper studies whether an overcomplete dictionary can represent the same dense model activation as a sparse combination of more coherent learned features. The aim is not ordinary compression: it is a more useful unit of analysis for inspecting model computation.</p>
+          <div className="sae-report-flow" aria-label="Sparse autoencoder representation flow"><span>Model activation <b>x</b></span><i aria-hidden="true">→</i><span>SAE encoder</span><i aria-hidden="true">→</i><span>Sparse features <b>f</b></span><i aria-hidden="true">→</i><span>Decoder <b>D</b></span><i aria-hidden="true">→</i><span>Reconstruction <b>x̂</b></span></div>
+          <div className="sae-report-equation"><span>Dictionary view</span><strong>x ≈ Df</strong><p><b>x</b> is the model activation, <b>f</b> its sparse feature vector, and the columns of <b>D</b> are learned decoder directions.</p></div>
+        </div>
+      </section>
+
+      <section className="sae-report-section">
+        <div className="sae-report-section-label"><span>02</span><p>Method & objective</p></div>
+        <div className="sae-report-section-body">
+          <h3>Keep reconstruction useful; make the code sparse.</h3>
+          <p>The encoder maps activations into an overcomplete feature space; the decoder reconstructs them. Training balances reconstruction error against a penalty on feature activity:</p>
+          <div className="sae-report-equation sae-report-equation--wide"><span>Simplified objective</span><strong>L = L<sub>reconstruction</sub>(x, x̂) + λ · ‖f‖₁</strong><p>For a mean-squared reconstruction term, stronger sparsity pressure (λ) can make codes more selective, but may worsen reconstruction. The chosen trade-off and exact implementation belong in the run record.</p></div>
+          <ol className="sae-report-steps">
+            <li><b>Collect</b><span>Capture activations at a named model layer and hook point.</span></li>
+            <li><b>Fit</b><span>Train an overcomplete SAE with the documented reconstruction and sparsity losses.</span></li>
+            <li><b>Measure</b><span>Report held-out reconstruction, sparsity, and inactive-feature counts with definitions.</span></li>
+            <li><b>Inspect</b><span>Review activating examples, test feature coherence, then run controlled interventions.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section className="sae-report-section">
+        <div className="sae-report-section-label"><span>03</span><p>Reference vs reproduction</p></div>
+        <div className="sae-report-section-body">
+          <h3>Keep the paper baseline distinct from this run.</h3>
+          <div className="sae-report-compare">
+            <article><p className="sae-report-card-label">Original paper · reference</p><ul><li>One-layer transformer with a 512-neuron MLP layer.</li><li>Featured A/1 dictionary: 4,096 learned features.</li><li>Paper reports training on 8 billion activation datapoints.</li></ul><small>Reference-study facts; not reproduction measurements.</small></article>
+            <article><p className="sae-report-card-label">This project · current snapshot</p><ul><li>Architecture listed as GELU-1L.</li><li>SAE dimensions listed as 2,048 → 4,096.</li><li>Validation cosine similarity: 0.897562; dead features: 0.10%.</li></ul><small>Project figures; configuration details are not yet linked here.</small></article>
+          </div>
+          <p className="sae-report-caution">Comparability check: the listed 2,048-dimensional input and the paper’s 512-neuron MLP are not the same stated activation width. Until the model checkpoint, layer/hook, data, and preprocessing are documented, describe this as an independent/adapted reproduction—not a parameter-for-parameter replication.</p>
+        </div>
+      </section>
+
+      <section className="sae-report-section">
+        <div className="sae-report-section-label"><span>04</span><p>Run record</p></div>
+        <div className="sae-report-section-body">
+          <h3>Make the result independently checkable.</h3>
+          <p>Fill these from the actual training code, saved config, and evaluation logs. Keep unknown values explicit rather than estimating them.</p>
+          <dl className="sae-report-fields">
+            <div><dt>Base model / checkpoint</dt><dd>[ADD exact model identifier, revision, and source]</dd></div>
+            <div><dt>Activation source</dt><dd>[ADD dataset, split, token count, and collection procedure]</dd></div>
+            <div><dt>Layer / hook point</dt><dd>[ADD module name, tensor shape, and activation preprocessing]</dd></div>
+            <div><dt>SAE implementation</dt><dd>[ADD encoder nonlinearity, biases, decoder constraints, and code version]</dd></div>
+            <div><dt>Training configuration</dt><dd>[ADD optimizer, learning rate/schedule, batch size, steps, seed, and λ]</dd></div>
+            <div><dt>Evaluation protocol</dt><dd>[ADD validation split, cosine-similarity aggregation, and dead-feature threshold]</dd></div>
+            <div><dt>Artifacts / revision</dt><dd>[ADD config, checkpoint/log links, commit hash, and report date]</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section className="sae-report-section">
+        <div className="sae-report-section-label"><span>05</span><p>Analysis still to document</p></div>
+        <div className="sae-report-section-body">
+          <h3>Training metrics are only the first layer of evidence.</h3>
+          <div className="sae-report-checks">
+            <p><span>01</span><b>Feature interpretability</b><small>[ADD representative activating examples, counterexamples, and an evaluation rubric.]</small></p>
+            <p><span>02</span><b>Feature splitting</b><small>[ADD dictionary sizes, matched feature families, and comparison method.]</small></p>
+            <p><span>03</span><b>Intervention / steering</b><small>[ADD intervention, controls, observed effect, and limitations—or mark not run.]</small></p>
+            <p><span>04</span><b>Universality</b><small>[ADD comparison model, feature-alignment method, and evidence—or mark not run.]</small></p>
+          </div>
+          <p className="sae-report-note">No feature-level or intervention conclusions are asserted here: the supplied context describes these research goals, but does not include run evidence for them.</p>
+        </div>
+      </section>
+
+      <footer className="sae-report-footer"><span>Research file · 02 / SAE reproduction</span><span>Revision: [ADD DATE]</span><p>Primary source: Bricken et al., “Towards Monosemanticity: Decomposing Language Models With Dictionary Learning” (2023). The reproduction link above identifies the project; the run record is intentionally left open where evidence was not supplied.</p></footer>
+    </main>
+  </div>
+}
+
 function ProjectModal({ project, close }) {
   const panel = useRef(null)
   const overlay = useRef(null)
   const closeButton = useRef(null)
-  useLayoutEffect(() => { if (panel.current && !reduceMotion()) gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: .55, ease: 'power3.inOut' }) }, [project])
+  const [reportReady, setReportReady] = useState(false)
+  const isResearch = project?.name === 'SAE Reproduction'
+  useLayoutEffect(() => {
+    if (!project || !panel.current) return undefined
+    setReportReady(!isResearch)
+    const completeCover = () => { if (isResearch) setReportReady(true) }
+    if (reduceMotion()) { completeCover(); return undefined }
+    const reveal = gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: .55, ease: 'power3.inOut', onComplete: completeCover })
+    return () => reveal.kill()
+  }, [project, isResearch])
+  useEffect(() => {
+    if (isResearch && reportReady) closeButton.current?.focus({ preventScroll: true })
+  }, [isResearch, reportReady])
   useEffect(() => {
     if (!project) return undefined
     const previousFocus = document.activeElement
@@ -174,7 +280,33 @@ function ProjectModal({ project, close }) {
     }
   }, [project, close])
   if (!project) return null
-  return <div ref={overlay} className="project-overlay fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}><article ref={panel} className="relative min-h-full overflow-hidden bg-accent text-black"><i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" /><button ref={closeButton} onClick={close} type="button" className="icon-button absolute right-6 top-6 z-10" aria-label="Close project details">×</button><div className="relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20"><p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-black/70">{project.id} / {project.tag}</p><h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2><p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-black/80">{project.detail}</p>{project.link && <a className="modal-link mt-10 w-fit border-b border-black pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}</div></article></div>
+  const closeControl = <button ref={closeButton} onClick={close} type="button" className="icon-button" aria-label="Close project details">×</button>
+  return <div ref={overlay} data-lenis-prevent className="project-overlay fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
+    <article ref={panel} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : ''}` : 'bg-accent text-black'}`}>
+      {!isResearch && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />}
+      {isResearch && reportReady ? <>
+        <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction</p>{closeControl}</header>
+        <SAEResearchReport />
+      </> : isResearch ? <>
+        <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />
+        {closeControl}
+        <div className="sae-cover" role="status" aria-live="polite">
+          <p>Research archive / 02</p>
+          <h2 id="project-title" className="font-display">SAE<br />REPRODUCTION</h2>
+          <span id="project-detail">Opening case file · verifying report sections</span>
+          <i aria-hidden="true"><b /></i>
+        </div>
+      </> : <>
+        {closeControl}
+        <div className="relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
+          <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-black/70">{project.id} / {project.tag}</p>
+          <h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2>
+          <p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-black/80">{project.detail}</p>
+          {project.link && <a className="modal-link mt-10 w-fit border-b border-black pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}
+        </div>
+      </>}
+    </article>
+  </div>
 }
 
 function WorkScrollProgress() {
