@@ -892,17 +892,172 @@ function Work() {
   </>
 }
 
+const methodPhases = [
+  {
+    project: 'SAE Reproduction',
+    topic: 'Independent study / Mechanistic interpretability',
+    title: 'Are sparse features easier to interpret?',
+    paragraph: "I reproduced Anthropic's monosemanticity research independently, with no affiliation to Anthropic. Trained a GELU-1L sparse autoencoder (2048→4096 features) to test whether I actually understood the interpretability technique, not just the paper. Built and validated over 8 days (Aug 7–16, 2026).",
+    stats: [
+      { value: '0.897562', label: 'SAE validation cosine similarity' },
+      { value: '0.10%', label: 'SAE dead features' },
+    ],
+  },
+  {
+    project: 'Orchestration Engine',
+    topic: 'Systems / Task reliability',
+    title: 'What survives a failed task?',
+    paragraph: 'I hand-wrote an execution/orchestration engine from scratch, choosing systems depth and interview legibility over another AI-wrapper project. I read the failure paths first — retries, timeouts, crash isolation, dependency deadlocks — then built and tested each one before calling it done.',
+    stats: [
+      { value: '58/58', label: 'Orchestration tests passing' },
+      { value: 'v0.1.0', label: 'Apache 2.0 · Published' },
+    ],
+  },
+  {
+    project: 'Pentagon',
+    topic: 'In progress / Private project',
+    title: 'Which constraints shape the solution?',
+    paragraph: 'I started Pentagon with an open-ended problem and a goal of understanding its constraints before settling on a solution. Working through it has reinforced the value of testing assumptions early. It is still in progress, and I am keeping the details private until I can share them clearly.',
+    stats: [
+      { value: 'IN PROGRESS', label: 'Current project status' },
+      { value: 'PRIVATE', label: 'Project details' },
+    ],
+  },
+]
+
 function Method() {
   const section = useRef(null)
+  const phaseContent = useRef(null)
+  const [phaseIndex, setPhaseIndex] = useState(0)
+  const [transition, setTransition] = useState('hold')
+  const [sectionActive, setSectionActive] = useState(false)
+  const [autoSlide, setAutoSlide] = useState(true)
+  const phase = methodPhases[phaseIndex]
+
   useLayoutEffect(() => {
     if (reduceMotion()) return undefined
     const context = gsap.context(() => {
       gsap.from('.metric', { opacity: 0, y: 44, stagger: .12, scrollTrigger: { trigger: section.current, start: 'top 72%', once: true } })
-      gsap.utils.toArray('.metric-number').forEach((node) => ScrollTrigger.create({ trigger: section.current, start: 'top 62%', once: true, onEnter: () => { const state = { value: 0 }; const precision = Number(node.dataset.decimals || 0); gsap.to(state, { value: Number(node.dataset.value), duration: 1.4, ease: 'power2.out', onUpdate: () => { node.textContent = `${state.value.toFixed(precision)}${node.dataset.suffix}` } }) } }))
     }, section)
     return () => context.revert()
   }, [])
-  return <section ref={section} id="method" className="relative isolate overflow-hidden bg-accent px-5 py-24 text-black sm:px-[8vw] sm:py-[11vw]"><SectionGeometry tone="light" variant="method" /><div className="relative z-10"><div className="grid gap-8 lg:grid-cols-[.75fr_1.5fr] lg:items-end"><div><p className="font-mono text-[.7rem] uppercase tracking-[.1em]">02 / Method</p><p className="mt-5 max-w-xs text-sm leading-7 text-black/70">{content.philosophy}</p></div><h2 className="font-display text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.82] tracking-[-.035em]">READ FIRST.<br />TEST <span className="text-black/55">FAILURE.</span></h2></div><div className="mt-16 grid grid-cols-2 gap-px bg-black/25 lg:grid-cols-4">{content.metrics.map((metric) => <article className="metric min-h-60 bg-accent p-6" key={metric.label}><strong className="metric-number font-display mt-16 block text-[clamp(2.4rem,5vw,5rem)] font-black leading-[.82] tracking-[-.035em]" data-value={metric.value} data-suffix={metric.suffix} data-decimals={metric.decimals || 0}>{Number(metric.value).toFixed(metric.decimals || 0)}{metric.suffix}</strong><span className="mt-4 block max-w-36 font-mono text-[.66rem] uppercase leading-relaxed tracking-[.08em] text-black/70">{metric.label}</span></article>)}</div></div></section>
+
+  useEffect(() => {
+    const node = section.current
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setSectionActive(true)
+      return undefined
+    }
+    const observer = new IntersectionObserver(([entry]) => setSectionActive(entry.isIntersecting), { threshold: .25 })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (transition !== 'hold' || !sectionActive || !autoSlide) return undefined
+    const timer = window.setTimeout(() => setTransition('exit'), 15000)
+    return () => window.clearTimeout(timer)
+  }, [autoSlide, phaseIndex, sectionActive, transition])
+
+  useLayoutEffect(() => {
+    if (transition === 'hold') return undefined
+    if (reduceMotion()) {
+      if (transition === 'exit') {
+        setPhaseIndex((current) => (current + 1) % methodPhases.length)
+      }
+      setTransition('hold')
+      return undefined
+    }
+    const movingContent = phaseContent.current
+    if (transition === 'exit') {
+      const outgoing = gsap.to(movingContent, {
+        xPercent: -4,
+        y: -8,
+        autoAlpha: 0,
+        duration: .58,
+        ease: 'power2.in',
+        onComplete: () => {
+          setPhaseIndex((current) => (current + 1) % methodPhases.length)
+          setTransition('enter')
+        },
+      })
+      return () => outgoing.kill()
+    }
+    const incoming = gsap.fromTo(movingContent,
+      { xPercent: 4, y: 8, autoAlpha: 0 },
+      { xPercent: 0, y: 0, autoAlpha: 1, duration: .82, ease: 'power3.out', onComplete: () => setTransition('hold') },
+    )
+    return () => incoming.kill()
+  }, [phaseIndex, transition])
+
+  const choosePhase = (index) => {
+    if (index === phaseIndex) return
+    setPhaseIndex(index)
+    setTransition('enter')
+  }
+
+  return <section ref={section} id="method" className="relative isolate overflow-hidden bg-accent px-5 py-20 text-black sm:px-[8vw] sm:py-24 lg:py-28">
+    <SectionGeometry tone="light" variant="method" />
+    <div className="relative z-10 mx-auto max-w-7xl">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/25 pb-4">
+        <p className="font-mono text-[.68rem] uppercase tracking-[.1em]">02 / Method</p>
+        <p className="font-mono text-[.6rem] uppercase tracking-[.08em] text-black/65">Research · Systems · Exploration</p>
+      </header>
+
+      <div className="grid gap-10 pt-10 lg:grid-cols-[.9fr_1.1fr] lg:gap-14 lg:pt-14">
+        <div className="flex flex-col items-start">
+          <h2 className="font-display text-[clamp(2.7rem,6vw,6.4rem)] font-black leading-[.82] tracking-[-.035em]">
+            RESEARCH.<br />SYSTEMS.<br /><span className="text-black/55">EXPLORATION.</span>
+          </h2>
+          <p className="mt-7 max-w-md text-sm leading-7 text-black/75">{content.philosophy}</p>
+        </div>
+
+        <div>
+          <article className="method-panel relative overflow-hidden bg-black p-5 text-white sm:p-8" aria-label={`${phase.project} case note`}>
+            <div ref={phaseContent} className="method-phase-content" aria-live="polite" aria-atomic="true">
+              <div className="flex min-h-12 items-start justify-between gap-4 border-b border-white/20 pb-4">
+                <div>
+                  <p className="font-mono text-[.58rem] uppercase tracking-[.1em] text-accent">Case {String(phaseIndex + 1).padStart(2, '0')} / {String(methodPhases.length).padStart(2, '0')}</p>
+                  <p className="mt-1 font-display text-2xl font-bold leading-none">{phase.project}</p>
+                </div>
+                <button type="button" className="method-autoplay-toggle shrink-0 font-mono text-[.55rem] uppercase tracking-[.08em]" aria-label={autoSlide ? 'Pause automatic case rotation' : 'Resume automatic case rotation'} aria-pressed={!autoSlide} disabled={transition !== 'hold'} onClick={() => setAutoSlide((active) => !active)}>
+                  <span aria-hidden="true">{autoSlide ? 'Ⅱ' : '▶'}</span> {autoSlide ? 'Pause auto' : 'Resume auto'}
+                </button>
+              </div>
+
+              <div className="pt-7">
+                <p className="font-mono text-[.56rem] uppercase tracking-[.08em] text-white/55">{phase.topic}</p>
+                <h3 className="mt-3 max-w-xl font-display text-[clamp(2.5rem,4.7vw,4.5rem)] font-black leading-[.88] tracking-[-.025em]">{phase.title}</h3>
+                <p className="mt-5 max-w-2xl text-[.9rem] leading-[1.75] text-white/75">{phase.paragraph}</p>
+                <div className="mt-7 grid grid-cols-2 gap-px border border-white/15 bg-white/15">
+                  {phase.stats.map((stat) => <article className="metric min-h-32 bg-black p-4 sm:min-h-36 sm:p-5" key={`${phaseIndex}-${stat.label}`}>
+                    <strong className="metric-number font-display block break-words text-[clamp(1.55rem,3.3vw,3rem)] font-black leading-[.85] tracking-[-.03em]">{stat.value}</strong>
+                    <span className="mt-3 block max-w-40 font-mono text-[.55rem] uppercase leading-relaxed tracking-[.07em] text-white/60">{stat.label}</span>
+                  </article>)}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7 border-t border-white/20 pt-4">
+              <div className="mb-2 flex justify-between gap-3 font-mono text-[.54rem] uppercase tracking-[.07em] text-white/55">
+                <span>{autoSlide ? 'Next case in 15 seconds' : 'Auto slide paused'}</span><span>{String(phaseIndex + 1).padStart(2, '0')} / {String(methodPhases.length).padStart(2, '0')}</span>
+              </div>
+              <div className="method-progress" aria-hidden="true">
+                <span key={`${phaseIndex}-${sectionActive}-${transition}-${autoSlide}`} className={`method-progress-fill ${sectionActive && transition === 'hold' && autoSlide ? 'is-running' : ''}`} />
+              </div>
+            </div>
+          </article>
+
+          <div className="method-topic-picker mt-3 grid grid-cols-3 gap-2" role="group" aria-label="Choose a case">
+            {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-black/30 px-2 py-3 text-left transition-colors" key={item.project}>
+              <span className="block font-mono text-[.53rem] uppercase tracking-[.06em] opacity-65">0{index + 1}</span>
+              <span className="mt-1 block font-display text-base font-bold leading-[.95] sm:text-lg">{item.project}</span>
+            </button>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 }
 
 function Now() {
