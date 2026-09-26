@@ -16,6 +16,6 @@ export const content = {
   now: [
     { name: 'Orchestration Engine', text: 'I’m building a first-principles Python workflow engine. The current project notes report 58 passing tests, a durable SQLite event log, and a deliberately small public API.' },
     { name: 'Pentagon', text: 'Private project. I can share more when the details are cleared for release.' },
-    { name: 'Shipped side work', text: 'Megit and ValtSky were built quickly with AI assistance. I keep them separate from my systems and research work.' },
+    { name: 'ValtSky', text: 'A Kotlin Android backup app built with the Telegram Bot API and AI assistance.' },
   ],
 }
