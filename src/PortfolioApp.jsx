@@ -14,6 +14,29 @@ const logoLetters = [
 const featuredProjects = content.projects
   .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
+const createOeWaypoints = () => {
+  const stars = []
+  let attempts = 0
+  while (stars.length < 34 && attempts < 1800) {
+    attempts += 1
+    const candidate = {
+      x: 20 + Math.random() * 960,
+      y: 18 + Math.random() * 524,
+      radius: Math.random() < .16 ? 2.15 : 1.45,
+      opacity: .42 + Math.random() * .34,
+    }
+    if (stars.every((star) => Math.hypot(star.x - candidate.x, star.y - candidate.y) > 46)) stars.push(candidate)
+  }
+  return stars
+}
+const createOeConstellation = () => Array.from({ length: 88 }, () => ({
+  x: 8 + Math.random() * 984,
+  y: 8 + Math.random() * 544,
+  radius: Math.random() > .94 ? 1.8 : Math.random() > .65 ? 1.15 : .72,
+  opacity: .16 + Math.random() * .34,
+}))
+const oeWaypoints = createOeWaypoints()
+const oeConstellationStars = createOeConstellation()
 
 function useSmoothScroll() {
   useEffect(() => {
@@ -240,6 +263,200 @@ function SAEResearchReport() {
   </div>
 }
 
+const ORCHESTRATION_REPO = 'https://github.com/Reddirector/Orchestration_Engine'
+
+function OrchestrationDependencyGraph() {
+  return <figure className="oe-dependency-graph">
+    <svg viewBox="0 0 920 280" role="img" aria-labelledby="oe-graph-title">
+      <title id="oe-graph-title">Two independent tasks run in the same scheduling pass; a third waits for both to succeed.</title>
+      <rect className="oe-graph-card" x="24" y="42" width="276" height="74" rx="2" />
+      <rect className="oe-graph-card" x="24" y="164" width="276" height="74" rx="2" />
+      <rect className="oe-graph-card oe-graph-card--target" x="610" y="103" width="286" height="74" rx="2" />
+      <path className="oe-graph-edge oe-graph-edge--a" d="M300 79 C430 79 470 123 610 140" />
+      <path className="oe-graph-edge oe-graph-edge--b" d="M300 201 C430 201 470 157 610 140" />
+      <circle className="oe-graph-node" cx="300" cy="79" r="6" />
+      <circle className="oe-graph-node oe-graph-node--delayed" cx="300" cy="201" r="6" />
+      <circle className="oe-graph-node oe-graph-node--target" cx="610" cy="140" r="7" />
+      <text className="oe-graph-index" x="42" y="68">TASK 01</text>
+      <text className="oe-graph-label" x="42" y="96">Independent A</text>
+      <text className="oe-graph-index" x="42" y="190">TASK 02</text>
+      <text className="oe-graph-label" x="42" y="218">Independent B</text>
+      <text className="oe-graph-index" x="632" y="129">TASK 03 · DEPENDS ON BOTH</text>
+      <text className="oe-graph-label" x="632" y="157">Runs after success</text>
+    </svg>
+    <figcaption>Two ready branches can run in one scheduling pass. The dependent task becomes eligible only after both report <code>SUCCEEDED</code>.</figcaption>
+  </figure>
+}
+
+function OrchestrationEngineReport() {
+  const report = useRef(null)
+  const transitionStates = ['PENDING', 'READY', 'RUNNING', 'SUCCEEDED', 'FAILED', 'RETRY_WAIT', 'CANCELLED']
+  const testSubjects = [
+    ['State machine', 'Validate legal task transitions and persist each transition before changing in-memory state.'],
+    ['Dependency scheduler', 'Run independent tasks in one pass; hold a dependent task until every dependency succeeds.'],
+    ['Retries and timeouts', 'Apply task-level retry policies; route timeout failures through the same retry budget.'],
+    ['Failure propagation', 'Cancel direct and transitive dependents, while unaffected branches finish.'],
+    ['SQLite history', 'Append ordered task events, including retry attempts, under a required workflow_id.'],
+    ['End-to-end use', 'Write a workflow JSON file and run it through the public entrypoint, not only internal helpers.'],
+  ]
+  useLayoutEffect(() => {
+    const root = report.current
+    const scope = root?.closest('.oe-report-panel')
+    if (!root || !scope || reduceMotion()) return undefined
+      const scroller = scope.closest('.project-overlay')
+      const context = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: 'power2.out' } })
+        .fromTo('.oe-report-topbar p', { autoAlpha: 0, y: -8 }, { autoAlpha: 1, y: 0, duration: .35 })
+        .fromTo('.oe-report-topbar .icon-button', { scale: .9 }, { scale: 1, duration: .32 }, '<')
+        .fromTo('.oe-report-kicker', { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: .38 }, '-=.12')
+        .fromTo('.oe-report-hero h2', { autoAlpha: 0, y: 20, clipPath: 'inset(0 0 18% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .68, ease: 'power3.out' }, '-=.08')
+        .fromTo('.oe-report-intro', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .46 }, '-=.28')
+        .fromTo('.oe-report-links a', { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: .3, stagger: .07 }, '-=.18')
+        .fromTo('.oe-report-metrics article', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .075 }, '-=.08')
+        .fromTo('.oe-report-note', { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: .32 }, '-=.1')
+
+      gsap.utils.toArray('.oe-report-section', root).forEach((section) => {
+        const parts = [section.querySelector('.oe-report-section-label'), section.querySelector('.oe-report-section-body')].filter(Boolean)
+        gsap.fromTo(parts, { autoAlpha: 0, y: 18 }, {
+          autoAlpha: 1, y: 0, duration: .52, stagger: .11, ease: 'power2.out',
+          scrollTrigger: { trigger: section, scroller, start: 'top 82%', once: true },
+        })
+      })
+
+      const graph = root.querySelector('.oe-dependency-graph')
+      if (graph) {
+        const edges = [...graph.querySelectorAll('.oe-graph-edge')]
+        const nodes = [...graph.querySelectorAll('.oe-graph-node')]
+        edges.forEach((edge) => {
+          const length = edge.getTotalLength()
+          gsap.set(edge, { strokeDasharray: length, strokeDashoffset: length })
+        })
+        gsap.set(nodes, { scale: 0, transformOrigin: 'center center' })
+        const graphTimeline = gsap.timeline({ scrollTrigger: { trigger: graph, scroller, start: 'top 78%', once: true } })
+        edges.forEach((edge, index) => graphTimeline.to(edge, { strokeDashoffset: 0, duration: .72, ease: 'power1.inOut' }, index * .12))
+        graphTimeline.to(nodes, { scale: 1, duration: .3, stagger: .12, ease: 'power2.out' }, '-=.12')
+      }
+
+      const stateMachine = root.querySelector('.oe-state-machine')
+      if (stateMachine) {
+        const states = [...stateMachine.querySelectorAll('.oe-state-path .oe-state-chip')]
+        const stateTimeline = gsap.timeline({ scrollTrigger: { trigger: stateMachine, scroller, start: 'top 82%', once: true } })
+        states.forEach((state, index) => {
+          stateTimeline
+            .to(state, { color: '#B7FF00', borderColor: '#B7FF00', backgroundColor: 'rgba(183,255,0,.16)', duration: .2 }, index * .34)
+            .to(state, { color: 'rgba(255,255,255,.82)', borderColor: 'rgba(183,255,0,.34)', backgroundColor: 'rgba(183,255,0,.045)', duration: .3 }, index * .34 + .2)
+        })
+      }
+
+      const durability = root.querySelector('.oe-durability-flow')
+      if (durability) {
+        const steps = [...durability.querySelectorAll('span')]
+        const arrows = [...durability.querySelectorAll('i')]
+        gsap.set([...steps, ...arrows], { autoAlpha: 0, y: 6 })
+        gsap.timeline({ scrollTrigger: { trigger: durability, scroller, start: 'top 84%', once: true } })
+          .to(steps, { autoAlpha: 1, y: 0, duration: .34, stagger: .22, ease: 'power2.out' })
+          .to(arrows, { autoAlpha: 1, y: 0, duration: .24, stagger: .22, ease: 'power2.out' }, '-=.58')
+      }
+
+      const footer = root.querySelector('.oe-report-footer')
+      if (footer) gsap.fromTo(footer, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .5, scrollTrigger: { trigger: footer, scroller, start: 'top 90%', once: true } })
+    }, scope)
+    ScrollTrigger.refresh()
+    return () => context.revert()
+  }, [])
+  return <div className="oe-report" ref={report}>
+    <main className="oe-report-main">
+      <header className="oe-report-hero">
+        <p className="oe-report-kicker">Independent systems project · Python workflow orchestration</p>
+        <h2 id="project-title">A WORKFLOW ENGINE<br /><span>FROM FIRST PRINCIPLES.</span></h2>
+        <p id="project-detail" className="oe-report-intro">I designed and built the state machine, scheduler, retries, failure handling, persistence layer, and public API by hand. The point was to understand why orchestration systems make these trade-offs, not just call one as a black box.</p>
+        <div className="oe-report-links">
+          <a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer">Open source repository <span aria-hidden="true">↗</span></a>
+          <a href={`${ORCHESTRATION_REPO}/blob/main/README.md`} target="_blank" rel="noreferrer">Read setup and API notes <span aria-hidden="true">↗</span></a>
+          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Apache 2.0 license <span aria-hidden="true">↗</span></a>
+        </div>
+      </header>
+
+      <section className="oe-report-metrics" aria-label="Project snapshot">
+        <article><span>Project version</span><strong>v0.1.0</strong><small>Stage 1 of a planned six-stage rollout</small></article>
+        <article><span>Automated tests</span><strong>58 / 58</strong><small>All passing in the supplied project notes</small></article>
+        <article><span>Runtime dependencies</span><strong>0</strong><small>Python standard library only</small></article>
+        <article><span>Definition format</span><strong>JSON</strong><small>Intent separated from runtime state</small></article>
+      </section>
+      <p className="oe-report-note">The supplied project notes identify v0.1.0 as the current version; no GitHub Release is listed for it.</p>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>01</span><p>Why build it this way</p></div>
+        <div className="oe-report-section-body">
+          <h3>Make the decisions visible, not hidden behind a framework.</h3>
+          <p>Orchestration libraries are useful, but they can make scheduling, retry, and durability behavior easy to take for granted. This solo project implements those pieces directly, as a small dependency-free system for multi-step jobs where tasks have prerequisites, can fail transiently, and need a durable history.</p>
+          <div className="oe-report-facts"><p><span>01 / Build approach</span><b>State machine, scheduler, retries, persistence, and public API implemented from first principles.</b></p><p><span>02 / Runtime</span><b>Python 3.12+ with sqlite3, concurrent.futures, dataclasses, and enum.</b></p><p><span>03 / Tooling</span><b>uv for environments and packaging; pytest, ruff, and strict mypy for checks.</b></p></div>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>02</span><p>Scheduling model</p></div>
+        <div className="oe-report-section-body">
+          <h3>A dependency graph, not a fixed sequence.</h3>
+          <p>A task is ready only when every dependency has succeeded. Independent ready tasks can be scheduled together; a task that depends on both waits for both.</p>
+          <OrchestrationDependencyGraph />
+          <div className="oe-state-machine"><div className="oe-state-machine-heading"><span>Task lifecycle</span><small>Transitions are validated before they are accepted</small></div><div className="oe-state-list"><div className="oe-state-path"><span className="oe-state-chip">PENDING</span><i aria-hidden="true">→</i><span className="oe-state-chip">READY</span><i aria-hidden="true">→</i><span className="oe-state-chip">RUNNING</span></div><div className="oe-state-outcomes"><small>Possible outcomes</small><div>{transitionStates.slice(3).map((state) => <span className="oe-state-chip oe-state-chip--branch" key={state}>{state}</span>)}</div></div></div></div>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>03</span><p>Durability & failure</p></div>
+        <div className="oe-report-section-body">
+          <h3>Record the transition before advancing live state.</h3>
+          <p>Every task transition is appended to the SQLite <code>task_events</code> log before the in-memory state is updated. If the write fails, the live state does not move ahead of its durable history. Events are ordered, include retry attempts, and are scoped to a required <code>workflow_id</code>.</p>
+          <div className="oe-durability-flow" aria-label="State transition persistence order"><span>Validate transition</span><i aria-hidden="true">→</i><span>Append SQLite event</span><i aria-hidden="true">→</i><span>Update live state</span></div>
+          <div className="oe-report-checks"><article><span>RETRY</span><p>A timeout uses the task's retry budget, as an ordinary execution failure does.</p></article><article><span>PROPAGATE</span><p>When retries are exhausted, dependent tasks are cancelled, including transitive dependents.</p></article><article><span>FINISH</span><p>The workflow becomes failed only when every task is terminal; unaffected branches can still complete.</p></article></div>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>04</span><p>Verification record</p></div>
+        <div className="oe-report-section-body">
+          <h3>What was checked, and how close it gets to real use.</h3>
+          <p>The supplied build notes report 58 automated tests passing. They also describe checks beyond isolated unit tests:</p>
+          <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Evidence in the project notes</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
+          <div className="oe-verification-strip"><p><b>01 / Built wheel</b><span>Installed into a clean virtual environment; public API imports checked from the installed package.</span></p><p><b>02 / Outside consumer</b><span>A separate project and environment ran a three-task non-linear workflow end to end.</span></p><p><b>03 / Package metadata</b><span>License and packaging metadata checked from the built wheel itself.</span></p></div>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>05</span><p>API & scope</p></div>
+        <div className="oe-report-section-body">
+          <h3>A small public surface; safety-sensitive mechanics stay internal.</h3>
+          <p>The public API covers task and workflow models, retry and status types, workflow execution and JSON loading, status/history reads, and SQLite connection access. Raw transition and scheduling helpers remain internal because calling them directly would bypass state validation.</p>
+          <div className="oe-api-list"><code>Task · Workflow · RetryPolicy</code><code>TaskState · WorkflowStatus</code><code>run_workflow · run_workflow_from_file</code><code>load_workflow_from_json</code><code>get_workflow_status · get_workflow_history</code><code>get_connection</code></div>
+          <p>Workflow definitions are JSON data. They describe identity and task intent, but exclude runtime state; the engine tracks that separately after a run starts.</p>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>06</span><p>Bug that changed the design</p></div>
+        <div className="oe-report-section-body">
+          <h3>A passing test suite had missed a real dependency deadlock.</h3>
+          <p>For six days, task completion helpers updated each <code>Task</code> object but not the separate <code>task_states</code> map the scheduler reads. Existing tests populated that map by hand, so they skipped the faulty execution path. Manual end-to-end reasoning exposed the deadlock; the completion, failure, and retry paths were fixed to update the scheduler's state as part of the transition.</p>
+          <p className="oe-report-callout">The lesson I took from it: test the public execution path too. A green unit suite is not proof that the scheduler sees the state the task object claims to have.</p>
+        </div>
+      </section>
+
+      <section className="oe-report-section">
+        <div className="oe-report-section-label"><span>07</span><p>Current boundaries</p></div>
+        <div className="oe-report-section-body">
+          <h3>Stage 1 is intentionally small, not finished.</h3>
+          <p>The plan has six stages. The current v0.1.0 scope is the minimal packaged and publicly showable engine. Performance and cleanup work, a thin CLI, and maintenance are later steps.</p>
+          <div className="oe-limit-list"><p><span>01</span><b>Timeout default</b><small>Current per-task default is short for realistic LLM or API calls; it needs reconsidering.</small></p><p><span>02</span><b>Database location</b><small>The database path is fixed and relative rather than configurable per consumer.</small></p><p><span>03</span><b>CLI</b><small>Planned as a wrapper over the stable library API; not included in this stage.</small></p></div>
+        </div>
+      </section>
+
+      <footer className="oe-report-footer"><span>01 / Orchestration Engine</span><span>v0.1.0 · Stage 1 / 6</span><p>Source for this case file: the supplied project context and the linked repository. The project notes are the source for the 58-test and isolated-install claims above.</p><a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer">github.com/Reddirector/Orchestration_Engine ↗</a></footer>
+    </main>
+  </div>
+}
+
 function ProjectModal({ project, close, openOrigin }) {
   const panel = useRef(null)
   const overlay = useRef(null)
@@ -249,15 +466,31 @@ function ProjectModal({ project, close, openOrigin }) {
   const [reportReady, setReportReady] = useState(false)
   const [transitionDone, setTransitionDone] = useState(false)
   const isResearch = project?.name === 'SAE Reproduction'
+  const isOrchestration = project?.name === 'Orchestration Engine'
+  const usesVenom = isResearch || isOrchestration
   useLayoutEffect(() => {
     if (!project || !panel.current) return undefined
-    if (isResearch) {
+    if (usesVenom) {
       setReportReady(false)
       setTransitionDone(false)
       if (reduceMotion() || !venom.current) {
         setReportReady(true)
         setTransitionDone(true)
         return undefined
+      }
+      if (isOrchestration) {
+        gsap.set(venom.current, { scale: 0, rotation: -8, autoAlpha: 1, transformOrigin: '50% 50%' })
+        gsap.set(venomLabel.current, { autoAlpha: 0, y: 10 })
+        const timeline = gsap.timeline({ onComplete: () => setTransitionDone(true) })
+        timeline
+          .to(venom.current, { scale: 1, rotation: 0, duration: .82, ease: 'power3.out' }, 0)
+          .call(() => setReportReady(true), null, .82)
+          .to(venomLabel.current, { autoAlpha: 1, y: 0, duration: .24, ease: 'power2.out' }, .9)
+          .to({}, { duration: .62 }, 1.14)
+          .to(venomLabel.current, { autoAlpha: 0, y: -5, duration: .16 }, 1.76)
+          .to(venom.current, { scale: 0, rotation: 8, duration: .98, ease: 'power3.in' }, 1.76)
+          .set(venom.current, { autoAlpha: 0 }, 2.74)
+        return () => timeline.kill()
       }
       gsap.set(venom.current, { scale: 0, autoAlpha: 1, transformOrigin: '50% 50%' })
       gsap.set(venomLabel.current, { autoAlpha: 0 })
@@ -267,9 +500,9 @@ function ProjectModal({ project, close, openOrigin }) {
         .call(() => setReportReady(true), null, 1.15)
         .to(venomLabel.current, { autoAlpha: 1, duration: .2 }, 1.15)
         .to({}, { duration: .45 }, 1.35)
-        .to(venomLabel.current, { autoAlpha: 0, duration: .15 }, 1.8)
-        .to(venom.current, { scale: 0, duration: 1.2, ease: 'power3.inOut' }, 1.8)
-        .set(venom.current, { autoAlpha: 0 }, 3)
+      .to(venomLabel.current, { autoAlpha: 0, duration: .15 }, 1.8)
+      .to(venom.current, { scale: 0, duration: 1.2, ease: 'power3.inOut' }, 1.8)
+      .set(venom.current, { autoAlpha: 0 }, 3)
       return () => timeline.kill()
     }
     setReportReady(true)
@@ -277,16 +510,16 @@ function ProjectModal({ project, close, openOrigin }) {
     if (reduceMotion()) return undefined
     const reveal = gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: .55, ease: 'power3.inOut' })
     return () => reveal.kill()
-  }, [project, isResearch, openOrigin])
+  }, [project, usesVenom, openOrigin])
   useEffect(() => {
-    if (isResearch && reportReady) closeButton.current?.focus({ preventScroll: true })
-  }, [isResearch, reportReady])
+    if (usesVenom && reportReady) closeButton.current?.focus({ preventScroll: true })
+  }, [usesVenom, reportReady])
   useEffect(() => {
     if (!project) return undefined
     const previousFocus = document.activeElement
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    if (isResearch && !reportReady) overlay.current?.focus({ preventScroll: true })
+    if (usesVenom && !reportReady) overlay.current?.focus({ preventScroll: true })
     else closeButton.current?.focus({ preventScroll: true })
     const onKeyDown = (event) => {
       if (event.key === 'Escape') { event.preventDefault(); close(); return }
@@ -303,20 +536,23 @@ function ProjectModal({ project, close, openOrigin }) {
       document.removeEventListener('keydown', onKeyDown)
       if (previousFocus && document.contains(previousFocus)) previousFocus.focus()
     }
-  }, [project, close])
+  }, [project, close, usesVenom, reportReady])
   if (!project) return null
   const closeControl = <button ref={closeButton} onClick={close} type="button" className="icon-button" aria-label="Close project details">×</button>
-  return <div ref={overlay} tabIndex="-1" data-lenis-prevent className={`project-overlay fixed inset-0 z-50 overflow-y-auto ${isResearch ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
-    {isResearch && !transitionDone && <div className="sr-only">
-      <div role="status" aria-live="polite">{reportReady ? 'SAE research report ready.' : 'Opening SAE research report.'}</div>
-      {!reportReady && <><h2 id="project-title">SAE Reproduction</h2><p id="project-detail">Opening the sparse autoencoder research case study.</p></>}
+  return <div ref={overlay} tabIndex="-1" data-lenis-prevent className={`project-overlay fixed inset-0 z-50 overflow-y-auto ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
+    {usesVenom && !transitionDone && <div className="sr-only">
+      <div role="status" aria-live="polite">{reportReady ? `${project.name} report ready.` : `Opening ${project.name} case study.`}</div>
+      {!reportReady && <><h2 id="project-title">{project.name}</h2><p id="project-detail">Opening the {project.name} case study.</p></>}
     </div>}
-    <article ref={panel} aria-hidden={isResearch && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-black'}`}>
-      {!isResearch && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />}
+    <article ref={panel} aria-hidden={usesVenom && !reportReady} style={isOrchestration ? { overflow: 'visible' } : undefined} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-black'}`}>
+      {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />}
       {isResearch && reportReady ? <>
         <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction</p>{closeControl}</header>
         <SAEResearchReport />
-      </> : isResearch ? null : <>
+      </> : isOrchestration && reportReady ? <>
+        <header className="oe-report-topbar"><p>01 / Engine case file <span>·</span> Orchestration Engine</p>{closeControl}</header>
+        <OrchestrationEngineReport />
+      </> : usesVenom ? null : <>
         {closeControl}
         <div className="relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
           <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-black/70">{project.id} / {project.tag}</p>
@@ -326,11 +562,16 @@ function ProjectModal({ project, close, openOrigin }) {
         </div>
       </>}
     </article>
-    {isResearch && !transitionDone && <div className="sae-venom-transition" aria-hidden="true">
-      <div ref={venom} className="sae-venom-blob" style={{ left: `${openOrigin?.x ?? window.innerWidth / 2}px`, top: `${openOrigin?.y ?? window.innerHeight / 2}px` }}>
-        {[-42, -18, 26, 52, 138].map((angle) => <i className="sae-venom-tendril" style={{ '--tendril-angle': `${angle}deg` }} key={angle} />)}
+    {usesVenom && !transitionDone && <div className={`sae-venom-transition ${isOrchestration ? 'oe-venom-transition' : ''}`} aria-hidden="true">
+      <div ref={venom} className={`sae-venom-blob ${isOrchestration ? 'oe-venom-blob' : ''}`} style={{ left: `${openOrigin?.x ?? window.innerWidth / 2}px`, top: `${openOrigin?.y ?? window.innerHeight / 2}px` }}>
+        {!isOrchestration && [-42, -18, 26, 52, 138].map((angle) => <i className="sae-venom-tendril" style={{ '--tendril-angle': `${angle}deg` }} key={angle} />)}
       </div>
-      <div ref={venomLabel} className="sae-venom-label"><span>02 / Research file</span><strong>SAE reproduction</strong></div>
+      <div ref={venomLabel} className={`sae-venom-label ${isOrchestration ? 'oe-venom-label' : ''}`}>
+        {isOrchestration ? <>
+          <svg className="oe-loader-graph" viewBox="0 0 180 64"><path d="M28 18 C65 18 68 32 90 32 M28 46 C65 46 68 32 90 32 H150" /><circle cx="28" cy="18" r="4" /><circle cx="28" cy="46" r="4" /><circle cx="90" cy="32" r="5" /><circle cx="150" cy="32" r="4" /></svg>
+          <span>01 / Workflow file</span><strong>Orchestration Engine</strong>
+        </> : <><span>02 / Research file</span><strong>SAE reproduction</strong></>}
+      </div>
     </div>}
   </div>
 }
@@ -349,20 +590,181 @@ function WorkScrollProgress() {
 }
 
 function ProjectVisual({ project, index, nextProject, advance }) {
-  const visual = useRef(null), scene = useRef(null), touchStart = useRef(null), swiped = useRef(false)
+  const visual = useRef(null), scene = useRef(null), starField = useRef(null), progressTrack = useRef(null), progressCount = useRef(null), transferSpark = useRef(null), touchStart = useRef(null), swiped = useRef(false)
   const proof = {
-    'Orchestration Engine': '56 / 56 tests passing',
+    'Orchestration Engine': '58 / 58 tests passing',
     'SAE Reproduction': '0.897562 validation similarity',
     Pentagon: 'Private case study',
   }[project.name]
   useLayoutEffect(() => {
-    if (reduceMotion()) return undefined
+    if (reduceMotion() || project.name === 'Orchestration Engine') return undefined
     const section = visual.current?.closest('#work')
     const context = gsap.context(() => {
       gsap.fromTo(scene.current, { y: 18, rotate: -.7, scale: .985 }, { y: -18, rotate: .7, scale: 1.015, ease: 'none', scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 } })
     }, visual)
     return () => context.revert()
-  }, [])
+  }, [project.id, project.name])
+  useLayoutEffect(() => {
+    const field = starField.current
+    if (project.name !== 'Orchestration Engine' || !field || reduceMotion()) return undefined
+    let currentIndex = Math.floor(Math.random() * oeWaypoints.length)
+    let recentDestinations = [currentIndex]
+    let flight
+    let pause
+    let railMotion
+    let transferMotion
+    let fieldMorph
+    let completedHops = 0
+    let disposed = false
+    const context = gsap.context(() => {
+      const points = [...field.querySelectorAll('.oe-waypoint')]
+      const halos = [...field.querySelectorAll('.oe-waypoint-halo')]
+      const traveler = field.querySelector('.oe-traveler')
+      const trail = field.querySelector('.oe-flight-trail')
+      const rail = progressTrack.current
+      const railFill = rail?.querySelector('.feature-track-progress')
+      const railMarker = rail?.querySelector('.feature-track-marker')
+      const stages = rail ? [...rail.querySelectorAll('.feature-node')] : []
+      const svg = field.querySelector('svg')
+      const art = field.closest('.oe-project-art')
+      const backgroundPoints = [...field.querySelectorAll('.oe-background-stars circle')]
+      let coordinates = oeWaypoints
+      const sendWaypointToRail = (targetIndex, onArrive) => {
+        if (!transferSpark.current || !railMarker || !art || !svg) { onArrive(); return }
+        const artRect = art.getBoundingClientRect()
+        const svgRect = svg.getBoundingClientRect()
+        const markerRect = railMarker.getBoundingClientRect()
+        const star = coordinates[targetIndex]
+        const startX = svgRect.left + (star.x / 1000) * svgRect.width - artRect.left
+        const startY = svgRect.top + (star.y / 560) * svgRect.height - artRect.top
+        const endX = markerRect.left + markerRect.width / 2 - artRect.left
+        const endY = markerRect.top + markerRect.height / 2 - artRect.top
+        gsap.set(transferSpark.current, { left: startX, top: startY, scale: .72, autoAlpha: 1 })
+        transferMotion?.kill()
+        transferMotion = gsap.to(transferSpark.current, {
+          left: endX,
+          top: endY,
+          scale: .42,
+          autoAlpha: .55,
+          duration: .68,
+          ease: 'power2.inOut',
+          onComplete: () => {
+            gsap.set(transferSpark.current, { autoAlpha: 0 })
+            onArrive()
+          },
+        })
+      }
+      const updateRail = (completed) => {
+        if (!railFill || !railMarker || !stages.length) return
+        const activeStage = completed <= 2 ? 0 : completed <= 5 ? 1 : 2
+        stages.forEach((stage, stageIndex) => {
+          stage.classList.toggle('is-active', stageIndex === activeStage)
+          stage.classList.toggle('is-complete', completed === 7 || stageIndex < activeStage)
+        })
+        if (progressCount.current) progressCount.current.textContent = String(completed).padStart(2, '0')
+        railMotion?.kill()
+        railMotion = gsap.timeline()
+          .to(railFill, { scaleX: completed / 7, duration: completed ? .52 : .4, ease: 'power2.out' }, 0)
+          .to(railMarker, { left: '50%', autoAlpha: completed ? 1 : 0, scale: 1, duration: completed ? .2 : .3, ease: 'power2.out' }, 0)
+        if (completed > 0) railMotion.to(railMarker, { scale: 1.55, duration: .18, yoyo: true, repeat: 1, ease: 'power1.inOut' }, .14)
+      }
+      const randomizeField = () => {
+        coordinates = createOeWaypoints()
+        recentDestinations = [currentIndex]
+        const sky = createOeConstellation()
+        fieldMorph?.kill()
+        fieldMorph = gsap.timeline()
+        coordinates.forEach((star, index) => {
+          fieldMorph.to(points[index], { attr: { cx: star.x, cy: star.y, r: star.radius }, opacity: star.opacity, duration: .86, ease: 'power2.inOut' }, 0)
+          fieldMorph.to(halos[index], { attr: { cx: star.x, cy: star.y, r: 3 }, duration: .86, ease: 'power2.inOut' }, 0)
+        })
+        sky.forEach((star, index) => {
+          fieldMorph.to(backgroundPoints[index], { attr: { cx: star.x, cy: star.y, r: star.radius }, opacity: star.opacity, duration: .86, ease: 'power2.inOut' }, 0)
+        })
+      }
+      if (railFill && railMarker) {
+        gsap.set(railFill, { scaleX: 0 })
+        gsap.set(railMarker, { left: '50%', autoAlpha: 0, scale: 1 })
+      }
+      updateRail(0)
+      const pointOnCurve = (from, control, to, progress) => {
+        const inverse = 1 - progress
+        return {
+          x: inverse * inverse * from.x + 2 * inverse * progress * control.x + progress * progress * to.x,
+          y: inverse * inverse * from.y + 2 * inverse * progress * control.y + progress * progress * to.y,
+        }
+      }
+      const shoot = () => {
+        if (disposed) return
+        const from = coordinates[currentIndex]
+        const candidates = coordinates
+          .map((target, targetIndex) => ({ target, targetIndex, distance: Math.hypot(target.x - from.x, target.y - from.y) }))
+          .filter(({ targetIndex, distance }) => distance > 115 && !recentDestinations.slice(-3).includes(targetIndex))
+        const destinations = candidates.length ? candidates : coordinates
+          .map((target, targetIndex) => ({ target, targetIndex, distance: Math.hypot(target.x - from.x, target.y - from.y) }))
+          .filter(({ targetIndex }) => targetIndex !== currentIndex)
+        const { target: to, targetIndex } = destinations[Math.floor(Math.random() * destinations.length)]
+        const dx = to.x - from.x, dy = to.y - from.y
+        const distance = Math.hypot(dx, dy) || 1
+        const bend = (Math.random() - .5) * Math.min(280, distance * .8)
+        const control = {
+          x: Math.max(18, Math.min(982, (from.x + to.x) / 2 - (dy / distance) * bend)),
+          y: Math.max(18, Math.min(542, (from.y + to.y) / 2 + (dx / distance) * bend)),
+        }
+        const progress = { value: 0 }
+        const duration = Math.max(1.35, Math.min(2.7, distance / 320))
+
+        gsap.set(traveler, { autoAlpha: 0, attr: { transform: `translate(${from.x} ${from.y})` } })
+        gsap.set(trail, { attr: { x1: from.x, y1: from.y, x2: from.x, y2: from.y }, opacity: 0 })
+        flight = gsap.timeline({
+          onComplete: () => {
+            currentIndex = targetIndex
+            recentDestinations = [...recentDestinations, targetIndex].slice(-4)
+            if (disposed) return
+            sendWaypointToRail(targetIndex, () => {
+              if (disposed) return
+              completedHops = (completedHops % 7) + 1
+              updateRail(completedHops)
+              if (completedHops === 7) {
+                pause = gsap.delayedCall(1.05, () => {
+                  completedHops = 0
+                  randomizeField()
+                  updateRail(0)
+                  pause = gsap.delayedCall(.28 + Math.random() * .48, shoot)
+                })
+              } else {
+                pause = gsap.delayedCall(.22 + Math.random() * .58, shoot)
+              }
+            })
+          },
+        })
+        flight.to(traveler, { autoAlpha: 1, duration: .1, ease: 'power1.out' }, 0)
+        flight.to(progress, {
+          value: 1,
+          duration,
+          ease: 'power2.inOut',
+          onUpdate: () => {
+            const t = progress.value
+            const position = pointOnCurve(from, control, to, t)
+            const tail = pointOnCurve(from, control, to, Math.max(0, t - .075))
+            traveler.setAttribute('transform', `translate(${position.x} ${position.y})`)
+            trail.setAttribute('x1', position.x)
+            trail.setAttribute('y1', position.y)
+            trail.setAttribute('x2', tail.x)
+            trail.setAttribute('y2', tail.y)
+            trail.style.opacity = String(Math.sin(t * Math.PI) * .76)
+          },
+        }, 0)
+        flight.to(traveler, { autoAlpha: 0, duration: .16, ease: 'power1.out' }, duration - .06)
+        flight.to(halos[targetIndex], { opacity: .82, attr: { r: 7 }, duration: .16, ease: 'power2.out' }, duration - .04)
+        flight.to(points[targetIndex], { fill: '#B7FF00', opacity: 1, duration: .16, ease: 'power1.out' }, duration - .04)
+        flight.to(halos[targetIndex], { opacity: 0, attr: { r: 24 }, duration: .88, ease: 'power2.out' }, duration + .12)
+        flight.to(points[targetIndex], { fill: '#F1F1EF', opacity: .66, duration: .62, ease: 'power1.inOut' }, duration + .2)
+      }
+      pause = gsap.delayedCall(.32, shoot)
+    }, field)
+    return () => { disposed = true; flight?.kill(); pause?.kill(); railMotion?.kill(); transferMotion?.kill(); fieldMorph?.kill(); context.revert() }
+  }, [project.id, project.name])
   const handleTouchStart = (event) => { touchStart.current = event.changedTouches[0].clientX }
   const handleTouchEnd = (event) => {
     if (touchStart.current === null) return
@@ -379,11 +781,32 @@ function ProjectVisual({ project, index, nextProject, advance }) {
       <span>Project representation</span><span>{project.id} / {String(featuredProjects.length).padStart(2, '0')}</span>
     </div>
     <div ref={scene} className="project-visual-scene">
-      <div className={`project-visual-art project-visual-art--${index + 1}`} key={project.id} aria-hidden="true">
+      <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''}`} key={project.id} aria-hidden="true">
       {project.name === 'Orchestration Engine' && <>
-        <p className="font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">Execution flow</p>
-        <div className="feature-track my-10 flex items-start justify-between">{['Queue', 'Execute', 'Commit'].map((step, stepIndex) => <span className="feature-node" key={step}><i>{`0${stepIndex + 1}`}</i>{step}</span>)}</div>
-        <p className="border-t border-white/15 pt-4 font-mono text-[.62rem] uppercase leading-relaxed tracking-[.08em] text-white/75">Durable state · SQLite event log</p>
+        <div className="flex items-center justify-between font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">
+          <p>Execution flow</p>
+          <span className="feature-progress-readout"><b ref={progressCount}>00</b><i> / 07</i></span>
+        </div>
+        <div ref={progressTrack} className="feature-track my-7 flex items-start justify-between" aria-label="Queue, execute, and commit stages with a seven-arrival progress cycle">
+          <span className="feature-track-base" aria-hidden="true"><span className="feature-track-progress" /><i className="feature-track-marker" /></span>
+          {['Queue', 'Execute', 'Commit'].map((step, stepIndex) => <span className={`feature-node${stepIndex === 0 ? ' is-active' : ''}`} key={step}><i>{`0${stepIndex + 1}`}</i>{step}</span>)}
+        </div>
+        <div ref={starField} className="oe-starfield" aria-hidden="true">
+          <svg viewBox="0 0 1000 560" preserveAspectRatio="none" focusable="false">
+            <g className="oe-background-stars">{oeConstellationStars.map((star, starIndex) => <circle key={starIndex} cx={star.x} cy={star.y} r={star.radius} opacity={star.opacity} />)}</g>
+            <g className="oe-waypoints">{oeWaypoints.map((star, starIndex) => <g key={starIndex}>
+              <circle className="oe-waypoint-halo" cx={star.x} cy={star.y} r="3" />
+              <circle className="oe-waypoint" cx={star.x} cy={star.y} r={star.radius} opacity={star.opacity} />
+            </g>)}</g>
+            <line className="oe-flight-trail" />
+            <g className="oe-traveler">
+              <circle className="oe-traveler-aura" r="10" />
+              <path className="oe-traveler-star" d="M0 -8 L1.8 -2.1 L8 0 L1.8 2.1 L0 8 L-1.8 2.1 L-8 0 L-1.8 -2.1 Z" />
+            </g>
+          </svg>
+        </div>
+        <span ref={transferSpark} className="oe-transfer-spark" aria-hidden="true" />
+        <p className="border-t border-white/15 pt-4 font-mono text-[.62rem] uppercase leading-relaxed tracking-[.08em] text-white/75">Durable state · task_events · workflow_id scoped</p>
       </>}
       {project.name === 'SAE Reproduction' && <>
         <p className="font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">Sparse autoencoder · research</p>
