@@ -45,7 +45,18 @@ function useSmoothScroll() {
     let frame
     const animate = (time) => { lenis.raf(time); frame = requestAnimationFrame(animate) }
     frame = requestAnimationFrame(animate)
-    return () => { cancelAnimationFrame(frame); lenis.destroy() }
+    // Route in-page anchor clicks through Lenis so nav jumps match the wheel feel.
+    const onAnchorClick = (event) => {
+      const anchor = event.target.closest?.('a[href^="#"]')
+      const hash = anchor?.getAttribute('href')
+      if (!hash || hash.length < 2) return
+      const target = document.querySelector(hash)
+      if (!target) return
+      event.preventDefault()
+      lenis.scrollTo(target, { duration: 1.15, easing: (t) => 1 - Math.pow(1 - t, 3) })
+    }
+    document.addEventListener('click', onAnchorClick)
+    return () => { document.removeEventListener('click', onAnchorClick); cancelAnimationFrame(frame); lenis.destroy() }
   }, [])
 }
 
@@ -77,6 +88,7 @@ function SectionGeometry({ tone = 'dark', variant = 'work' }) {
 
 function Reveal({ children, className = '', id }) {
   const element = useRef(null)
+  usePageReveals(element)
   useLayoutEffect(() => {
     if (reduceMotion()) return undefined
     const tween = gsap.fromTo(element.current, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: .7, ease: 'power2.out', scrollTrigger: { trigger: element.current, start: 'top 82%', once: true } })
@@ -111,6 +123,26 @@ function caseFileFlowReveal(root, scroller, selector) {
   })
 }
 
+// Shared page-level reveals: display headings wipe in, [data-reveal-group] children stagger.
+function usePageReveals(sectionRef) {
+  useLayoutEffect(() => {
+    if (reduceMotion()) return undefined
+    const root = sectionRef.current
+    if (!root) return undefined
+    const context = gsap.context(() => {
+      root.querySelectorAll('h2').forEach((heading) => {
+        gsap.fromTo(heading, { autoAlpha: 0, y: 34, clipPath: 'inset(0 0 22% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .85, ease: 'power3.out', scrollTrigger: { trigger: heading, start: 'top 82%', once: true } })
+      })
+      gsap.utils.toArray('[data-reveal-group]', root).forEach((group) => {
+        const children = [...group.children]
+        if (!children.length) return
+        gsap.fromTo(children, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .6, stagger: .1, ease: 'power2.out', scrollTrigger: { trigger: group, start: 'top 86%', once: true } })
+      })
+    }, root)
+    return () => context.revert()
+  }, [])
+}
+
 // Shared scroll choreography for the long-form case files. `scope` is the report panel;
 // `prefix` is 'oe' or 'sae' so the same timeline drives both reports.
 function setupCaseFileScrollFx(scope, prefix, entranceDelay = 0) {
@@ -125,8 +157,12 @@ function setupCaseFileScrollFx(scope, prefix, entranceDelay = 0) {
       .fromTo(q(`.${prefix}-report-hero h2`), { autoAlpha: 0, y: 20, clipPath: 'inset(0 0 18% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .68, ease: 'power3.out' }, '-=.08')
       .fromTo(q(`.${prefix}-report-intro`), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .46 }, '-=.28')
       .fromTo(q(`.${prefix}-report-links a`), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: .3, stagger: .07 }, '-=.18')
+      .fromTo(q(`.${prefix}-hero-chips span`), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .34, stagger: .06 }, '-=.2')
       .fromTo(q(`.${prefix}-report-metrics article`), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .075 }, '-=.08')
       .fromTo(q(`.${prefix}-report-metrics ~ .${prefix}-report-note`), { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: .32 }, '-=.1')
+
+    const ticker = scope.querySelector('.oe-event-ticker')
+    if (ticker) gsap.fromTo(ticker, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: .5, delay: entranceDelay + .9, ease: 'power2.out', scrollTrigger: { trigger: ticker, scroller, start: 'top 96%', once: true } })
 
     gsap.utils.toArray(`.${prefix}-report-section`, scope).forEach((section) => {
       const parts = [section.querySelector(`.${prefix}-report-section-label`), section.querySelector(`.${prefix}-report-section-body`)].filter(Boolean)
@@ -265,7 +301,7 @@ function EntryGate({ enter }) {
 }
 
 function Header({ shown }) {
-  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" aria-label="REDIRECTOR" className="brand-lockup font-display font-black uppercase">{logoLetters.map(([letter, desktopSize, mobileSize], index) => <span className="brand-letter" style={{ '--brand-size': `${desktopSize}px`, '--brand-size-mobile': `${mobileSize}px` }} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#work">Work</a><a className="link-line" href="#method">Method</a><a className="link-line" href="#now">Now</a><a className="link-line" href="#contact">Contact</a></nav></header>
+  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" aria-label="REDIRECTOR" className="brand-lockup font-display font-black uppercase">{logoLetters.map(([letter, desktopSize, mobileSize], index) => <span className="brand-letter" style={{ '--brand-size': `${desktopSize}px`, '--brand-size-mobile': `${mobileSize}px` }} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#about">About</a><a className="link-line" href="#work">Work</a><a className="link-line" href="#method">Method</a><a className="link-line" href="#now">Now</a><a className="link-line" href="#contact">Contact</a></nav></header>
 }
 
 function Hero({ shown }) {
@@ -296,7 +332,7 @@ function Hero({ shown }) {
       <i className="geo-line absolute left-[8%] top-[47%]" />
     </div>
     <div className="hero-content relative z-10 mt-18 max-w-6xl text-center"><h1 className="hero-name font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]"><span className="block">RED</span><span className="block">DIRECTOR</span></h1><p className="hero-intro mx-auto mt-8 max-w-xl text-[1rem] leading-7 text-white/85">{content.intro}</p></div>
-    <a href="#work" className="absolute bottom-7 z-10 grid justify-items-center gap-2 font-mono text-[.66rem] uppercase tracking-[.1em]"><span className="text-white">Selected work</span><span className="text-xl text-white">↓</span></a>
+    <a href="#work" className="hero-scroll-cue absolute bottom-7 z-10 grid justify-items-center gap-2 font-mono text-[.66rem] uppercase tracking-[.1em]"><span className="text-white">Selected work</span><span className="text-xl text-white">↓</span></a>
   </section>
 }
 
@@ -1085,7 +1121,10 @@ function ProjectVisual({ project, index, nextProject, advance }) {
           stage.classList.toggle('is-active', stageIndex === activeStage)
           stage.classList.toggle('is-complete', completed === 7 || stageIndex < activeStage)
         })
-        if (progressCount.current) progressCount.current.textContent = String(completed).padStart(2, '0')
+        if (progressCount.current) {
+          progressCount.current.textContent = String(completed).padStart(2, '0')
+          if (completed) gsap.fromTo(progressCount.current, { autoAlpha: 0, y: -6 }, { autoAlpha: 1, y: 0, duration: .32, ease: 'power2.out', overwrite: 'auto' })
+        }
         railMotion?.kill()
         railMotion = gsap.timeline()
           .to(railFill, { scaleX: completed / 7, duration: completed ? .52 : .4, ease: 'power2.out' }, 0)
@@ -1294,7 +1333,7 @@ function Work() {
           <ProjectVisual project={selectedProject} index={selectedIndex} nextProject={nextProject} advance={changeProject} />
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2" data-reveal-group>
           <button type="button" onClick={() => setSelectedIndex((selectedIndex - 1 + featuredProjects.length) % featuredProjects.length)} className="project-preview project-preview--previous group" aria-label={`Preview previous project: ${previousProject.name}`}>
             <span className="project-preview-label">← Previous project <span>{previousProject.id}</span></span>
             <strong>{previousProject.name}</strong>
@@ -1343,6 +1382,8 @@ function Method() {
   const [sectionActive, setSectionActive] = useState(false)
   const [autoSlide, setAutoSlide] = useState(true)
   const phase = methodPhases[phaseIndex]
+
+  usePageReveals(section)
 
   useLayoutEffect(() => {
     if (reduceMotion()) return undefined
@@ -1458,7 +1499,7 @@ function Method() {
             </div>
           </article>
 
-          <div className="method-topic-picker mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Choose a case">
+          <div className="method-topic-picker mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Choose a case" data-reveal-group>
             {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-black/30 px-2 py-3 text-left transition-colors" key={item.project}>
               <span className="block font-mono text-[.53rem] uppercase tracking-[.06em] opacity-65">0{index + 1}</span>
               <span className="mt-1 block font-display text-base font-bold leading-[.95] sm:text-lg">{item.project}</span>
@@ -1470,11 +1511,70 @@ function Method() {
   </section>
 }
 
+// About: mirrors the site's Reveal/geometry language with the 1px-gap card grid and
+// bordered rows used by the OE report, so no new styles are required.
+function About() {
+  const { about } = content
+  return <Reveal id="about" className="px-5 py-20 sm:px-[8vw] sm:py-28 lg:py-32">
+    <div className="mx-auto max-w-7xl">
+      <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4">
+        <p className="section-label">03 / About</p>
+        <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">Builder & researcher <span aria-hidden="true">↘</span></p>
+      </div>
+      <div className="grid gap-10 pt-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
+        <div>
+          <h2 className="font-display text-[clamp(4rem,9vw,9rem)] font-black leading-[.76] tracking-[-.055em]">WHO I<br /><span className="text-white/55">AM.</span></h2>
+          <p className="mt-7 max-w-md text-sm leading-7 text-white/75">{about.intro}</p>
+        </div>
+        <div className="flex flex-col gap-10">
+          <div>
+            <p className="section-label">Skills</p>
+            <div className="mt-5 grid gap-px border border-white/15 bg-white/15 sm:grid-cols-2" data-reveal-group>
+              {about.skills.map((skill) => <article className="bg-black p-4" key={skill.area}>
+                <p className="font-mono text-[.58rem] uppercase tracking-[.1em] text-accent">{skill.area}</p>
+                <p className="mt-3 text-[.82rem] leading-[1.65] text-white/72">{skill.detail}</p>
+              </article>)}
+            </div>
+          </div>
+          <div>
+            <p className="section-label">Projects</p>
+            <div data-reveal-group>
+              {about.projects.map((project) => <a className="about-row group flex items-center justify-between gap-4 border-b border-white/15 py-4" key={project.name} href={project.href} {...(project.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
+                <span className="min-w-0">
+                  <span className="block font-display text-xl font-black tracking-[-.02em] text-white">{project.name}</span>
+                  <span className="mt-1 block font-mono text-[.55rem] uppercase tracking-[.07em] text-white/55">{project.note}</span>
+                </span>
+                <span className="link-line shrink-0 font-mono text-[.58rem] uppercase tracking-[.08em] text-accent">{project.linkLabel} <span aria-hidden="true">{project.external ? '↗' : '→'}</span></span>
+              </a>)}
+            </div>
+          </div>
+          <div className="grid gap-10 sm:grid-cols-2">
+            <div>
+              <p className="section-label">Certifications</p>
+              <ul className="mt-5" data-reveal-group>
+                {about.certifications.map((certification) => <li className="border-b border-white/15 py-3 text-[.82rem] leading-[1.6] text-white/72" key={certification}>{certification}</li>)}
+              </ul>
+            </div>
+            <div>
+              <p className="section-label">Find me online</p>
+              <div className="mt-5 flex flex-col items-start gap-3 font-mono text-[.68rem] uppercase tracking-[.12em]" data-reveal-group>
+                <a className="link-line text-white" href="https://github.com/Reddirector" target="_blank" rel="noreferrer">GitHub / {content.handle} ↗</a>
+                <a className="link-line text-white" href={content.links.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>
+                <a className="link-line text-white" href={content.links.x} target="_blank" rel="noreferrer">X ↗</a>
+              </div>
+            </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </Reveal>
+}
+
 function Now() {
   return <Reveal id="now" className="px-5 py-24 sm:px-[8vw] sm:py-[12vw]">
     <div className="grid gap-8 lg:grid-cols-[.75fr_1.5fr]">
-      <div><p className="section-label">03 / In progress</p><h2 className="font-display mt-4 text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.72] tracking-[-.055em]">THE<br />WORKBENCH.</h2></div>
-      <div className="divide-y divide-white/20">{content.now.map((item, index) => <article className="grid gap-4 py-8 sm:grid-cols-[4rem_1fr]" key={item.name}>
+      <div><p className="section-label">04 / In progress</p><h2 className="font-display mt-4 text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.72] tracking-[-.055em]">THE<br />WORKBENCH.</h2></div>
+      <div className="divide-y divide-white/20" data-reveal-group>{content.now.map((item, index) => <article className="grid gap-4 py-8 sm:grid-cols-[4rem_1fr]" key={item.name}>
         <span className="font-mono text-[.68rem] text-white/50">0{index + 1}</span>
         <div><h3 className="font-display text-4xl font-black tracking-tight">{item.name}</h3><p className="mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
       </article>)}</div>
@@ -1483,11 +1583,13 @@ function Now() {
 }
 
 function Contact() {
-  return <footer id="contact" className="relative isolate overflow-hidden bg-white px-5 py-20 text-black sm:px-[8vw] sm:py-[10vw]">
+  const contactRef = useRef(null)
+  usePageReveals(contactRef)
+  return <footer ref={contactRef} id="contact" className="relative isolate overflow-hidden bg-white px-5 py-20 text-black sm:px-[8vw] sm:py-[10vw]">
     <SectionGeometry tone="light" variant="contact" />
     <div className="relative z-10 mx-auto max-w-7xl">
       <div className="flex items-center justify-between gap-4 border-b border-black/15 pb-4">
-        <p className="font-mono text-[.63rem] uppercase tracking-[.16em]">04 / Contact & links</p>
+        <p className="font-mono text-[.63rem] uppercase tracking-[.16em]">05 / Contact & links</p>
         <div className="flex items-center gap-3">
           <svg className="contact-trace" viewBox="0 0 64 14" fill="none" aria-hidden="true"><path d="M1 7h13l5-5 7 10 7-8 5 3h25" stroke="currentColor" strokeWidth="1" /><circle cx="38" cy="7" r="2" fill="var(--color-interactive)" /><circle cx="63" cy="7" r="1" fill="currentColor" /></svg>
           <p className="font-mono text-[.58rem] uppercase tracking-[.1em] text-black/50">Red Director · India</p>
@@ -1497,7 +1599,7 @@ function Contact() {
       <div className="mt-14 border-t border-black/15 pt-8">
         <div>
           <p className="font-mono text-[.62rem] uppercase tracking-[.12em] text-black/55">Find me online</p>
-          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-4 font-mono text-[.68rem] uppercase tracking-[.12em]">
+          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-4 font-mono text-[.68rem] uppercase tracking-[.12em]" data-reveal-group>
             <a className="footer-link border-b border-black pb-2" href={content.links.github} target="_blank" rel="noreferrer">GitHub / {content.handle} ↗</a>
             <a className="footer-link border-b border-black pb-2" href={content.links.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>
             <a className="footer-link border-b border-black pb-2" href={content.links.x} target="_blank" rel="noreferrer">X ↗</a>
@@ -1510,4 +1612,4 @@ function Contact() {
   </footer>
 }
 
-export default function PortfolioApp() { const [entered, setEntered] = useState(false); useSmoothScroll(); return <div style={{ '--color-accent': content.accent }}>{!entered && <EntryGate enter={() => setEntered(true)} />}<Header shown={entered} /><main><Hero shown={entered} /><Work /><Method /><Now /></main><Contact /></div> }
+export default function PortfolioApp() { const [entered, setEntered] = useState(false); useSmoothScroll(); return <div style={{ '--color-accent': content.accent }}>{!entered && <EntryGate enter={() => setEntered(true)} />}<Header shown={entered} /><main><Hero shown={entered} /><Work /><Method /><About /><Now /></main><Contact /></div> }
