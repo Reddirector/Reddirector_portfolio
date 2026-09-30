@@ -8,7 +8,6 @@ I build task systems and run model experiments. I’m interested in how software
 
 - **Build systems:** I’m developing a Python workflow engine for dependency scheduling, retries, timeouts, failure handling, and durable history in SQLite.
 - **Study model internals:** I ran an independent sparse autoencoder experiment based on Anthropic’s work, tracking reconstruction quality and feature activity.
-- **Make software:** I built ValtSky, a native Android app for backing up photos and videos through the Telegram Bot API, in three days with Kotlin and AI tools.
 
 ## Selected work
 
@@ -19,14 +18,6 @@ A first-principles workflow engine built with Python 3.12+, SQLite, and the stan
 ### SAE Reproduction
 
 An independent reproduction experiment using a GELU-1L model and a sparse autoencoder with 2,048 input dimensions and 4,096 features. Project notes report a validation cosine similarity of 0.897562 and 0.10% dead features; the training configuration and evaluation procedure still need fuller documentation.
-
-### ValtSky
-
-A Kotlin native Android app for photo and video backup using the Telegram Bot API. I built it in three days with AI assistance, and keep it distinct from my systems and research work.
-
-### Pentagon
-
-A private project. I keep its public description brief until I can share verified details.
 
 ## How I work
 
