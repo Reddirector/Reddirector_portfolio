@@ -12,7 +12,7 @@ const logoLetters = [
   ['E', 18, 16], ['C', 21, 18], ['T', 24, 20], ['O', 27, 22], ['R', 30, 24],
 ]
 const featuredProjects = content.projects
-  .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
+  .filter((project) => ['Orchestration Engine', 'SAE Reproduction'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
 const createOeWaypoints = () => {
   const stars = []
@@ -86,6 +86,137 @@ function Reveal({ children, className = '', id }) {
     <SectionGeometry variant={id === 'now' ? 'now' : 'work'} />
     <div className="relative z-10">{children}</div>
   </section>
+}
+
+function caseFileGroupReveal(root, scroller, groupSelector, childSelector, { start = 'top 85%', stagger = .09 } = {}) {
+  gsap.utils.toArray(groupSelector, root).forEach((group) => {
+    const children = [...group.querySelectorAll(childSelector)]
+    if (!children.length) return
+    gsap.fromTo(children, { autoAlpha: 0, y: 18 }, {
+      autoAlpha: 1, y: 0, duration: .5, stagger, ease: 'power2.out',
+      scrollTrigger: { trigger: group, scroller, start, once: true },
+    })
+  })
+}
+
+function caseFileFlowReveal(root, scroller, selector) {
+  gsap.utils.toArray(selector, root).forEach((flow) => {
+    const steps = [...flow.querySelectorAll('span')]
+    const arrows = [...flow.querySelectorAll('i')]
+    if (!steps.length) return
+    gsap.set([...steps, ...arrows], { autoAlpha: 0, y: 6 })
+    gsap.timeline({ scrollTrigger: { trigger: flow, scroller, start: 'top 84%', once: true } })
+      .to(steps, { autoAlpha: 1, y: 0, duration: .34, stagger: .2, ease: 'power2.out' })
+      .to(arrows, { autoAlpha: 1, y: 0, duration: .22, stagger: .2, ease: 'power2.out' }, '-=.52')
+  })
+}
+
+// Shared scroll choreography for the long-form case files. `scope` is the report panel;
+// `prefix` is 'oe' or 'sae' so the same timeline drives both reports.
+function setupCaseFileScrollFx(scope, prefix, entranceDelay = 0) {
+  if (reduceMotion()) return undefined
+  const scroller = scope.closest('.project-overlay')
+  const q = gsap.utils.selector(scope)
+  const context = gsap.context(() => {
+    gsap.timeline({ defaults: { ease: 'power2.out' }, delay: entranceDelay })
+      .fromTo(q(`.${prefix}-report-topbar p`), { autoAlpha: 0, y: -8 }, { autoAlpha: 1, y: 0, duration: .35 })
+      .fromTo(q(`.${prefix}-report-topbar .icon-button`), { scale: .9 }, { scale: 1, duration: .32 }, '<')
+      .fromTo(q(`.${prefix}-report-kicker`), { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: .38 }, '-=.12')
+      .fromTo(q(`.${prefix}-report-hero h2`), { autoAlpha: 0, y: 20, clipPath: 'inset(0 0 18% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .68, ease: 'power3.out' }, '-=.08')
+      .fromTo(q(`.${prefix}-report-intro`), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .46 }, '-=.28')
+      .fromTo(q(`.${prefix}-report-links a`), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: .3, stagger: .07 }, '-=.18')
+      .fromTo(q(`.${prefix}-report-metrics article`), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .075 }, '-=.08')
+      .fromTo(q(`.${prefix}-report-metrics ~ .${prefix}-report-note`), { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: .32 }, '-=.1')
+
+    gsap.utils.toArray(`.${prefix}-report-section`, scope).forEach((section) => {
+      const parts = [section.querySelector(`.${prefix}-report-section-label`), section.querySelector(`.${prefix}-report-section-body`)].filter(Boolean)
+      if (!parts.length) return
+      gsap.fromTo(parts, { autoAlpha: 0, y: 18 }, {
+        autoAlpha: 1, y: 0, duration: .52, stagger: .11, ease: 'power2.out',
+        scrollTrigger: { trigger: section, scroller, start: 'top 82%', once: true },
+      })
+    })
+
+    caseFileGroupReveal(scope, scroller, `.${prefix}-report-steps`, ':scope > li', { start: 'top 80%', stagger: .08 })
+    caseFileGroupReveal(scope, scroller, `.${prefix}-report-compare`, ':scope > article', { start: 'top 80%' })
+    caseFileGroupReveal(scope, scroller, `.${prefix}-report-fields`, ':scope > div', { start: 'top 82%', stagger: .07 })
+    caseFileGroupReveal(scope, scroller, `.${prefix}-report-checks`, ':scope > article, :scope > p', { start: 'top 82%' })
+    caseFileGroupReveal(scope, scroller, '.oe-report-facts', ':scope > p', { start: 'top 82%' })
+    caseFileGroupReveal(scope, scroller, '.oe-verification-strip', ':scope > p', { start: 'top 82%' })
+    caseFileGroupReveal(scope, scroller, '.oe-limit-list', ':scope > p', { start: 'top 84%', stagger: .07 })
+    caseFileGroupReveal(scope, scroller, '.oe-api-list', ':scope > code', { start: 'top 86%', stagger: .05 })
+    caseFileGroupReveal(scope, scroller, '.oe-test-table', ':scope > .oe-test-row', { start: 'top 80%', stagger: .055 })
+
+    caseFileFlowReveal(scope, scroller, '.sae-report-flow')
+    caseFileFlowReveal(scope, scroller, '.oe-durability-flow')
+
+    gsap.utils.toArray(`.${prefix}-report-section-body .${prefix}-report-note, .${prefix}-report-section-body .${prefix}-report-callout, .${prefix}-report-section-body .${prefix}-report-caution`, scope).forEach((node) => {
+      gsap.fromTo(node, { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, duration: .45, ease: 'power2.out', scrollTrigger: { trigger: node, scroller, start: 'top 85%', once: true } })
+    })
+
+    const graph = scope.querySelector('.oe-dependency-graph')
+    if (graph) {
+      const edges = [...graph.querySelectorAll('.oe-graph-edge')]
+      const nodes = [...graph.querySelectorAll('.oe-graph-node')]
+      edges.forEach((edge) => {
+        const length = edge.getTotalLength()
+        gsap.set(edge, { strokeDasharray: length, strokeDashoffset: length })
+      })
+      gsap.set(nodes, { scale: 0, transformOrigin: 'center center' })
+      const graphTimeline = gsap.timeline({ scrollTrigger: { trigger: graph, scroller, start: 'top 78%', once: true } })
+      edges.forEach((edge, index) => graphTimeline.to(edge, { strokeDashoffset: 0, duration: .72, ease: 'power1.inOut' }, index * .12))
+      graphTimeline.to(nodes, { scale: 1, duration: .3, stagger: .12, ease: 'power2.out' }, '-=.12')
+    }
+
+    const stateMachine = scope.querySelector('.oe-state-machine')
+    if (stateMachine) {
+      const states = [...stateMachine.querySelectorAll('.oe-state-path .oe-state-chip')]
+      const stateTimeline = gsap.timeline({ scrollTrigger: { trigger: stateMachine, scroller, start: 'top 82%', once: true } })
+      states.forEach((state, index) => {
+        stateTimeline
+          .to(state, { color: '#B7FF00', borderColor: '#B7FF00', backgroundColor: 'rgba(183,255,0,.16)', duration: .2 }, index * .34)
+          .to(state, { color: 'rgba(255,255,255,.82)', borderColor: 'rgba(183,255,0,.34)', backgroundColor: 'rgba(183,255,0,.045)', duration: .3 }, index * .34 + .2)
+      })
+    }
+
+    const footer = scope.querySelector(`.${prefix}-report-footer`)
+    if (footer) gsap.fromTo(footer, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .5, scrollTrigger: { trigger: footer, scroller, start: 'top 90%', once: true } })
+  }, scope)
+  ScrollTrigger.refresh()
+  let driftFrame = 0
+  const hero = scope.querySelector(`.${prefix}-report-hero`)
+  const onScroll = () => {
+    if (driftFrame || !scroller || !hero) return
+    driftFrame = requestAnimationFrame(() => {
+      driftFrame = 0
+      const drift = Math.min(scroller.scrollTop * .06, 30)
+      hero.style.transform = `translateY(${(-drift).toFixed(2)}px)`
+      hero.style.opacity = String(Math.max(.82, 1 - drift / 160))
+    })
+  }
+  scroller?.addEventListener('scroll', onScroll, { passive: true })
+  return () => {
+    scroller?.removeEventListener('scroll', onScroll)
+    if (driftFrame) cancelAnimationFrame(driftFrame)
+    context.revert()
+  }
+}
+
+function CaseFileProgress({ tone = 'lime' }) {
+  const bar = useRef(null), fill = useRef(null)
+  useEffect(() => {
+    const scroller = bar.current?.closest('.project-overlay')
+    if (!scroller || !fill.current || reduceMotion()) return undefined
+    const update = () => {
+      const max = scroller.scrollHeight - scroller.clientHeight
+      const progress = max > 0 ? Math.min(1, Math.max(0, scroller.scrollTop / max)) : 0
+      fill.current.style.transform = `scaleX(${progress})`
+    }
+    update()
+    scroller.addEventListener('scroll', update, { passive: true })
+    return () => scroller.removeEventListener('scroll', update)
+  }, [])
+  return <div ref={bar} className={`case-progress ${tone === 'ink' ? 'case-progress--ink' : ''}`} aria-hidden="true"><span ref={fill} /></div>
 }
 
 function EntryGate({ enter }) {
@@ -169,8 +300,109 @@ function Hero({ shown }) {
   </section>
 }
 
-function SAEResearchReport() {
-  return <div className="sae-report">
+// Passive: mirror the report section currently in view into the case-file topbar readout.
+function useCaseFileReadout(reportRef, anchors) {
+  useEffect(() => {
+    const scroller = reportRef.current?.closest('.project-overlay')
+    if (!scroller || reduceMotion() || typeof IntersectionObserver !== 'function') return undefined
+    // Scope to this report's own overlay so the two case files never fight over the readout.
+    const readout = scroller.querySelector('.oe-readout-value')
+    if (!readout) return undefined
+    let activeSection = null
+    let frame = 0
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) activeSection = entry.target })
+    }, { root: scroller, threshold: .18 })
+    anchors.forEach(({ id }) => { const node = document.getElementById(id); if (node) observer.observe(node) })
+    const onScroll = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        const match = anchors.find(({ id }) => id === activeSection?.id)
+        if (match && readout.textContent !== match.label) readout.textContent = match.label
+      })
+    }
+    scroller.addEventListener('scroll', onScroll, { passive: true })
+    return () => { observer.disconnect(); scroller.removeEventListener('scroll', onScroll); if (frame) cancelAnimationFrame(frame) }
+  }, [])
+}
+
+// Interactive: qualitative illustration of the reconstruction/sparsity trade-off.
+function SparsityTradeoffExplorer() {
+  const levels = [
+    { lambda: 'λ · 0.25', sparse: 22, recon: 92, note: 'Light pressure: reconstruction stays strong, but many features stay active — the code stays dense and hard to read.' },
+    { lambda: 'λ · 1', sparse: 58, recon: 71, note: 'Balanced regime: fewer active features per activation while reconstruction remains useful — the trade-off the paper studies.' },
+    { lambda: 'λ · 4', sparse: 90, recon: 38, note: 'Heavy pressure: very sparse codes, but reconstruction degrades — the dictionary starts losing real structure.' },
+  ]
+  const [index, setIndex] = useState(1)
+  const level = levels[index]
+  return <div className="sae-tradeoff" aria-label="Interactive sparsity trade-off illustration">
+    <div className="sae-tradeoff-head"><span>Sparsity trade-off · interactive illustration</span><div role="group" aria-label="Choose sparsity pressure">{levels.map((item, itemIndex) => <button key={item.lambda} type="button" className={`sae-tradeoff-step${itemIndex === index ? ' is-active' : ''}`} aria-pressed={itemIndex === index} onClick={() => setIndex(itemIndex)}>{item.lambda}</button>)}</div></div>
+    <div className="sae-tradeoff-meters">
+      <div className="sae-tradeoff-meter"><span>Sparsity</span><b><i style={{ width: `${level.sparse}%` }} /></b><small>{level.sparse}%</small></div>
+      <div className="sae-tradeoff-meter"><span>Reconstruction</span><b><i style={{ width: `${level.recon}%` }} /></b><small>{level.recon}%</small></div>
+    </div>
+    <p className="sae-tradeoff-note" role="status">{level.note}</p>
+    <small className="sae-tradeoff-disclaimer">Qualitative illustration, not measured run data — the real λ and loss values still need to be documented from the training configuration.</small>
+  </div>
+}
+
+// Interactive: selecting a feature slot lists the evidence an interpretation would require.
+function FeatureProbeExplorer() {
+  const [probe, setProbe] = useState(null)
+  return <div className="sae-feature-probe" aria-label="Feature probe illustration">
+    <div className="sae-feature-probe-head"><span>Feature probe · interactive</span><small>Select a feature slot</small></div>
+    <div className="sae-feature-grid" role="group" aria-label="Feature slots">{Array.from({ length: 12 }, (_, slot) => <button key={slot} type="button" className={`sae-feature-cell${probe === slot ? ' is-probed' : ''}`} aria-pressed={probe === slot} aria-label={`Feature ${String(slot + 1).padStart(2, '0')}`} onClick={() => setProbe(slot)}><span>{String(slot + 1).padStart(2, '0')}</span></button>)}</div>
+    <p className="sae-feature-readout" role="status">{probe === null ? 'Select a feature to see what evidence an interpretation would require.' : `Feature ${String(probe + 1).padStart(2, '0')} · probed — an interpretation would need activating examples, counterexamples, a coherence check, and an intervention result. None of that evidence is in the current project notes.`}</p>
+  </div>
+}
+
+// Ambient background for the research case file — same passive language as the engine report.
+function SaeReportAmbience() {
+  const field = useRef(null)
+  useLayoutEffect(() => {
+    if (reduceMotion()) return undefined
+    const scroller = field.current?.closest('.project-overlay')
+    const context = gsap.context(() => {
+      gsap.to('.sae-ambience-ring--spin', { rotate: 360, duration: 96, ease: 'none', repeat: -1 })
+      gsap.to('.sae-ambience-float', { y: -12, rotate: 8, opacity: .22, duration: 7.5, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: { each: 1.5, from: 'random' } })
+      if (scroller) {
+        const range = { trigger: field.current, scroller, start: 'top bottom', end: 'bottom top', scrub: 1 }
+        gsap.fromTo('.sae-ambience-ring--orbit', { yPercent: -12, rotate: -10 }, { yPercent: 12, rotate: 10, ease: 'none', scrollTrigger: range })
+        gsap.fromTo('.sae-ambience-diamond', { y: 26, rotate: -16 }, { y: -26, rotate: 50, ease: 'none', scrollTrigger: range })
+      }
+    }, field)
+    return () => context.revert()
+  }, [])
+  return <div ref={field} className="sae-ambience" aria-hidden="true">
+    <i className="sae-ambience-plane" />
+    <i className="sae-ambience-ring sae-ambience-ring--spin" />
+    <i className="sae-ambience-ring sae-ambience-ring--orbit" />
+    <i className="sae-ambience-diamond" />
+    <i className="sae-ambience-diamond sae-ambience-diamond--secondary" />
+    <i className="sae-ambience-float sae-ambience-square" />
+    <i className="sae-ambience-float sae-ambience-cross"><b /><b /></i>
+  </div>
+}
+
+function SAEResearchReport({ entranceDelay = 0 }) {
+  const report = useRef(null)
+  const saeSectionAnchors = [
+    { id: 'sae-s01', label: 'question' },
+    { id: 'sae-s02', label: 'method' },
+    { id: 'sae-s03', label: 'reference' },
+    { id: 'sae-s04', label: 'run record' },
+    { id: 'sae-s05', label: 'analysis' },
+  ]
+  useCaseFileReadout(report, saeSectionAnchors)
+  useLayoutEffect(() => {
+    const root = report.current
+    const scope = root?.closest('.sae-report-panel')
+    if (!root || !scope) return undefined
+    return setupCaseFileScrollFx(scope, 'sae', entranceDelay)
+  }, [entranceDelay])
+  return <div className="sae-report" ref={report}>
+    <SaeReportAmbience />
     <main className="sae-report-main">
       <header className="sae-report-hero">
         <p className="sae-report-kicker">Independent reproduction · Mechanistic interpretability</p>
@@ -180,6 +412,8 @@ function SAEResearchReport() {
           <a href="https://www.transformer-circuits.pub/2023/monosemantic-features/index.html" target="_blank" rel="noreferrer">Read the original paper <span aria-hidden="true">↗</span></a>
           <a href="https://reddirector.github.io/Towards_Monosemanticity_Reproduction/" target="_blank" rel="noreferrer">Open the reproduction project <span aria-hidden="true">↗</span></a>
         </div>
+        <div className="oe-hero-chips" aria-hidden="true"><span>gelu-1l</span><span>2,048 → 4,096 features</span><span>0.897562 cosine</span><span>0.10% dead</span></div>
+        <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" /><i className="oe-hero-bracket oe-hero-bracket--br" aria-hidden="true" />
       </header>
 
       <section className="sae-report-metrics" aria-label="Reproduction snapshot">
@@ -190,7 +424,7 @@ function SAEResearchReport() {
       </section>
       <p className="sae-report-note">These figures come from my project notes, not Anthropic’s paper. I still need to add the exact training setup and explain how each metric was calculated.</p>
 
-      <section className="sae-report-section">
+      <section className="sae-report-section" id="sae-s01">
         <div className="sae-report-section-label"><span>01</span><p>Research question</p></div>
         <div className="sae-report-section-body">
           <h3>Can a larger sparse basis reveal structure hidden by superposition?</h3>
@@ -200,12 +434,13 @@ function SAEResearchReport() {
         </div>
       </section>
 
-      <section className="sae-report-section">
+      <section className="sae-report-section" id="sae-s02">
         <div className="sae-report-section-label"><span>02</span><p>Method & objective</p></div>
         <div className="sae-report-section-body">
           <h3>Keep reconstruction useful; make the code sparse.</h3>
           <p>The encoder maps each activation into a larger feature space. The decoder then tries to reconstruct it. Training balances reconstruction error against a penalty that encourages sparse feature activity:</p>
           <div className="sae-report-equation sae-report-equation--wide"><span>Simplified objective</span><strong>L = L<sub>reconstruction</sub>(x, x̂) + λ · ‖f‖₁</strong><p>For a mean-squared reconstruction term, stronger sparsity pressure (λ) can make codes more selective, but may worsen reconstruction. The chosen trade-off and exact implementation belong in the run record.</p></div>
+          <SparsityTradeoffExplorer />
           <ol className="sae-report-steps">
             <li><b>Collect</b><span>Capture activations at a named model layer and hook point.</span></li>
             <li><b>Fit</b><span>Train an overcomplete SAE with the documented reconstruction and sparsity losses.</span></li>
@@ -215,7 +450,7 @@ function SAEResearchReport() {
         </div>
       </section>
 
-      <section className="sae-report-section">
+      <section className="sae-report-section" id="sae-s03">
         <div className="sae-report-section-label"><span>03</span><p>Reference vs reproduction</p></div>
         <div className="sae-report-section-body">
           <h3>The paper and this run are not the same experiment.</h3>
@@ -227,7 +462,7 @@ function SAEResearchReport() {
         </div>
       </section>
 
-      <section className="sae-report-section">
+      <section className="sae-report-section" id="sae-s04">
         <div className="sae-report-section-label"><span>04</span><p>Run record</p></div>
         <div className="sae-report-section-body">
           <h3>What someone would need to rerun it.</h3>
@@ -244,7 +479,7 @@ function SAEResearchReport() {
         </div>
       </section>
 
-      <section className="sae-report-section">
+      <section className="sae-report-section" id="sae-s05">
         <div className="sae-report-section-label"><span>05</span><p>Analysis still to document</p></div>
         <div className="sae-report-section-body">
           <h3>Training numbers don’t tell me what a feature means.</h3>
@@ -254,6 +489,7 @@ function SAEResearchReport() {
             <p><span>03</span><b>Intervention / steering</b><small>[Intervention, controls, result, and limitations, or “not run.”]</small></p>
             <p><span>04</span><b>Universality</b><small>[Second model, feature matching method, evidence, or “not run.”]</small></p>
           </div>
+          <FeatureProbeExplorer />
           <p className="sae-report-note">I haven’t added feature interpretations or intervention results because my current notes don’t include that evidence.</p>
         </div>
       </section>
@@ -288,83 +524,251 @@ function OrchestrationDependencyGraph() {
   </figure>
 }
 
-function OrchestrationEngineReport() {
+const LIFECYCLE_NOTES = {
+  PENDING: 'Created, but its dependencies have not succeeded yet — the scheduler will not pick it up.',
+  READY: 'Every dependency has succeeded. It can enter the next scheduling pass.',
+  RUNNING: 'Executing now. A timeout fails like any execution failure and spends the same retry budget.',
+  SUCCEEDED: 'Finished cleanly. Dependents waiting on it become eligible.',
+  FAILED: 'Retries were exhausted. Direct and transitive dependents are cancelled.',
+  RETRY_WAIT: 'Cooling down before the next attempt, still inside its retry budget.',
+  CANCELLED: 'Not run: an upstream dependency failed, so the engine cancelled it.',
+}
+
+function LifecycleExplorer() {
+  const [active, setActive] = useState(null)
+  const path = useRef(null)
+  const activate = (state, node) => {
+    setActive(state)
+    path.current?.querySelectorAll('.oe-state-chip').forEach((chip) => { chip.style.color = ''; chip.style.borderColor = ''; chip.style.backgroundColor = '' })
+    if (node) { node.style.color = '#B7FF00'; node.style.borderColor = 'rgb(183 255 0 / .85)'; node.style.backgroundColor = 'rgb(183 255 0 / .16)' }
+  }
+  const chip = (state, extra = '', key) => <button type="button" key={key} className={`oe-state-chip${extra ? ` ${extra}` : ''}`} onClick={(event) => activate(state, event.currentTarget)} aria-pressed={active === state}>{state}</button>
+  const mainStates = ['PENDING', 'READY', 'RUNNING']
+  const branchStates = ['SUCCEEDED', 'FAILED', 'RETRY_WAIT', 'CANCELLED']
+  return <div className="oe-state-machine">
+    <div className="oe-state-machine-heading"><span>Task lifecycle</span><small>Transitions are validated before they are accepted — select a state</small></div>
+    <div className="oe-state-list">
+      <div ref={path} className="oe-state-path">
+        {mainStates.map((state, index) => [chip(state, '', state), index < mainStates.length - 1 ? <i aria-hidden="true" key={`${state}-arrow`}>→</i> : null])}
+      </div>
+      <div className="oe-state-outcomes"><small>Possible outcomes</small><div>{branchStates.map((state) => chip(state, 'oe-state-chip--branch', state))}</div></div>
+    </div>
+    <p className="oe-lifecycle-readout" role="status">{active ? LIFECYCLE_NOTES[active] : 'Select a state to see what the engine guarantees at that point.'}</p>
+  </div>
+}
+
+function DurabilityStepper() {
+  const steps = [
+    { label: 'Validate transition', detail: 'The requested move is checked against the state machine before anything is written. Illegal transitions never reach storage.' },
+    { label: 'Append SQLite event', detail: 'The event is inserted into task_events — ordered, attempt-numbered, scoped to the workflow_id. This write is the commit point.' },
+    { label: 'Update live state', detail: 'Only after the write succeeds does the in-memory TaskState advance. A failed write leaves live state behind durable history, never ahead of it.' },
+  ]
+  const [active, setActive] = useState(0)
+  const [auto, setAuto] = useState(true)
+  useEffect(() => {
+    if (!auto || reduceMotion()) return undefined
+    const id = setInterval(() => setActive((current) => (current + 1) % steps.length), 3400)
+    return () => clearInterval(id)
+  }, [auto])
+  return <div className="oe-durability-flow" aria-label="State transition persistence order">
+    {steps.map((step, index) => [
+      <button key={step.label} type="button" className={`oe-flow-step${index === active ? ' is-active' : ''}`} aria-pressed={index === active} onClick={() => { setAuto(false); setActive(index) }}><span>{`0${index + 1} ${step.label}`}</span></button>,
+      index < steps.length - 1 ? <i aria-hidden="true" key={`${step.label}-arrow`}>→</i> : null,
+    ])}
+    <p className="oe-flow-detail"><span key={active} className="oe-flow-detail-text">{steps[active].detail}</span><small>{`step 0${active + 1} / 03${auto ? ' · auto-advancing' : ''}`}</small></p>
+  </div>
+}
+
+function FailureDrillPanel() {
+  const groupA = useRef(null), groupB = useRef(null), groupT = useRef(null)
+  const edgeA = useRef(null), edgeB = useRef(null)
+  const statusA = useRef(null), statusB = useRef(null), statusT = useRef(null)
+  const narrative = useRef(null)
+  const timeline = useRef(null)
+  const [phase, setPhase] = useState('idle')
+  useEffect(() => () => timeline.current?.kill(), [])
+  const applyStates = (states) => {
+    const groups = { a: groupA.current, b: groupB.current, t: groupT.current }
+    const statuses = { a: statusA.current, b: statusB.current, t: statusT.current }
+    Object.entries(states).forEach(([key, value]) => {
+      if (groups[key]) groups[key].setAttribute('class', `oe-drill-group ${value.cls || ''}`)
+      if (value.text && statuses[key]) statuses[key].textContent = value.text
+    })
+  }
+  const writeNarrative = (text) => { if (narrative.current) narrative.current.textContent = text }
+  const resetVisual = () => {
+    timeline.current?.kill()
+    applyStates({ a: { text: 'idle' }, b: { text: 'idle' }, t: { text: 'waiting' } })
+    ;[edgeA.current, edgeB.current].forEach((edge) => {
+      if (!edge) return
+      const length = edge.getTotalLength()
+      edge.setAttribute('stroke-dasharray', String(length))
+      edge.setAttribute('stroke-dashoffset', String(length))
+    })
+    writeNarrative('Task 03 becomes eligible only after both dependencies report SUCCEEDED. Run the drill to watch one transient failure move through that contract.')
+  }
+  const runDrill = () => {
+    if (phase === 'running') return
+    if (phase === 'done') { setPhase('idle'); resetVisual(); return }
+    if (reduceMotion()) {
+      applyStates({ a: { cls: 'is-done', text: 'succeeded' }, b: { cls: 'is-done', text: 'succeeded · 2/3' }, t: { cls: 'is-done', text: 'succeeded' } })
+      ;[edgeA.current, edgeB.current].forEach((edge) => edge?.setAttribute('stroke-dashoffset', '0'))
+      writeNarrative('Drill result (reduced motion): task B failed once, spent one retry, succeeded — so the dependent task ran without being cancelled.')
+      setPhase('done')
+      return
+    }
+    setPhase('running')
+    resetVisual()
+    const flash = (group, className) => {
+      if (!group) return
+      group.classList.add(className)
+      gsap.fromTo(group, { opacity: .4 }, { opacity: 1, duration: .32, ease: 'power1.out', clearProps: 'opacity' })
+    }
+    const drill = gsap.timeline({ onComplete: () => setPhase('done') })
+    timeline.current = drill
+    drill
+      .call(() => { applyStates({ a: { cls: 'is-run', text: 'running' }, b: { cls: 'is-run', text: 'running' } }); writeNarrative('Both independent tasks are ready, so they enter the same scheduling pass.') })
+      .call(() => applyStates({ a: { cls: 'is-done', text: 'succeeded' } }), null, '+=.7')
+      .to(edgeA.current, { strokeDashoffset: 0, duration: .5, ease: 'power1.inOut' }, '<')
+      .call(() => { applyStates({ b: { cls: 'is-failed', text: 'failed · 1/3' } }); flash(groupB.current, 'is-failed'); writeNarrative('Task B times out. The timeout is treated as an ordinary execution failure and spends the task retry budget.') }, null, '+=.55')
+      .call(() => applyStates({ b: { cls: 'is-retry', text: 'retry_wait · 2/3' } }), null, '+=.8')
+      .call(() => applyStates({ b: { cls: 'is-run', text: 'running · 2/3' } }), null, '+=.65')
+      .call(() => applyStates({ b: { cls: 'is-done', text: 'succeeded · 2/3' } }), null, '+=.7')
+      .to(edgeB.current, { strokeDashoffset: 0, duration: .5, ease: 'power1.inOut' }, '<')
+      .call(() => { applyStates({ t: { cls: 'is-run', text: 'running' } }); writeNarrative('Both dependencies are terminal and successful — the dependent task becomes eligible in the next pass.') }, null, '<')
+      .call(() => { applyStates({ t: { cls: 'is-done', text: 'succeeded' } }); writeNarrative('Drill complete: one transient failure, one retry, zero cancelled dependents — because the failure was recovered inside its budget.') }, null, '+=.85')
+  }
+  return <div className="oe-dependency-graph oe-drill">
+    <div className="oe-drill-head"><span>Failure drill · interactive</span><button type="button" className="oe-drill-button" onClick={runDrill} disabled={phase === 'running'}>{phase === 'running' ? 'drill running…' : phase === 'done' ? 'Reset drill' : 'Run failure drill'}</button></div>
+    <svg viewBox="0 0 920 280" role="img" aria-label="Failure drill: task B fails once, retries, succeeds; the dependent task then runs after both dependencies succeed.">
+      <g ref={groupA} className="oe-drill-group">
+        <rect className="oe-graph-card" x="24" y="42" width="276" height="74" rx="2" />
+        <text className="oe-graph-index" x="42" y="68">TASK 01</text>
+        <text className="oe-graph-label" x="42" y="96">Independent A</text>
+        <text ref={statusA} className="oe-drill-status" x="282" y="68" textAnchor="end">idle</text>
+      </g>
+      <g ref={groupB} className="oe-drill-group">
+        <rect className="oe-graph-card" x="24" y="164" width="276" height="74" rx="2" />
+        <text className="oe-graph-index" x="42" y="190">TASK 02</text>
+        <text className="oe-graph-label" x="42" y="218">Independent B</text>
+        <text ref={statusB} className="oe-drill-status" x="282" y="190" textAnchor="end">idle</text>
+      </g>
+      <g ref={groupT} className="oe-drill-group">
+        <rect className="oe-graph-card oe-graph-card--target" x="610" y="103" width="286" height="74" rx="2" />
+        <text className="oe-graph-index" x="632" y="129">TASK 03 · DEPENDS ON BOTH</text>
+        <text className="oe-graph-label" x="632" y="157">Runs after success</text>
+        <text ref={statusT} className="oe-drill-status" x="878" y="129" textAnchor="end">waiting</text>
+      </g>
+      <path ref={edgeA} className="oe-graph-edge oe-graph-edge--a" d="M300 79 C430 79 470 123 610 140" />
+      <path ref={edgeB} className="oe-graph-edge oe-graph-edge--b" d="M300 201 C430 201 470 157 610 140" />
+      <circle className="oe-graph-node" cx="300" cy="79" r="6" />
+      <circle className="oe-graph-node oe-graph-node--delayed" cx="300" cy="201" r="6" />
+      <circle className="oe-graph-node oe-graph-node--target" cx="610" cy="140" r="7" />
+    </svg>
+    <p ref={narrative} className="oe-drill-narrative" role="status">Task 03 becomes eligible only after both dependencies report SUCCEEDED. Run the drill to watch one transient failure move through that contract.</p>
+  </div>
+}
+
+const API_ITEMS = [
+  'Task · Workflow · RetryPolicy',
+  'TaskState · WorkflowStatus',
+  'run_workflow · run_workflow_from_file',
+  'load_workflow_from_json',
+  'get_workflow_status · get_workflow_history',
+  'get_connection',
+]
+
+function ApiSurfaceExplorer() {
+  const [copied, setCopied] = useState(null)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const copy = (item, index) => {
+    const flash = () => { setCopied(index); clearTimeout(timer.current); timer.current = setTimeout(() => setCopied(null), 1300) }
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(item).then(flash).catch(flash)
+    else flash()
+  }
+  return <div className="oe-api-list">
+    {API_ITEMS.map((item, index) => <button key={item} type="button" className={`oe-api-item${copied === index ? ' is-copied' : ''}`} onClick={() => copy(item, index)} title="Copy to clipboard"><code>{copied === index ? 'copied ✓' : item}</code></button>)}
+  </div>
+}
+
+const OE_TICKER_EVENTS = [
+  'INSERT INTO task_events (workflow_id="wf_9f2", task="fetch_source", state="RUNNING", attempt=1)',
+  'STATE_CHANGED task="fetch_source" READY → RUNNING',
+  'TIMEOUT task="render_map" after=30s → retry budget 2/3',
+  'STATE_CHANGED task="render_map" RETRY_WAIT → RUNNING attempt=2',
+  'DEPENDENCY_MET task="publish" requires=["render_map","fetch_source"]',
+  'INSERT INTO task_events seq=047 task="publish" state="SUCCEEDED"',
+  'CANCELLED task="notify" upstream failure in "render_map"',
+  'CHECKPOINT workflow="wf_9f2" · 6/7 tasks terminal · durable',
+]
+
+function OeEventTicker() {
+  return <div className="oe-event-ticker" aria-hidden="true">
+    <span className="oe-event-ticker-label">append-only · task_events (sample rows)</span>
+    <div className="oe-event-ticker-window"><div className="oe-event-ticker-track">{[...OE_TICKER_EVENTS, ...OE_TICKER_EVENTS].map((event, index) => <span key={index}>{event}</span>)}</div></div>
+  </div>
+}
+
+// Ambient background for the engine case file, echoing the site's passive layers:
+// the masked dot-grid plane and scroll-scrubbed rings/diamonds from SectionGeometry,
+// plus the slow-rotating ring and floating geo shapes from the hero.
+function OeReportAmbience() {
+  const field = useRef(null)
+  useLayoutEffect(() => {
+    if (reduceMotion()) return undefined
+    const scroller = field.current?.closest('.project-overlay')
+    const context = gsap.context(() => {
+      gsap.to('.oe-ambience-ring--spin', { rotate: 360, duration: 90, ease: 'none', repeat: -1 })
+      gsap.to('.oe-ambience-float', { y: -12, rotate: 8, opacity: .22, duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1, stagger: { each: 1.4, from: 'random' } })
+      if (scroller) {
+        const range = { trigger: field.current, scroller, start: 'top bottom', end: 'bottom top', scrub: 1 }
+        gsap.fromTo('.oe-ambience-ring--orbit', { yPercent: -12, rotate: -10 }, { yPercent: 12, rotate: 10, ease: 'none', scrollTrigger: range })
+        gsap.fromTo('.oe-ambience-diamond', { y: 26, rotate: -16 }, { y: -26, rotate: 50, ease: 'none', scrollTrigger: range })
+      }
+    }, field)
+    return () => context.revert()
+  }, [])
+  return <div ref={field} className="oe-ambience" aria-hidden="true">
+    <i className="oe-ambience-plane" />
+    <i className="oe-ambience-ring oe-ambience-ring--spin" />
+    <i className="oe-ambience-ring oe-ambience-ring--orbit" />
+    <i className="oe-ambience-diamond" />
+    <i className="oe-ambience-diamond oe-ambience-diamond--secondary" />
+    <i className="oe-ambience-float oe-ambience-square" />
+    <i className="oe-ambience-float oe-ambience-cross"><b /><b /></i>
+  </div>
+}
+
+function OrchestrationEngineReport({ entranceDelay = 0 }) {
   const report = useRef(null)
-  const transitionStates = ['PENDING', 'READY', 'RUNNING', 'SUCCEEDED', 'FAILED', 'RETRY_WAIT', 'CANCELLED']
   const testSubjects = [
     ['State machine', 'Validate legal task transitions and persist each transition before changing in-memory state.'],
     ['Dependency scheduler', 'Run independent tasks in one pass; hold a dependent task until every dependency succeeds.'],
     ['Retries and timeouts', 'Apply task-level retry policies; route timeout failures through the same retry budget.'],
     ['Failure propagation', 'Cancel direct and transitive dependents, while unaffected branches finish.'],
-    ['SQLite history', 'Append ordered task events, including retry attempts, under a required workflow_id.'],
+    ['SQLite history', 'Append ordered task_events, including retry attempts, under a required workflow_id.'],
     ['End-to-end use', 'Write a workflow JSON file and run it through the public entrypoint, not only internal helpers.'],
+  ]
+  const sectionAnchors = [
+    { id: 'oe-s01', label: 'why' },
+    { id: 'oe-s02', label: 'scheduling' },
+    { id: 'oe-s03', label: 'durability' },
+    { id: 'oe-s04', label: 'verification' },
+    { id: 'oe-s05', label: 'api & scope' },
+    { id: 'oe-s06', label: 'the bug' },
+    { id: 'oe-s07', label: 'boundaries' },
   ]
   useLayoutEffect(() => {
     const root = report.current
     const scope = root?.closest('.oe-report-panel')
-    if (!root || !scope || reduceMotion()) return undefined
-      const scroller = scope.closest('.project-overlay')
-      const context = gsap.context(() => {
-      gsap.timeline({ defaults: { ease: 'power2.out' } })
-        .fromTo('.oe-report-topbar p', { autoAlpha: 0, y: -8 }, { autoAlpha: 1, y: 0, duration: .35 })
-        .fromTo('.oe-report-topbar .icon-button', { scale: .9 }, { scale: 1, duration: .32 }, '<')
-        .fromTo('.oe-report-kicker', { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: .38 }, '-=.12')
-        .fromTo('.oe-report-hero h2', { autoAlpha: 0, y: 20, clipPath: 'inset(0 0 18% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .68, ease: 'power3.out' }, '-=.08')
-        .fromTo('.oe-report-intro', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .46 }, '-=.28')
-        .fromTo('.oe-report-links a', { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: .3, stagger: .07 }, '-=.18')
-        .fromTo('.oe-report-metrics article', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .4, stagger: .075 }, '-=.08')
-        .fromTo('.oe-report-note', { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: .32 }, '-=.1')
-
-      gsap.utils.toArray('.oe-report-section', root).forEach((section) => {
-        const parts = [section.querySelector('.oe-report-section-label'), section.querySelector('.oe-report-section-body')].filter(Boolean)
-        gsap.fromTo(parts, { autoAlpha: 0, y: 18 }, {
-          autoAlpha: 1, y: 0, duration: .52, stagger: .11, ease: 'power2.out',
-          scrollTrigger: { trigger: section, scroller, start: 'top 82%', once: true },
-        })
-      })
-
-      const graph = root.querySelector('.oe-dependency-graph')
-      if (graph) {
-        const edges = [...graph.querySelectorAll('.oe-graph-edge')]
-        const nodes = [...graph.querySelectorAll('.oe-graph-node')]
-        edges.forEach((edge) => {
-          const length = edge.getTotalLength()
-          gsap.set(edge, { strokeDasharray: length, strokeDashoffset: length })
-        })
-        gsap.set(nodes, { scale: 0, transformOrigin: 'center center' })
-        const graphTimeline = gsap.timeline({ scrollTrigger: { trigger: graph, scroller, start: 'top 78%', once: true } })
-        edges.forEach((edge, index) => graphTimeline.to(edge, { strokeDashoffset: 0, duration: .72, ease: 'power1.inOut' }, index * .12))
-        graphTimeline.to(nodes, { scale: 1, duration: .3, stagger: .12, ease: 'power2.out' }, '-=.12')
-      }
-
-      const stateMachine = root.querySelector('.oe-state-machine')
-      if (stateMachine) {
-        const states = [...stateMachine.querySelectorAll('.oe-state-path .oe-state-chip')]
-        const stateTimeline = gsap.timeline({ scrollTrigger: { trigger: stateMachine, scroller, start: 'top 82%', once: true } })
-        states.forEach((state, index) => {
-          stateTimeline
-            .to(state, { color: '#B7FF00', borderColor: '#B7FF00', backgroundColor: 'rgba(183,255,0,.16)', duration: .2 }, index * .34)
-            .to(state, { color: 'rgba(255,255,255,.82)', borderColor: 'rgba(183,255,0,.34)', backgroundColor: 'rgba(183,255,0,.045)', duration: .3 }, index * .34 + .2)
-        })
-      }
-
-      const durability = root.querySelector('.oe-durability-flow')
-      if (durability) {
-        const steps = [...durability.querySelectorAll('span')]
-        const arrows = [...durability.querySelectorAll('i')]
-        gsap.set([...steps, ...arrows], { autoAlpha: 0, y: 6 })
-        gsap.timeline({ scrollTrigger: { trigger: durability, scroller, start: 'top 84%', once: true } })
-          .to(steps, { autoAlpha: 1, y: 0, duration: .34, stagger: .22, ease: 'power2.out' })
-          .to(arrows, { autoAlpha: 1, y: 0, duration: .24, stagger: .22, ease: 'power2.out' }, '-=.58')
-      }
-
-      const footer = root.querySelector('.oe-report-footer')
-      if (footer) gsap.fromTo(footer, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .5, scrollTrigger: { trigger: footer, scroller, start: 'top 90%', once: true } })
-    }, scope)
-    ScrollTrigger.refresh()
-    return () => context.revert()
-  }, [])
+    if (!root || !scope) return undefined
+    return setupCaseFileScrollFx(scope, 'oe', entranceDelay)
+  }, [entranceDelay])
+  // Passive: track which numbered section is in view and mirror it in the topbar readout.
+  useCaseFileReadout(report, sectionAnchors)
   return <div className="oe-report" ref={report}>
+    <OeReportAmbience />
     <main className="oe-report-main">
       <header className="oe-report-hero">
         <p className="oe-report-kicker">Independent systems project · Python workflow orchestration</p>
@@ -375,7 +779,11 @@ function OrchestrationEngineReport() {
           <a href={`${ORCHESTRATION_REPO}/blob/main/README.md`} target="_blank" rel="noreferrer">Read setup and API notes <span aria-hidden="true">↗</span></a>
           <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Apache 2.0 license <span aria-hidden="true">↗</span></a>
         </div>
+        <div className="oe-hero-chips" aria-hidden="true"><span>python 3.12+</span><span>sqlite3</span><span>concurrent.futures</span><span>0 dependencies</span><span>58 / 58 tests</span></div>
+        <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" /><i className="oe-hero-bracket oe-hero-bracket--br" aria-hidden="true" />
       </header>
+
+      <OeEventTicker />
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
         <article><span>Project version</span><strong>v0.1.0</strong><small>Stage 1 of a planned six-stage rollout</small></article>
@@ -385,7 +793,7 @@ function OrchestrationEngineReport() {
       </section>
       <p className="oe-report-note">The supplied project notes identify v0.1.0 as the current version; no GitHub Release is listed for it.</p>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s01">
         <div className="oe-report-section-label"><span>01</span><p>Why build it this way</p></div>
         <div className="oe-report-section-body">
           <h3>Make the decisions visible, not hidden behind a framework.</h3>
@@ -394,27 +802,28 @@ function OrchestrationEngineReport() {
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s02">
         <div className="oe-report-section-label"><span>02</span><p>Scheduling model</p></div>
         <div className="oe-report-section-body">
           <h3>A dependency graph, not a fixed sequence.</h3>
           <p>A task is ready only when every dependency has succeeded. Independent ready tasks can be scheduled together; a task that depends on both waits for both.</p>
           <OrchestrationDependencyGraph />
-          <div className="oe-state-machine"><div className="oe-state-machine-heading"><span>Task lifecycle</span><small>Transitions are validated before they are accepted</small></div><div className="oe-state-list"><div className="oe-state-path"><span className="oe-state-chip">PENDING</span><i aria-hidden="true">→</i><span className="oe-state-chip">READY</span><i aria-hidden="true">→</i><span className="oe-state-chip">RUNNING</span></div><div className="oe-state-outcomes"><small>Possible outcomes</small><div>{transitionStates.slice(3).map((state) => <span className="oe-state-chip oe-state-chip--branch" key={state}>{state}</span>)}</div></div></div></div>
+          <FailureDrillPanel />
+          <LifecycleExplorer />
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s03">
         <div className="oe-report-section-label"><span>03</span><p>Durability & failure</p></div>
         <div className="oe-report-section-body">
           <h3>Record the transition before advancing live state.</h3>
           <p>Every task transition is appended to the SQLite <code>task_events</code> log before the in-memory state is updated. If the write fails, the live state does not move ahead of its durable history. Events are ordered, include retry attempts, and are scoped to a required <code>workflow_id</code>.</p>
-          <div className="oe-durability-flow" aria-label="State transition persistence order"><span>Validate transition</span><i aria-hidden="true">→</i><span>Append SQLite event</span><i aria-hidden="true">→</i><span>Update live state</span></div>
+          <DurabilityStepper />
           <div className="oe-report-checks"><article><span>RETRY</span><p>A timeout uses the task's retry budget, as an ordinary execution failure does.</p></article><article><span>PROPAGATE</span><p>When retries are exhausted, dependent tasks are cancelled, including transitive dependents.</p></article><article><span>FINISH</span><p>The workflow becomes failed only when every task is terminal; unaffected branches can still complete.</p></article></div>
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s04">
         <div className="oe-report-section-label"><span>04</span><p>Verification record</p></div>
         <div className="oe-report-section-body">
           <h3>What was checked, and how close it gets to real use.</h3>
@@ -424,17 +833,17 @@ function OrchestrationEngineReport() {
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s05">
         <div className="oe-report-section-label"><span>05</span><p>API & scope</p></div>
         <div className="oe-report-section-body">
           <h3>A small public surface; safety-sensitive mechanics stay internal.</h3>
           <p>The public API covers task and workflow models, retry and status types, workflow execution and JSON loading, status/history reads, and SQLite connection access. Raw transition and scheduling helpers remain internal because calling them directly would bypass state validation.</p>
-          <div className="oe-api-list"><code>Task · Workflow · RetryPolicy</code><code>TaskState · WorkflowStatus</code><code>run_workflow · run_workflow_from_file</code><code>load_workflow_from_json</code><code>get_workflow_status · get_workflow_history</code><code>get_connection</code></div>
+          <ApiSurfaceExplorer />
           <p>Workflow definitions are JSON data. They describe identity and task intent, but exclude runtime state; the engine tracks that separately after a run starts.</p>
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s06">
         <div className="oe-report-section-label"><span>06</span><p>Bug that changed the design</p></div>
         <div className="oe-report-section-body">
           <h3>A passing test suite had missed a real dependency deadlock.</h3>
@@ -443,7 +852,7 @@ function OrchestrationEngineReport() {
         </div>
       </section>
 
-      <section className="oe-report-section">
+      <section className="oe-report-section" id="oe-s07">
         <div className="oe-report-section-label"><span>07</span><p>Current boundaries</p></div>
         <div className="oe-report-section-body">
           <h3>Stage 1 is intentionally small, not finished.</h3>
@@ -468,6 +877,9 @@ function ProjectModal({ project, close, openOrigin }) {
   const isResearch = project?.name === 'SAE Reproduction'
   const isOrchestration = project?.name === 'Orchestration Engine'
   const usesVenom = isResearch || isOrchestration
+  // The venom blob fully covers the report until it starts shrinking away,
+  // so the report's own entrance choreography begins as the blob recedes.
+  const entranceDelay = usesVenom ? (isOrchestration ? 1.7 : 1.75) : 0
   useLayoutEffect(() => {
     if (!project || !panel.current) return undefined
     if (usesVenom) {
@@ -509,7 +921,9 @@ function ProjectModal({ project, close, openOrigin }) {
     setTransitionDone(true)
     if (reduceMotion()) return undefined
     const reveal = gsap.fromTo(panel.current, { clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(150% at 50% 50%)', duration: .55, ease: 'power3.inOut' })
-    return () => reveal.kill()
+    const copy = panel.current.querySelector('.modal-copy')
+    const copyCascade = copy ? gsap.fromTo(copy.children, { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: .6, stagger: .09, ease: 'power3.out', delay: .2 }) : null
+    return () => { reveal.kill(); copyCascade?.kill() }
   }, [project, usesVenom, openOrigin])
   useEffect(() => {
     if (usesVenom && reportReady) closeButton.current?.focus({ preventScroll: true })
@@ -539,22 +953,23 @@ function ProjectModal({ project, close, openOrigin }) {
   }, [project, close, usesVenom, reportReady])
   if (!project) return null
   const closeControl = <button ref={closeButton} onClick={close} type="button" className="icon-button" aria-label="Close project details">×</button>
-  return <div ref={overlay} tabIndex="-1" data-lenis-prevent className={`project-overlay fixed inset-0 z-50 overflow-y-auto ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
+  return <div ref={overlay} tabIndex="-1" data-lenis-prevent className={`project-overlay fixed inset-0 z-50 overflow-y-auto overflow-x-hidden ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
     {usesVenom && !transitionDone && <div className="sr-only">
       <div role="status" aria-live="polite">{reportReady ? `${project.name} report ready.` : `Opening ${project.name} case study.`}</div>
       {!reportReady && <><h2 id="project-title">{project.name}</h2><p id="project-detail">Opening the {project.name} case study.</p></>}
     </div>}
-    <article ref={panel} aria-hidden={usesVenom && !reportReady} style={isOrchestration ? { overflow: 'visible' } : undefined} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-black'}`}>
+    <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-black'}`}>
       {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />}
+      {reportReady && (!usesVenom || transitionDone) && <CaseFileProgress tone={usesVenom ? 'lime' : 'ink'} />}
       {isResearch && reportReady ? <>
-        <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction</p>{closeControl}</header>
-        <SAEResearchReport />
+        <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">question</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">research live</span>{closeControl}</div></header>
+        <SAEResearchReport entranceDelay={entranceDelay} />
       </> : isOrchestration && reportReady ? <>
-        <header className="oe-report-topbar"><p>01 / Engine case file <span>·</span> Orchestration Engine</p>{closeControl}</header>
-        <OrchestrationEngineReport />
+        <header className="oe-report-topbar"><p>01 / Engine case file <span>·</span> Orchestration Engine <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">overview</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">engine live</span>{closeControl}</div></header>
+        <OrchestrationEngineReport entranceDelay={entranceDelay} />
       </> : usesVenom ? null : <>
         {closeControl}
-        <div className="relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
+        <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
           <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-black/70">{project.id} / {project.tag}</p>
           <h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2>
           <p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-black/80">{project.detail}</p>
@@ -589,12 +1004,21 @@ function WorkScrollProgress() {
   return <div className="work-scroll-track" aria-hidden="true"><span ref={progress} /></div>
 }
 
+// Passive halo behind the engine visual: masked dot grid plus two slow, counter-rotating
+// rings — the site's idle-geometry language, matched to the dark carousel panel.
+function OeVisualHalo() {
+  return <div className="oe-visual-halo" aria-hidden="true">
+    <i className="oe-visual-halo-plane" />
+    <i className="oe-visual-halo-ring oe-visual-halo-ring--a" />
+    <i className="oe-visual-halo-ring oe-visual-halo-ring--b" />
+  </div>
+}
+
 function ProjectVisual({ project, index, nextProject, advance }) {
   const visual = useRef(null), scene = useRef(null), starField = useRef(null), progressTrack = useRef(null), progressCount = useRef(null), transferSpark = useRef(null), touchStart = useRef(null), swiped = useRef(false)
   const proof = {
     'Orchestration Engine': '58 / 58 tests passing',
     'SAE Reproduction': '0.897562 validation similarity',
-    Pentagon: 'Private case study',
   }[project.name]
   useLayoutEffect(() => {
     if (reduceMotion() || project.name === 'Orchestration Engine') return undefined
@@ -783,7 +1207,8 @@ function ProjectVisual({ project, index, nextProject, advance }) {
     <div ref={scene} className="project-visual-scene">
       <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''}`} key={project.id} aria-hidden="true">
       {project.name === 'Orchestration Engine' && <>
-        <div className="flex items-center justify-between font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">
+        <OeVisualHalo />
+        <div className="flex items-center justify-between relative z-10 font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">
           <p>Execution flow</p>
           <span className="feature-progress-readout"><b ref={progressCount}>00</b><i> / 07</i></span>
         </div>
@@ -813,11 +1238,6 @@ function ProjectVisual({ project, index, nextProject, advance }) {
         <div className="sae-bars" aria-hidden="true">{[34, 58, 44, 78, 52, 92, 63, 40, 72, 50, 86, 60].map((height, bar) => <i key={bar} style={{ '--bar-height': `${height}%`, '--bar-delay': `${bar * .13}s` }} />)}</div>
         <div className="mt-7 grid grid-cols-2 gap-4 border-t border-white/15 pt-4 font-mono uppercase"><span><small>Features</small><strong>2,048 → 4,096</strong></span><span><small>Validation</small><strong>0.897562</strong></span></div>
       </>}
-      {project.name === 'Pentagon' && <>
-        <p className="font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">Private project</p>
-        <div className="private-mark private-mark--pentagon"><i /><i /><i /><span>P</span></div>
-        <p className="border-t border-white/15 pt-4 font-mono text-[.62rem] uppercase leading-relaxed tracking-[.08em] text-white/75">Private project · details not public</p>
-      </>}
       </div>
     </div>
     <div className="mt-6 flex items-end justify-between gap-3 border-t border-white/15 pt-4 text-left">
@@ -840,7 +1260,7 @@ function Work() {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4">
           <p className="section-label">01 / Selected work</p>
-          <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">03 selected works <span aria-hidden="true">↘</span></p>
+          <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">02 selected works <span aria-hidden="true">↘</span></p>
         </div>
         <WorkScrollProgress />
 
@@ -911,16 +1331,6 @@ const methodPhases = [
     stats: [
       { value: '58/58', label: 'Orchestration tests passing' },
       { value: 'v0.1.0', label: 'Apache 2.0 · Published' },
-    ],
-  },
-  {
-    project: 'Pentagon',
-    topic: 'In progress / Private project',
-    title: 'Which constraints shape the solution?',
-    paragraph: 'I started Pentagon with an open-ended problem and a goal of understanding its constraints before settling on a solution. Working through it has reinforced the value of testing assumptions early. It is still in progress, and I am keeping the details private until I can share them clearly.',
-    stats: [
-      { value: 'IN PROGRESS', label: 'Current project status' },
-      { value: 'PRIVATE', label: 'Project details' },
     ],
   },
 ]
@@ -1048,7 +1458,7 @@ function Method() {
             </div>
           </article>
 
-          <div className="method-topic-picker mt-3 grid grid-cols-3 gap-2" role="group" aria-label="Choose a case">
+          <div className="method-topic-picker mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Choose a case">
             {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-black/30 px-2 py-3 text-left transition-colors" key={item.project}>
               <span className="block font-mono text-[.53rem] uppercase tracking-[.06em] opacity-65">0{index + 1}</span>
               <span className="mt-1 block font-display text-base font-bold leading-[.95] sm:text-lg">{item.project}</span>
