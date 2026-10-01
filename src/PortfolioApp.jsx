@@ -4,6 +4,8 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { content } from './content'
 import About from './components/About/About'
+import Intro from './components/Intro/Intro'
+import { useIntro } from './components/Intro/useIntro'
 
 gsap.registerPlugin(ScrollTrigger)
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -42,7 +44,9 @@ const oeConstellationStars = createOeConstellation()
 function useSmoothScroll() {
   useEffect(() => {
     if (reduceMotion() || touchDevice()) return undefined
-    const lenis = new Lenis({ lerp: .08, smoothWheel: true, wheelMultiplier: .86 })
+    // The project case-file overlay runs its own scoped Lenis (same settings),
+    // so the main page must not react to wheel events over it.
+    const lenis = new Lenis({ lerp: .08, smoothWheel: true, wheelMultiplier: .86, prevent: (node) => !!node.closest?.('.project-overlay') })
     let frame
     const animate = (time) => { lenis.raf(time); frame = requestAnimationFrame(animate) }
     frame = requestAnimationFrame(animate)
@@ -211,8 +215,8 @@ function setupCaseFileScrollFx(scope, prefix, entranceDelay = 0) {
       const stateTimeline = gsap.timeline({ scrollTrigger: { trigger: stateMachine, scroller, start: 'top 82%', once: true } })
       states.forEach((state, index) => {
         stateTimeline
-          .to(state, { color: '#B7FF00', borderColor: '#B7FF00', backgroundColor: 'rgba(183,255,0,.16)', duration: .2 }, index * .34)
-          .to(state, { color: 'rgba(255,255,255,.82)', borderColor: 'rgba(183,255,0,.34)', backgroundColor: 'rgba(183,255,0,.045)', duration: .3 }, index * .34 + .2)
+          .to(state, { color: '#E5484D', borderColor: '#E5484D', backgroundColor: 'rgba(229,72,77,.16)', duration: .2 }, index * .34)
+          .to(state, { color: 'rgba(255,255,255,.82)', borderColor: 'rgba(229,72,77,.4)', backgroundColor: 'rgba(229,72,77,.06)', duration: .3 }, index * .34 + .2)
       })
     }
 
@@ -254,51 +258,6 @@ function CaseFileProgress({ tone = 'lime' }) {
     return () => scroller.removeEventListener('scroll', update)
   }, [])
   return <div ref={bar} className={`case-progress ${tone === 'ink' ? 'case-progress--ink' : ''}`} aria-hidden="true"><span ref={fill} /></div>
-}
-
-function EntryGate({ enter }) {
-  const gate = useRef(null), number = useRef(null), enterButton = useRef(null)
-  const leaving = useRef(false)
-  const leave = () => {
-    if (leaving.current) return
-    leaving.current = true
-    const done = enter
-    if (reduceMotion()) return done()
-    gsap.to(gate.current, { clipPath: 'circle(0% at 50% 50%)', duration: .85, ease: 'power4.inOut', onComplete: done })
-  }
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    const previousFocus = document.activeElement
-    const button = enterButton.current
-    document.body.style.overflow = 'hidden'
-    button?.focus({ preventScroll: true })
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') { event.preventDefault(); leave(); return }
-      if (event.key === 'Tab') { event.preventDefault(); button?.focus() }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      document.removeEventListener('keydown', onKeyDown)
-      if (previousFocus && previousFocus !== document.body && document.contains(previousFocus)) previousFocus.focus()
-    }
-  }, [])
-  useLayoutEffect(() => {
-    if (reduceMotion()) return undefined
-    const context = gsap.context(() => {
-      gsap.timeline({ onComplete: () => gsap.delayedCall(.4, leave) })
-        .set('.entry-symbol,.entry-riddle', { opacity: 0, y: 12 })
-        .fromTo(number.current, { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(1.7)' })
-        .to(number.current, { opacity: 0, duration: .18, delay: .35 }).call(() => { number.current.textContent = '02' })
-        .to(number.current, { opacity: 1, duration: .3, ease: 'back.out(1.7)' }).to(number.current, { opacity: 0, duration: .18, delay: .35 }).call(() => { number.current.textContent = '03' })
-        .to(number.current, { opacity: 1, duration: .3, ease: 'back.out(1.7)' })
-        .from('.entry-copy span', { opacity: 0, y: 10, stagger: .028, duration: .22 }, '<.1')
-        .to('.entry-symbol', { opacity: 1, y: 0, duration: .5, ease: 'elastic.out(1,.45)' }, '>.1')
-        .to('.entry-riddle', { opacity: 1, y: 0, stagger: .14, duration: .45, ease: 'power2.out' }, '>.1')
-    }, gate)
-    return () => context.revert()
-  }, [])
-  return <div ref={gate} className="entry-gate fixed inset-0 z-[100] grid place-items-center bg-black [clip-path:circle(150%_at_50%_50%)]" role="dialog" aria-modal="true" aria-labelledby="entry-title"><div className="w-[94vw] max-w-xl text-center"><h2 id="entry-title" className="sr-only">Welcome to the portfolio</h2><div ref={number} aria-hidden="true" className="font-display text-[clamp(5.5rem,15vw,10rem)] font-black leading-none tracking-[-.06em]">01</div><p id="entry-copy" className="entry-copy mt-5 font-mono text-[.65rem] tracking-[.19em]">{[...content.entryCopy].map((letter, index) => <span className="inline-block" key={index}>{letter === ' ' ? '\u00a0' : letter}</span>)}</p><div className="entry-symbol mt-7 text-4xl text-white" aria-hidden="true">✦</div>{content.riddles.map((line) => <p className="entry-riddle mt-3 text-xs text-white/60" key={line}>{line}</p>)}<button ref={enterButton} type="button" onClick={leave} className="entry-action mt-8 font-mono text-[.62rem] uppercase tracking-[.1em]">Enter portfolio <span aria-hidden="true">↗</span></button></div></div>
 }
 
 function Header({ shown }) {
@@ -577,7 +536,7 @@ function LifecycleExplorer() {
   const activate = (state, node) => {
     setActive(state)
     path.current?.querySelectorAll('.oe-state-chip').forEach((chip) => { chip.style.color = ''; chip.style.borderColor = ''; chip.style.backgroundColor = '' })
-    if (node) { node.style.color = '#B7FF00'; node.style.borderColor = 'rgb(183 255 0 / .85)'; node.style.backgroundColor = 'rgb(183 255 0 / .16)' }
+    if (node) { node.style.color = '#E5484D'; node.style.borderColor = 'rgb(229 72 77 / .85)'; node.style.backgroundColor = 'rgb(229 72 77 / .16)' }
   }
   const chip = (state, extra = '', key) => <button type="button" key={key} className={`oe-state-chip${extra ? ` ${extra}` : ''}`} onClick={(event) => activate(state, event.currentTarget)} aria-pressed={active === state}>{state}</button>
   const mainStates = ['PENDING', 'READY', 'RUNNING']
@@ -965,6 +924,20 @@ function ProjectModal({ project, close, openOrigin }) {
   useEffect(() => {
     if (usesVenom && reportReady) closeButton.current?.focus({ preventScroll: true })
   }, [usesVenom, reportReady])
+  // Same smoothed wheel feel as the main page: a dedicated Lenis scoped to the
+  // overlay, using the site-wide sensitivity (lerp .08, wheelMultiplier .86).
+  // Touch and reduced-motion stay native, exactly like the main page.
+  useEffect(() => {
+    if (!project || reduceMotion() || touchDevice()) return undefined
+    const wrapper = overlay.current
+    const content = panel.current
+    if (!wrapper || !content) return undefined
+    const lenis = new Lenis({ wrapper, content, lerp: .08, smoothWheel: true, wheelMultiplier: .86 })
+    let frame
+    const animate = (time) => { lenis.raf(time); frame = requestAnimationFrame(animate) }
+    frame = requestAnimationFrame(animate)
+    return () => { cancelAnimationFrame(frame); lenis.destroy() }
+  }, [project])
   useEffect(() => {
     if (!project) return undefined
     const previousFocus = document.activeElement
@@ -990,13 +963,13 @@ function ProjectModal({ project, close, openOrigin }) {
   }, [project, close, usesVenom, reportReady])
   if (!project) return null
   const closeControl = <button ref={closeButton} onClick={close} type="button" className="icon-button" aria-label="Close project details">×</button>
-  return <div ref={overlay} tabIndex="-1" data-lenis-prevent className={`project-overlay fixed inset-0 z-50 overflow-y-auto overflow-x-hidden ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
+  return <div ref={overlay} tabIndex="-1" className={`project-overlay fixed inset-0 z-50 overflow-y-auto overflow-x-hidden ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
     {usesVenom && !transitionDone && <div className="sr-only">
       <div role="status" aria-live="polite">{reportReady ? `${project.name} report ready.` : `Opening ${project.name} case study.`}</div>
       {!reportReady && <><h2 id="project-title">{project.name}</h2><p id="project-detail">Opening the {project.name} case study.</p></>}
     </div>}
-    <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-black'}`}>
-      {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-black/20" />}
+    <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-white'}`}>
+      {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-white/25" />}
       {reportReady && (!usesVenom || transitionDone) && <CaseFileProgress tone={usesVenom ? 'lime' : 'ink'} />}
       {isResearch && reportReady ? <>
         <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">question</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">research live</span>{closeControl}</div></header>
@@ -1007,10 +980,10 @@ function ProjectModal({ project, close, openOrigin }) {
       </> : usesVenom ? null : <>
         {closeControl}
         <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
-          <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-black/70">{project.id} / {project.tag}</p>
+          <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-white/70">{project.id} / {project.tag}</p>
           <h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2>
-          <p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-black/80">{project.detail}</p>
-          {project.link && <a className="modal-link mt-10 w-fit border-b border-black pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}
+          <p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-white/80">{project.detail}</p>
+          {project.link && <a className="modal-link mt-10 w-fit border-b border-white pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}
         </div>
       </>}
     </article>
@@ -1221,7 +1194,7 @@ function ProjectVisual({ project, index, nextProject, advance }) {
         }, 0)
         flight.to(traveler, { autoAlpha: 0, duration: .16, ease: 'power1.out' }, duration - .06)
         flight.to(halos[targetIndex], { opacity: .82, attr: { r: 7 }, duration: .16, ease: 'power2.out' }, duration - .04)
-        flight.to(points[targetIndex], { fill: '#B7FF00', opacity: 1, duration: .16, ease: 'power1.out' }, duration - .04)
+        flight.to(points[targetIndex], { fill: '#E5484D', opacity: 1, duration: .16, ease: 'power1.out' }, duration - .04)
         flight.to(halos[targetIndex], { opacity: 0, attr: { r: 24 }, duration: .88, ease: 'power2.out' }, duration + .12)
         flight.to(points[targetIndex], { fill: '#F1F1EF', opacity: .66, duration: .62, ease: 'power1.inOut' }, duration + .2)
       }
@@ -1292,6 +1265,7 @@ function Work() {
   const [openOrigin, setOpenOrigin] = useState(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const selectedProject = featuredProjects[selectedIndex]
+  const inkIsDark = selectedProject.ink === 'dark'
   const previousProject = featuredProjects[(selectedIndex - 1 + featuredProjects.length) % featuredProjects.length]
   const nextProject = featuredProjects[(selectedIndex + 1) % featuredProjects.length]
   const changeProject = (step) => setSelectedIndex((index) => (index + step + featuredProjects.length) % featuredProjects.length)
@@ -1318,18 +1292,18 @@ function Work() {
           </div>
         </div>
 
-        <div className="project-feature grid overflow-hidden md:grid-cols-[1.05fr_.95fr]" style={{ background: selectedProject.color, color: '#000' }} role="region" aria-label="Project carousel. Use the left and right arrow keys to switch projects." aria-live="polite" aria-atomic="true" tabIndex={0} onKeyDown={(event) => { if (event.key === 'ArrowLeft') { event.preventDefault(); changeProject(-1) } else if (event.key === 'ArrowRight') { event.preventDefault(); changeProject(1) } }}>
+        <div className="project-feature grid overflow-hidden md:grid-cols-[1.05fr_.95fr]" style={{ background: selectedProject.color, color: inkIsDark ? '#0B0708' : '#fff' }} role="region" aria-label="Project carousel. Use the left and right arrow keys to switch projects." aria-live="polite" aria-atomic="true" tabIndex={0} onKeyDown={(event) => { if (event.key === 'ArrowLeft') { event.preventDefault(); changeProject(-1) } else if (event.key === 'ArrowRight') { event.preventDefault(); changeProject(1) } }}>
           <div className="project-stage-copy flex min-h-[25rem] flex-col p-6 sm:p-9 lg:p-11" key={selectedProject.id}>
             <div className="flex items-start justify-between gap-6">
               <div>
                 <p className="font-mono text-[.65rem] uppercase tracking-[.1em]">{selectedProject.id} / {selectedProject.name === featuredProjects[0].name ? 'Featured project' : 'Selected project'}</p>
-                <p className="project-tag mt-3 font-mono text-[.62rem] uppercase leading-relaxed text-black/70">{selectedProject.tag}</p>
+                <p className={`project-tag mt-3 font-mono text-[.62rem] uppercase leading-relaxed ${inkIsDark ? 'text-black/70' : 'text-white/70'}`}>{selectedProject.tag}</p>
               </div>
                 <span className="shrink-0 whitespace-nowrap font-mono text-[.65rem] tracking-[.08em]">{selectedProject.id} / {String(featuredProjects.length).padStart(2, '0')}</span>
             </div>
             <h3 className="font-display mt-12 max-w-2xl text-[clamp(3.5rem,7vw,6.5rem)] font-black leading-[.8] tracking-[-.045em]">{selectedProject.name}</h3>
-            <p className="mt-6 max-w-xl text-[.94rem] leading-[1.7] text-black/80">{selectedProject.short}</p>
-            <button type="button" onClick={(event) => { const bounds = event.currentTarget.getBoundingClientRect(); setOpenOrigin({ x: event.detail ? event.clientX : bounds.left + bounds.width / 2, y: event.detail ? event.clientY : bounds.top + bounds.height / 2 }); setActive(selectedProject) }} aria-haspopup="dialog" className="mt-auto inline-flex w-fit items-center gap-3 border-b border-black/40 pt-8 pb-2 font-mono text-[.65rem] uppercase tracking-[.1em] transition-colors hover:border-black">Open case study <span aria-hidden="true">↗</span></button>
+            <p className={`mt-6 max-w-xl text-[.94rem] leading-[1.7] ${inkIsDark ? 'text-black/80' : 'text-white/80'}`}>{selectedProject.short}</p>
+            <button type="button" onClick={(event) => { const bounds = event.currentTarget.getBoundingClientRect(); setOpenOrigin({ x: event.detail ? event.clientX : bounds.left + bounds.width / 2, y: event.detail ? event.clientY : bounds.top + bounds.height / 2 }); setActive(selectedProject) }} aria-haspopup="dialog" className={`mt-auto inline-flex w-fit items-center gap-3 border-b pt-8 pb-2 font-mono text-[.65rem] uppercase tracking-[.1em] transition-colors ${inkIsDark ? 'border-black/40 hover:border-black' : 'border-white/40 hover:border-white'}`}>Open case study <span aria-hidden="true">↗</span></button>
           </div>
           <ProjectVisual project={selectedProject} index={selectedIndex} nextProject={nextProject} advance={changeProject} />
         </div>
@@ -1448,20 +1422,20 @@ function Method() {
     setTransition('enter')
   }
 
-  return <section ref={section} id="method" className="relative isolate overflow-hidden bg-accent px-5 py-20 text-black sm:px-[8vw] sm:py-24 lg:py-28">
+  return <section ref={section} id="method" className="relative isolate overflow-hidden bg-accent px-5 py-20 text-white sm:px-[8vw] sm:py-24 lg:py-28">
     <SectionGeometry tone="light" variant="method" />
     <div className="relative z-10 mx-auto max-w-7xl">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/25 pb-4">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/30 pb-4">
         <p className="font-mono text-[.68rem] uppercase tracking-[.1em]">02 / Method</p>
-        <p className="font-mono text-[.6rem] uppercase tracking-[.08em] text-black/65">Research · Systems · Exploration</p>
+        <p className="font-mono text-[.6rem] uppercase tracking-[.08em] text-white/70">Research · Systems · Exploration</p>
       </header>
 
       <div className="grid gap-10 pt-10 lg:grid-cols-[.9fr_1.1fr] lg:gap-14 lg:pt-14">
         <div className="flex flex-col items-start">
           <h2 className="font-display text-[clamp(2.7rem,6vw,6.4rem)] font-black leading-[.82] tracking-[-.035em]">
-            RESEARCH.<br />SYSTEMS.<br /><span className="text-black/55">EXPLORATION.</span>
+            RESEARCH.<br />SYSTEMS.<br /><span className="text-white/55">EXPLORATION.</span>
           </h2>
-          <p className="mt-7 max-w-md text-sm leading-7 text-black/75">{content.philosophy}</p>
+          <p className="mt-7 max-w-md text-sm leading-7 text-white/75">{content.philosophy}</p>
         </div>
 
         <div>
@@ -1501,7 +1475,7 @@ function Method() {
           </article>
 
           <div className="method-topic-picker mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Choose a case" data-reveal-group>
-            {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-black/30 px-2 py-3 text-left transition-colors" key={item.project}>
+            {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-white/30 px-2 py-3 text-left transition-colors" key={item.project}>
               <span className="block font-mono text-[.53rem] uppercase tracking-[.06em] opacity-65">0{index + 1}</span>
               <span className="mt-1 block font-display text-base font-bold leading-[.95] sm:text-lg">{item.project}</span>
             </button>)}
@@ -1554,4 +1528,17 @@ function Contact() {
   </footer>
 }
 
-export default function PortfolioApp() { const [entered, setEntered] = useState(false); useSmoothScroll(); return <div style={{ '--color-accent': content.accent }}>{!entered && <EntryGate enter={() => setEntered(true)} />}<Header shown={entered} /><main><Hero shown={entered} /><Work /><Method /><About /><Now /></main><Contact /></div> }
+export default function PortfolioApp() {
+  useSmoothScroll()
+  const { playing, done } = useIntro()
+  const contentRef = useRef(null)
+  return <div style={{ '--color-accent': content.accent }} className="portfolio-root" inert={playing || undefined} aria-hidden={playing || undefined}>
+    <Intro active={playing} onDone={done} contentRef={contentRef} />
+    <div className="portfolio-content" ref={contentRef}>
+      <a className="skip-link" href="#main">Skip to content</a>
+      <Header shown={!playing} />
+      <main id="main"><Hero shown={!playing} /><Work /><Method /><About /><Now /></main>
+      <Contact />
+    </div>
+  </div>
+}

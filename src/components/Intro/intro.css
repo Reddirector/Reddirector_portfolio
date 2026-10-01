@@ -1,0 +1,38 @@
+/* Intro overlay — name draw-on. Colors: only the site's fg (#fff) on its bg (#000);
+   no new colors. All motion is transform/opacity/stroke-dashoffset plus one
+   clip-path curtain on the portfolio root (driven from Intro.jsx). */
+.intro-overlay { position: fixed; z-index: 200; inset: 0; overflow: hidden; background: #000; cursor: pointer; }
+.intro-stage { position: absolute; left: 50%; top: 50%; width: min(78vw, 44rem); transform: translate(-50%, -50%); }
+
+/* Wordmark: generated Barlow Condensed 900 outlines, stroked as a hairline.
+   Stroke width is in viewBox units (no vector-effect — non-scaling-stroke
+   breaks pathLength dash math in some browsers, rendering dots instead of
+   a draw-on). 502-unit viewBox at ~44rem display ≈ 2.1px visual at desktop,
+   ≈1.2px at 390px phones. */
+.intro-wordmark { display: block; width: 100%; height: auto; overflow: visible; }
+.intro-letter { fill: #fff; fill-opacity: 0; stroke: #fff; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; will-change: stroke-dashoffset, fill-opacity; }
+
+/* Hairline rule draws from the center outward. */
+.intro-rule { display: block; width: 100%; height: 1px; margin-top: 1.4rem; background: rgb(255 255 255 / .32); transform: scaleX(0); transform-origin: center; will-change: transform; }
+
+/* Subline: small, letter-spaced, low contrast. Spans the full stage width so
+   it centers on the wordmark — the site's global p { max-width: 65ch } would
+   otherwise pull the block (and its centered text) to the left. */
+.intro-subline { max-width: none; margin: 1rem auto 0; color: rgb(255 255 255 / .55); font-family: var(--font-mono, monospace); font-size: clamp(.56rem, 1.4vw, .68rem); letter-spacing: .32em; text-indent: .32em; text-transform: uppercase; text-align: center; }
+
+/* Page blocks animated on exit are staged from Intro.jsx; keep them from
+   flashing by ensuring the overlay sits above everything until it lifts. */
+.portfolio-root[data-intro='pending'] { pointer-events: none; }
+
+/* Visible skip cue: the intro already skips on any key/pointer input, so this
+   is discovery only. aria-hidden — keyboard users skip via the global keydown. */
+.intro-skip-cue { position: absolute; bottom: 22px; right: 26px; color: rgb(255 255 255 / .42); font-family: var(--font-mono, monospace); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; animation: intro-cue-pulse 2.6s ease-in-out infinite; }
+@keyframes intro-cue-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-letter { stroke-dashoffset: 0; fill-opacity: 1; stroke-width: 1; }
+  .intro-rule { transform: scaleX(1); }
+  .intro-subline { opacity: 1; transform: none; }
+  .intro-overlay { cursor: default; }
+  .intro-skip-cue { animation: none; }
+}

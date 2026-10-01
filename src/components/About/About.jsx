@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
-  PROFILE_IMAGE, AVAILABILITY, NAME, ROLE, HEADLINE, LINKS,
-  STORY, SKILLS, ACHIEVEMENTS, EDUCATION,
+  PROFILE_IMAGE, AVAILABILITY, NAME, ROLE, HEADLINE,
+  STORY, SKILLS, SKILL_FILTERS, SKILLS_CAPTION, ACHIEVEMENTS, EDUCATION,
 } from '../../data/about'
 import Reveal from './Reveal'
 import AboutTabs from './AboutTabs'
@@ -196,19 +197,214 @@ function StoryPanel() {
   )
 }
 
+// One tooltip at a time, rendered through a portal into document.body (skill
+// cards clip overflow). Fixed coordinates from the anchor chip's rect: above
+// the chip by default, flipped below near the top edge, clamped inside the
+// viewport and never covering the filter toolbar. Repositions on scroll/resize.
+const TIP_GAP = 8
+const TIP_MARGIN = 12
+
+function SkillTip({ tip, toolbarEl, tipId, instant }) {
+  const node = useRef(null)
+  const [pos, setPos] = useState(null)
+  const update = useCallback(() => {
+    const el = node.current
+    const chip = tip.anchor
+    if (!el || !chip || !chip.isConnected) return
+    const r = chip.getBoundingClientRect()
+    const t = el.getBoundingClientRect()
+    const minTop = Math.max(TIP_MARGIN, (toolbarEl ? toolbarEl.getBoundingClientRect().bottom : 0) + 4)
+    let x = r.left + r.width / 2 - t.width / 2
+    x = Math.min(Math.max(TIP_MARGIN, x), window.innerWidth - TIP_MARGIN - t.width)
+    const aboveY = r.top - t.height - TIP_GAP
+    const below = aboveY < minTop
+    let y = below ? r.bottom + TIP_GAP : aboveY
+    if (y + t.height > window.innerHeight - TIP_MARGIN) y = window.innerHeight - TIP_MARGIN - t.height
+    y = Math.max(minTop, y)
+    const arrowX = Math.min(Math.max(r.left + r.width / 2 - x, 12), t.width - 12)
+    setPos((current) => (current && Math.abs(current.x - x) < .5 && Math.abs(current.y - y) < .5 && current.below === below && Math.abs(current.arrowX - arrowX) < .5 ? current : { x, y, below, arrowX }))
+  }, [tip, toolbarEl])
+  useLayoutEffect(() => {
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => { window.removeEventListener('resize', update); window.removeEventListener('scroll', update, true) }
+  }, [update])
+  return createPortal(
+    <div
+      ref={node}
+      id={tipId}
+      role="tooltip"
+      className={`about-skill-tip${pos?.below ? ' is-below' : ''}${instant ? ' is-instant' : ''}`}
+      style={{ left: pos ? `${pos.x}px` : '-9999px', top: pos ? `${pos.y}px` : '-9999px', '--tip-arrow-x': pos ? `${pos.arrowX}px` : '50%' }}
+    >
+      {[['Learned', tip.fields.learned], ['Why', tip.fields.why], ['Can do', tip.fields.can]]
+        .filter(([, value]) => value)
+        .map(([label, value]) => (
+          <p className="about-skill-tip-line" key={label}>
+            <span className="about-skill-tip-label">{label}</span>
+            {value}
+          </p>
+        ))}
+    </div>,
+    document.body,
+  )
+}
+
 function SkillsPanel() {
+  // Tier filter: 'All' | 'Built with' | 'Learning'. Two-phase swap — matching
+  // chips fade in after the outgoing ones fade out, then empty cards collapse
+  // via the grid-template-rows 1fr -> 0fr transition on their cell wrapper.
+  const [filter, setFilter] = useState('All')
+  const [pending, setPending] = useState(null)
+  const [hiddenCells, setHiddenCells] = useState(() => new Set())
+  const swapTimer = useRef(null)
+  const hideTimer = useRef(null)
+  const filterRefs = useRef([])
+  useEffect(() => () => { clearTimeout(swapTimer.current); clearTimeout(hideTimer.current) }, [])
+
+  // Chip tooltips: one open at a time, owned here so tab switches unmount it.
+  // openTimer gives the 120ms open delay; 'instant' skips the delay for taps.
+  const [tip, setTip] = useState(null)
+  const [tipInstant, setTipInstant] = useState(false)
+  const openTimer = useRef(null)
+  const toolbarRef = useRef(null)
+  const coarsePointer = () => window.matchMedia('(pointer: coarse)').matches
+  const closeTip = useCallback(() => { clearTimeout(openTimer.current); setTip(null); setTipInstant(false) }, [])
+  const openTip = (item, anchor, instant = false) => {
+    clearTimeout(openTimer.current)
+    setTipInstant(instant)
+    if (instant || reduce()) setTip({ anchor, fields: item })
+    else openTimer.current = setTimeout(() => setTip({ anchor, fields: item }), 120)
+  }
+  useEffect(() => () => clearTimeout(openTimer.current), [])
+  // A filter change hides chips — drop any open tooltip at the same moment.
+  useEffect(() => { closeTip() }, [filter, closeTip])
+  // Tap elsewhere (or Escape) dismisses; taps toggle via isTipOpen below.
+  useEffect(() => {
+    if (!tip) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') closeTip() }
+    const onDown = (event) => { if (!tip.anchor.contains(event.target) && !event.target.closest?.('.about-skill-tip')) closeTip() }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown, true)
+    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDown, true) }
+  }, [tip, closeTip])
+
+  const tierOf = (name) => (name === 'Built with' ? 'built' : 'learning')
+  const matches = (item, f) => f === 'All' || item.tier === tierOf(f)
+  const collapsedTitles = (f) => SKILLS.filter((group) => group.items.every((item) => !matches(item, f))).map((group) => group.title)
+  const selectFilter = (next) => {
+    if (next === filter || pending !== null) return
+    if (reduce()) {
+      setFilter(next)
+      setHiddenCells(new Set(collapsedTitles(next)))
+      return
+    }
+    setPending(next)
+    clearTimeout(swapTimer.current)
+    clearTimeout(hideTimer.current)
+    swapTimer.current = setTimeout(() => {
+      const collapsed = new Set(collapsedTitles(next))
+      setFilter(next)
+      setPending(null)
+      // Keep still-collapsed cells hidden (no flash), release expanding ones now.
+      setHiddenCells((current) => new Set([...current].filter((title) => collapsed.has(title))))
+      // After the 0fr collapse transition finishes, remove the cell from the grid
+      // flow so the row reflows without leaving an empty track (grey block).
+      hideTimer.current = setTimeout(() => setHiddenCells(collapsed), 520)
+    }, 180)
+  }
+  const onFilterKey = (event, index) => {
+    const last = SKILL_FILTERS.length - 1
+    let next = null
+    if (event.key === 'ArrowRight') next = index === last ? 0 : index + 1
+    else if (event.key === 'ArrowLeft') next = index === 0 ? last : index - 1
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = last
+    if (next === null) return
+    event.preventDefault()
+    selectFilter(SKILL_FILTERS[next])
+    filterRefs.current[next]?.focus()
+  }
+
+  // Spotlight: track the pointer inside each card (pointer-fine devices only);
+  // the tint itself is a CSS radial gradient at --mx/--my.
+  const spotlight = (event) => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    event.currentTarget.style.setProperty('--mx', `${(event.clientX - rect.left).toFixed(0)}px`)
+    event.currentTarget.style.setProperty('--my', `${(event.clientY - rect.top).toFixed(0)}px`)
+  }
+
   return (
-    <div className="about-skills">
-      {SKILLS.map((group) => (
-        <article className="about-skill-card" key={group.area}>
-          <p className="about-skill-label">{group.area}</p>
-          <ul className="about-chips">
-            {group.items.map((item, index) => (
-              <li className="about-chip" style={{ '--i': index }} key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-      ))}
+    <div>
+      <div className="about-skill-toolbar" ref={toolbarRef}>
+        <p className="about-skill-caption">{SKILLS_CAPTION}</p>
+        <div className="about-skill-filter" role="radiogroup" aria-label="Filter skills by tier">
+          {SKILL_FILTERS.map((name, index) => (
+            <button
+              key={name}
+              ref={(node) => { filterRefs.current[index] = node }}
+              type="button"
+              role="radio"
+              aria-checked={filter === name}
+              tabIndex={filter === name ? 0 : -1}
+              className={`about-skill-filter-btn${filter === name ? ' is-active' : ''}`}
+              onClick={() => selectFilter(name)}
+              onKeyDown={(event) => onFilterKey(event, index)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="about-skills">
+        {SKILLS.map((group, groupIndex) => {
+          const collapsed = pending === null && group.items.every((item) => !matches(item, filter))
+          const hidden = hiddenCells.has(group.title)
+          return (
+            <div
+              className={`about-skill-cell${collapsed ? ' is-collapsed' : ''}${hidden ? ' is-hidden' : ''}`}
+              style={{ '--c': groupIndex }}
+              key={group.title}
+            >
+              <article className="about-skill-card" onPointerMove={spotlight} inert={collapsed || undefined}>
+                <p className="about-skill-title">{group.title}</p>
+                <ul className="about-chips">
+                  {group.items.map((item, itemIndex) => {
+                    if (!matches(item, filter)) return null
+                    const leaving = pending !== null && !matches(item, pending)
+                    const chipClass = `about-chip${item.tier === 'learning' ? ' about-chip--learning' : ''}`
+                    const tipKey = `${group.title}-${item.name}`
+                    const isTipOpen = tip !== null && tip.fields === item
+                    const open = (event, instant = false) => openTip(item, event.currentTarget, instant)
+                    return (
+                      <li className={`about-chip-item${leaving ? ' is-leaving' : ''}`} style={{ '--i': itemIndex }} key={tipKey}>
+                        <span
+                          className={chipClass}
+                          tabIndex={0}
+                          aria-describedby={isTipOpen ? 'about-skill-tip' : undefined}
+                          onMouseEnter={(event) => { if (!coarsePointer()) open(event) }}
+                          onMouseLeave={() => { if (!coarsePointer()) closeTip() }}
+                          onFocus={(event) => open(event)}
+                          onBlur={closeTip}
+                          onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); closeTip() } }}
+                          onClick={(event) => { if (coarsePointer()) { isTipOpen ? closeTip() : open(event, true) } }}
+                        >
+                          {item.name}
+                        </span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </article>
+            </div>
+          )
+        })}
+      </div>
+      {tip && (
+        <SkillTip tip={tip} toolbarEl={toolbarRef.current} tipId="about-skill-tip" instant={tipInstant} />
+      )}
     </div>
   )
 }
@@ -281,8 +477,8 @@ export default function About() {
           <p className="about-header-note">Builder & researcher <span aria-hidden="true">↘</span></p>
         </header>
 
+        {/* Row 1 — hero: identity card and headline+tabs stretch to equal height. */}
         <div className="about-grid">
-          {/* LEFT — identity card, sticky on desktop */}
           <aside className="about-identity">
             <div className="about-identity-card">
               <div ref={tiltRef} className="about-portrait-tilt">
@@ -302,40 +498,32 @@ export default function About() {
                   {AVAILABILITY}
                 </p>
               )}
-              <div className="about-links">
-                {LINKS.map((link) => (
-                  <a className="about-link link-line" href={link.href} target="_blank" rel="noreferrer" key={link.label}>
-                    <span className="about-link-glyph" aria-hidden="true">{link.glyph}</span>
-                    {link.label}
-                  </a>
-                ))}
-              </div>
             </div>
           </aside>
 
-          {/* RIGHT — headline, tabs, panels */}
           <div className="about-content">
-            <p className="section-label">About</p>
             <h2 className="about-headline">
               Systems first,<br /><span className="about-headline-soft">then the models.</span>
             </h2>
+            <div className="about-tabs-anchor">
+              <AboutTabs active={selected} onChange={select} />
+            </div>
+          </div>
+        </div>
 
-            <AboutTabs active={selected} onChange={select} />
-
-            <div
-              className={`about-panel is-${phase}`}
-              style={{ height: panelHeight === null ? 'auto' : `${panelHeight}px`, '--about-dir': direction.current }}
-              onTransitionEnd={(event) => { if (event.propertyName === 'height') setPanelHeight(null) }}
-            >
-              <div className="about-panel-clip">
-                {/* key=shown remounts on swap so the enter animation and stagger replay */}
-                <div ref={panelBody} className="about-panel-inner" key={shown} id={`about-panel-${currentTabId}`} role="tabpanel" aria-labelledby={`about-tab-${currentTabId}`} tabIndex={0}>
-                  {shown === 0 && <StoryPanel />}
-                  {shown === 1 && <SkillsPanel />}
-                  {shown === 2 && <Timeline items={ACHIEVEMENTS} />}
-                  {shown === 3 && <Timeline items={EDUCATION} />}
-                </div>
-              </div>
+        {/* Row 2 — the active panel, full container width. */}
+        <div
+          className={`about-panel is-${phase}`}
+          style={{ height: panelHeight === null ? 'auto' : `${panelHeight}px`, '--about-dir': direction.current }}
+          onTransitionEnd={(event) => { if (event.propertyName === 'height') setPanelHeight(null) }}
+        >
+          <div className="about-panel-clip">
+            {/* key=shown remounts on swap so the enter animation and stagger replay */}
+            <div ref={panelBody} className="about-panel-inner" key={shown} id={`about-panel-${currentTabId}`} role="tabpanel" aria-labelledby={`about-tab-${currentTabId}`} tabIndex={0}>
+              {shown === 0 && <StoryPanel />}
+              {shown === 1 && <SkillsPanel />}
+              {shown === 2 && <Timeline items={ACHIEVEMENTS} />}
+              {shown === 3 && <Timeline items={EDUCATION} />}
             </div>
           </div>
         </div>
