@@ -1,0 +1,149 @@
+/* ============================================================
+   About module — namespaced .about-*
+   Palette/fonts/tokens come from the site's existing variables:
+   --color-interactive, --font-display, --font-mono, --font-sans.
+   Motion: transform/opacity only (plus one measured height), the
+   site's cubic-bezier(.2,.75,.25,1) easing. Reduced motion: see block at end.
+   ============================================================ */
+
+:root {
+  --about-ease: cubic-bezier(.2, .75, .25, 1);
+  --about-line: rgb(255 255 255 / .14);
+  --about-muted: rgb(255 255 255 / .6);
+  --about-soft: rgb(255 255 255 / .55);
+}
+
+/* --- Section shell ------------------------------------------------ */
+.about-section { position: relative; isolation: isolate; overflow: hidden; background: #000; padding: 5rem 1.25rem 7rem; }
+@media (min-width: 640px) { .about-section { padding: 7rem 8vw 9rem; } }
+.about-shell { margin: 0 auto; max-width: 80rem; }
+.about-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--about-line); padding-bottom: 1rem; }
+.about-header-note { font-family: var(--font-mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--about-soft); }
+.about-grid { display: grid; gap: 2.75rem; margin-top: 3rem; }
+@media (min-width: 1024px) { .about-grid { grid-template-columns: 5fr 7fr; gap: 4rem; } }
+
+/* --- LEFT: identity card (sticky on desktop) ---------------------- */
+.about-identity { min-width: 0; }
+@media (min-width: 1024px) { .about-identity { position: sticky; top: 6.5rem; align-self: start; } }
+.about-identity-card { border: 1px solid var(--about-line); background: rgb(255 255 255 / .02); padding: 2rem 1.75rem 1.75rem; display: flex; flex-direction: column; align-items: center; gap: .55rem; text-align: center; }
+@media (min-width: 1024px) { .about-identity-card { align-items: flex-start; text-align: left; padding: 2.25rem; } }
+
+/* Portrait + ring + orbit. Ring: 40s linear infinite, transform only. */
+.about-portrait-tilt { position: relative; transform: perspective(900px) rotateX(var(--about-tilt-x, 0deg)) rotateY(var(--about-tilt-y, 0deg)); transition: transform .6s var(--about-ease); }
+.about-portrait-tilt:hover { will-change: transform; }
+.about-portrait-wrap { position: relative; width: clamp(11.5rem, 22vw, 18.75rem); aspect-ratio: 1; }
+.about-portrait { display: block; width: 100%; height: 100%; overflow: hidden; border: 1px solid rgb(255 255 255 / .18); border-radius: 50%; object-fit: cover; background: #0a0a0a; box-shadow: 0 0 2.2rem rgb(183 255 0 / .08); }
+.about-portrait--placeholder { display: grid; place-items: center; color: var(--color-interactive); background: radial-gradient(circle at 50% 36%, rgb(183 255 0 / .14), rgb(183 255 0 / .04) 58%, transparent 76%); }
+.about-portrait--placeholder span { font-family: var(--font-display); font-weight: 900; letter-spacing: -.03em; font-size: clamp(3rem, 6vw, 4.5rem); }
+.about-portrait-ring { position: absolute; inset: -.9rem; border: 1px dashed rgb(183 255 0 / .28); border-radius: 50%; animation: about-ring-turn 40s linear infinite; pointer-events: none; }
+.about-portrait-orbit { position: absolute; inset: -2.1rem; border: 1px solid rgb(255 255 255 / .09); border-radius: 50%; animation: about-ring-turn 14s linear infinite; pointer-events: none; }
+.about-portrait-orbit-dot { position: absolute; top: -3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: rgb(183 255 0 / .65); }
+@keyframes about-ring-turn { to { transform: rotate(360deg); } }
+
+.about-name { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.7rem, 2.6vw, 2.3rem); letter-spacing: -.02em; line-height: 1; margin-top: 1.4rem; color: #fff; }
+.about-role { font-family: var(--font-mono); font-size: .64rem; letter-spacing: .09em; text-transform: uppercase; color: var(--about-muted); margin-top: .35rem; }
+.about-status { display: inline-flex; align-items: center; gap: .5rem; margin-top: .9rem; border: 1px solid rgb(183 255 0 / .25); background: rgb(183 255 0 / .04); padding: .4rem .65rem; font-family: var(--font-mono); font-size: .56rem; letter-spacing: .07em; text-transform: uppercase; color: rgb(255 255 255 / .78); }
+.about-status-dot { width: .4rem; height: .4rem; border-radius: 50%; background: var(--color-interactive); animation: about-pulse 2.6s ease-in-out infinite; }
+@keyframes about-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(183 255 0 / .35); } 50% { box-shadow: 0 0 0 5px rgb(183 255 0 / 0); } }
+
+.about-links { display: flex; flex-wrap: wrap; gap: 1.15rem; margin-top: 1.5rem; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; }
+.about-link { display: inline-flex; align-items: center; gap: .45rem; color: #fff; transition: color .2s ease, transform .2s var(--about-ease); }
+.about-link:hover, .about-link:focus-visible { color: var(--color-interactive); transform: translateY(-2px); }
+.about-link-glyph { display: grid; width: 1.35rem; height: 1.35rem; place-items: center; border: 1px solid rgb(255 255 255 / .3); font-size: .52rem; letter-spacing: 0; transition: border-color .2s ease, background-color .2s ease, color .2s ease; }
+.about-link:hover .about-link-glyph, .about-link:focus-visible .about-link-glyph { border-color: var(--color-interactive); background: var(--color-interactive); color: #000; }
+
+/* --- RIGHT: headline, tabs, panels -------------------------------- */
+.about-content { min-width: 0; }
+.about-content > .section-label { margin: 0; }
+.about-headline { font-family: var(--font-display); font-weight: 900; font-size: clamp(3.1rem, 7vw, 5.9rem); line-height: .82; letter-spacing: -.04em; margin: 1rem 0 0; color: #fff; }
+.about-headline-soft { color: rgb(255 255 255 / .5); }
+
+/* Tab bar: sticky inside the block; horizontally scrollable on mobile,
+   scrollbar hidden, edge fade masks. */
+.about-tabbar { position: sticky; top: 5.25rem; z-index: 5; display: flex; gap: .5rem; margin-top: 2.25rem; border-bottom: 1px solid var(--about-line); background: #000; padding: 0 .25rem .9rem; }
+@media (max-width: 767px) {
+  .about-tabbar { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-inline: 1rem; margin-inline: -1rem; mask-image: linear-gradient(90deg, transparent 0, #000 1rem, #000 calc(100% - 1rem), transparent 100%); }
+  .about-tabbar::-webkit-scrollbar { display: none; }
+}
+.about-tab { flex: none; position: relative; z-index: 1; white-space: nowrap; border: 0; background: transparent; padding: .5rem .2rem; color: var(--about-muted); font-family: var(--font-mono); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; transition: color .2s ease; }
+.about-tab:hover { color: #fff; }
+.about-tab.is-active { color: var(--color-interactive); }
+.about-tab:focus-visible { outline: 2px solid var(--color-interactive); outline-offset: 4px; }
+/* One sliding indicator: transform + width, 280ms, site easing. */
+.about-tab-indicator { position: absolute; bottom: -1px; left: 0; height: 2px; background: var(--color-interactive); transition: transform .28s var(--about-ease), width .28s var(--about-ease); }
+
+/* Panel wrapper: the measured height animates so the page never jumps. */
+.about-panel { margin-top: 1.4rem; overflow: hidden; transition: height .32s var(--about-ease); }
+.about-panel.is-out, .about-panel.is-in { will-change: height; }
+.about-panel-clip { overflow: hidden; }
+/* Out: 120ms fade + 6px out (direction-aware). In: 220ms fade + slide. */
+.about-panel.is-out .about-panel-inner { opacity: 0; transform: translateX(calc(var(--about-dir, 1) * -6px)); transition: opacity 120ms ease, transform 120ms ease; }
+.about-panel.is-in .about-panel-inner { animation: about-panel-in 220ms var(--about-ease) both; }
+@keyframes about-panel-in { from { opacity: 0; transform: translateX(calc(var(--about-dir, 1) * 14px)); } to { opacity: 1; transform: none; } }
+
+/* --- Story --------------------------------------------------------- */
+.about-lead { margin: 0; max-width: 54ch; color: rgb(255 255 255 / .85); font-size: clamp(1.02rem, 1.6vw, 1.2rem); line-height: 1.75; }
+.about-body { margin: 1.1rem 0 0; max-width: 58ch; color: rgb(255 255 255 / .72); font-size: .95rem; line-height: 1.8; }
+.about-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 2.25rem; border: 1px solid var(--about-line); background: rgb(255 255 255 / .12); }
+.about-stat { background: #050505; padding: 1.15rem; }
+.about-stat-number { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(1.45rem, 2.6vw, 2.15rem); letter-spacing: -.02em; line-height: 1; color: #f5f5f5; }
+.about-stat-value { font-variant-numeric: tabular-nums; }
+.about-stat-label { margin: .6rem 0 0; font-family: var(--font-mono); font-size: .55rem; letter-spacing: .08em; text-transform: uppercase; color: var(--about-muted); line-height: 1.6; }
+.about-footnote { margin: .8rem 0 0; font-family: var(--font-mono); font-size: .58rem; letter-spacing: .07em; text-transform: uppercase; color: var(--about-soft); }
+@media (max-width: 540px) { .about-stats { grid-template-columns: 1fr; } }
+
+/* --- Skills -------------------------------------------------------- */
+.about-skills { display: grid; gap: 1px; margin-top: .25rem; border: 1px solid var(--about-line); background: rgb(255 255 255 / .12); }
+@media (min-width: 640px) { .about-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.about-skill-card { background: #050505; padding: 1.15rem 1.25rem; }
+.about-skill-label { margin: 0; font-family: var(--font-mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-interactive); }
+.about-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .8rem 0 0; padding: 0; list-style: none; }
+.about-chip { border: 1px solid rgb(183 255 0 / .22); background: rgb(183 255 0 / .04); padding: .32rem .55rem; color: rgb(255 255 255 / .72); font-family: var(--font-mono); font-size: .55rem; letter-spacing: .05em; animation: about-chip-in .38s var(--about-ease) both; animation-delay: calc(var(--i, 0) * 30ms); transition: border-color .2s ease; }
+.about-chip:hover { border-color: rgb(183 255 0 / .55); }
+@keyframes about-chip-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* --- Timeline (Achievements + Education) --------------------------- */
+/* Clipped viewport: shows TIMELINE_VISIBLE items; the track glides between
+   items via transform (measured in About.jsx). Height is set in JS. */
+.about-timeline-viewport { position: relative; overflow: hidden; }
+.about-timeline-viewport::after { position: absolute; inset: auto 0 0 0; height: 2.75rem; background: linear-gradient(180deg, transparent, #000 78%); content: ""; pointer-events: none; }
+/* Sticky cue button: pinned to the bottom edge over the fade; click advances
+   the timeline one step. Round, inverting hover — the icon-button language. */
+.about-timeline-cue { position: absolute; bottom: .55rem; left: 50%; z-index: 2; display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border: 1px solid rgb(183 255 0 / .45); border-radius: 50%; background: rgb(0 0 0 / .82); color: var(--color-interactive); font-size: .95rem; line-height: 1; transform: translateX(-50%); cursor: pointer; transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .2s var(--about-ease); animation: about-cue 2.6s ease-in-out infinite; }
+.about-timeline-cue:hover, .about-timeline-cue:focus-visible { border-color: var(--color-interactive); background: var(--color-interactive); color: #000; animation-play-state: paused; transform: translateX(-50%) translateY(-1px); }
+.about-timeline-cue:active { transform: translateX(-50%) scale(.94); }
+@keyframes about-cue { 0%, 100% { opacity: .95; } 50% { opacity: .5; } }
+.about-timeline--glide { will-change: transform; backface-visibility: hidden; }
+.about-timeline-item--clone .about-timeline-item { animation: none; }
+.about-timeline { position: relative; margin: .25rem 0 0; padding: 0 0 0 1.6rem; list-style: none; }
+.about-timeline-line { position: absolute; top: .3rem; bottom: .3rem; left: .27rem; width: 1px; background: linear-gradient(180deg, var(--color-interactive), rgb(255 255 255 / .18)); transform-origin: top; animation: about-line-draw .6s var(--about-ease) both; }
+@keyframes about-line-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.about-timeline-item { position: relative; display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; padding: .95rem 0; opacity: 0; animation: about-node-in .45s var(--about-ease) both; animation-delay: calc(80ms + var(--i, 0) * 55ms); border-bottom: 1px solid rgb(255 255 255 / .1); }
+/* Clones must be visible immediately (they enter during the glide); their
+   entrance is driven by the GSAP node stagger instead of the CSS delay. */
+.about-timeline-item--clone { opacity: 1; animation: none; }
+.about-timeline-item:last-child { border-bottom: 0; }
+@keyframes about-node-in { to { opacity: 1; } }
+.about-timeline-dot { position: absolute; left: -1.6rem; top: 1.35rem; width: .55rem; height: .55rem; border: 1px solid var(--color-interactive); background: #000; transform: rotate(45deg); margin-top: .1rem; }
+.about-timeline-title { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; letter-spacing: -.01em; color: #fff; }
+.about-timeline-detail { margin: .3rem 0 0; color: rgb(255 255 255 / .65); font-size: .84rem; line-height: 1.6; max-width: 60ch; }
+.about-timeline-date { margin: .45rem 0 0; width: fit-content; font-family: var(--font-mono); font-size: .55rem; letter-spacing: .08em; text-transform: uppercase; color: var(--color-interactive); }
+
+/* --- Shared reveal (IntersectionObserver toggles .is-shown) -------- */
+.about-reveal { opacity: 0; transform: translateY(12px); transition: opacity .7s var(--about-ease), transform .7s var(--about-ease); }
+.about-reveal.is-shown { opacity: 1; transform: none; }
+
+/* --- Reduced motion: instant state changes, <=100ms fades ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .about-portrait-ring, .about-portrait-orbit, .about-status-dot { animation: none; }
+  .about-portrait-tilt { transition: none; transform: none; }
+  .about-panel { transition: none; }
+  .about-panel.is-out .about-panel-inner { transition: opacity .1s ease; transform: none; }
+  .about-panel.is-in .about-panel-inner { animation: about-fade-100 .1s ease both; }
+  .about-chip, .about-timeline-item { animation: about-fade-100 .1s ease both; animation-delay: 0ms; }
+  .about-timeline-line { animation: none; transform: none; }
+  .about-reveal { transition: opacity .1s ease; transform: none; }
+  .about-link { transition: color .1s ease; transform: none; }
+  .about-timeline--glide { will-change: auto; }
+}
+@keyframes about-fade-100 { from { opacity: 0; } to { opacity: 1; } }

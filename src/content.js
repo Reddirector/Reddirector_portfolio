@@ -14,22 +14,4 @@ export const content = {
   now: [
     { name: 'Orchestration Engine', text: 'I’m building a first-principles Python workflow engine. The current project notes report 58 passing tests, a durable SQLite event log, and a deliberately small public API.' },
   ],
-  about: {
-    intro: 'Aditya Kumar Singh (Reddirector). B.Tech CSE student and independent software builder across mobile, web, and AI. I understand AI well enough to use it without being defined by it. Background in documentary filmmaking (research, scriptwriting, direction).',
-    skills: [
-      { area: 'AI / LLM', detail: 'Building LLMs from scratch, LangChain, LangSmith, local stack (Ollama, ChromaDB, Faster-Whisper, Piper TTS); learning LangGraph and QLoRA fine-tuning.' },
-      { area: 'Backend / Systems', detail: 'Python; hand-written orchestration engine (retries, failure propagation, timeouts, SQLite event log, JSON workflow loader); pytest; packaging.' },
-      { area: 'Mobile / Web', detail: 'Kotlin (native Android), Flutter, Firebase / Supabase, web frontend.' },
-      { area: 'Computer Vision', detail: 'MediaPipe, OpenCV hand tracking.' },
-      { area: 'Security', detail: 'Mobile / Firestore security auditing; curl, Postman, Burp Suite.' },
-    ],
-    projects: [
-      { name: 'Orchestration Engine', note: 'Published v0.1.0 · Apache 2.0', href: '#work', linkLabel: 'Open case study' },
-      { name: 'Monosemanticity reproduction', note: 'Independent research', href: '#work', linkLabel: 'Open case study' },
-    ],
-    certifications: [
-      'Harvard CS50 Intro to AI with Python',
-      'Anthropic: Claude 101, AI Fluency: Framework and Foundations, Claude with Google Vertex AI',
-    ],
-  },
 }

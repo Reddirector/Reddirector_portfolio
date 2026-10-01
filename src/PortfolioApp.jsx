@@ -3,6 +3,7 @@ import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { content } from './content'
+import About from './components/About/About'
 
 gsap.registerPlugin(ScrollTrigger)
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -91,7 +92,7 @@ function Reveal({ children, className = '', id }) {
   usePageReveals(element)
   useLayoutEffect(() => {
     if (reduceMotion()) return undefined
-    const tween = gsap.fromTo(element.current, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: .7, ease: 'power2.out', scrollTrigger: { trigger: element.current, start: 'top 82%', once: true } })
+    const tween = gsap.fromTo(element.current, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: .78, ease: 'power3.out', scrollTrigger: { trigger: element.current, start: 'top 82%', once: true }, onComplete: () => gsap.set(element.current, { clearProps: 'transform,opacity' }) })
     return () => tween.kill()
   }, [])
   return <section ref={element} id={id} className={`relative isolate overflow-hidden ${className}`}>
@@ -131,12 +132,12 @@ function usePageReveals(sectionRef) {
     if (!root) return undefined
     const context = gsap.context(() => {
       root.querySelectorAll('h2').forEach((heading) => {
-        gsap.fromTo(heading, { autoAlpha: 0, y: 34, clipPath: 'inset(0 0 22% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .85, ease: 'power3.out', scrollTrigger: { trigger: heading, start: 'top 82%', once: true } })
+        gsap.fromTo(heading, { autoAlpha: 0, y: 34, clipPath: 'inset(0 0 22% 0)' }, { autoAlpha: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .85, ease: 'power3.out', scrollTrigger: { trigger: heading, start: 'top 82%', once: true }, onComplete: () => gsap.set(heading, { clearProps: 'all' }) })
       })
       gsap.utils.toArray('[data-reveal-group]', root).forEach((group) => {
         const children = [...group.children]
         if (!children.length) return
-        gsap.fromTo(children, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .6, stagger: .1, ease: 'power2.out', scrollTrigger: { trigger: group, start: 'top 86%', once: true } })
+        gsap.fromTo(children, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: .6, stagger: .1, ease: 'power2.out', scrollTrigger: { trigger: group, start: 'top 86%', once: true }, onComplete: () => gsap.set(children, { clearProps: 'all' }) })
       })
     }, root)
     return () => context.revert()
@@ -1509,65 +1510,6 @@ function Method() {
       </div>
     </div>
   </section>
-}
-
-// About: mirrors the site's Reveal/geometry language with the 1px-gap card grid and
-// bordered rows used by the OE report, so no new styles are required.
-function About() {
-  const { about } = content
-  return <Reveal id="about" className="px-5 py-20 sm:px-[8vw] sm:py-28 lg:py-32">
-    <div className="mx-auto max-w-7xl">
-      <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4">
-        <p className="section-label">03 / About</p>
-        <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">Builder & researcher <span aria-hidden="true">↘</span></p>
-      </div>
-      <div className="grid gap-10 pt-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
-        <div>
-          <h2 className="font-display text-[clamp(4rem,9vw,9rem)] font-black leading-[.76] tracking-[-.055em]">WHO I<br /><span className="text-white/55">AM.</span></h2>
-          <p className="mt-7 max-w-md text-sm leading-7 text-white/75">{about.intro}</p>
-        </div>
-        <div className="flex flex-col gap-10">
-          <div>
-            <p className="section-label">Skills</p>
-            <div className="mt-5 grid gap-px border border-white/15 bg-white/15 sm:grid-cols-2" data-reveal-group>
-              {about.skills.map((skill) => <article className="bg-black p-4" key={skill.area}>
-                <p className="font-mono text-[.58rem] uppercase tracking-[.1em] text-accent">{skill.area}</p>
-                <p className="mt-3 text-[.82rem] leading-[1.65] text-white/72">{skill.detail}</p>
-              </article>)}
-            </div>
-          </div>
-          <div>
-            <p className="section-label">Projects</p>
-            <div data-reveal-group>
-              {about.projects.map((project) => <a className="about-row group flex items-center justify-between gap-4 border-b border-white/15 py-4" key={project.name} href={project.href} {...(project.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
-                <span className="min-w-0">
-                  <span className="block font-display text-xl font-black tracking-[-.02em] text-white">{project.name}</span>
-                  <span className="mt-1 block font-mono text-[.55rem] uppercase tracking-[.07em] text-white/55">{project.note}</span>
-                </span>
-                <span className="link-line shrink-0 font-mono text-[.58rem] uppercase tracking-[.08em] text-accent">{project.linkLabel} <span aria-hidden="true">{project.external ? '↗' : '→'}</span></span>
-              </a>)}
-            </div>
-          </div>
-          <div className="grid gap-10 sm:grid-cols-2">
-            <div>
-              <p className="section-label">Certifications</p>
-              <ul className="mt-5" data-reveal-group>
-                {about.certifications.map((certification) => <li className="border-b border-white/15 py-3 text-[.82rem] leading-[1.6] text-white/72" key={certification}>{certification}</li>)}
-              </ul>
-            </div>
-            <div>
-              <p className="section-label">Find me online</p>
-              <div className="mt-5 flex flex-col items-start gap-3 font-mono text-[.68rem] uppercase tracking-[.12em]" data-reveal-group>
-                <a className="link-line text-white" href="https://github.com/Reddirector" target="_blank" rel="noreferrer">GitHub / {content.handle} ↗</a>
-                <a className="link-line text-white" href={content.links.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>
-                <a className="link-line text-white" href={content.links.x} target="_blank" rel="noreferrer">X ↗</a>
-              </div>
-            </div>
-        </div>
-        </div>
-      </div>
-    </div>
-  </Reveal>
 }
 
 function Now() {
