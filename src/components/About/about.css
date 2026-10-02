@@ -11,7 +11,7 @@
 
 :root {
   --about-ease: cubic-bezier(.2, .75, .25, 1);
-  --about-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --about-serif: var(--font-serif);
   --about-line: rgb(255 255 255 / .16);
   --about-card: var(--surface-raised);
   --about-pad: 24px;

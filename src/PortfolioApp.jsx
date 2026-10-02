@@ -291,7 +291,7 @@ function Hero({ shown }) {
       <i className="geo-orbit-path absolute right-[13%] top-[55%]"><b className="geo-orbit-dot" /></i>
       <i className="geo-line absolute left-[8%] top-[47%]" />
     </div>
-    <div className="hero-content relative z-10 mt-18 max-w-6xl text-center"><h1 className="hero-name font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]"><span className="block">RED</span><span className="block">DIRECTOR</span></h1><p className="hero-intro mx-auto mt-8 max-w-xl text-[1rem] leading-7 text-white/85">{content.intro}</p></div>
+    <div className="hero-content relative z-10 mt-18 max-w-6xl text-center"><h1 className="hero-name font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]"><span className="block">RED</span><span className="block">DIRECTOR</span></h1><p className="hero-intro font-serif mx-auto mt-8 max-w-xl text-[1.0625rem] leading-7 text-white/85">{content.intro}</p></div>
     <a href="#work" className="hero-scroll-cue absolute bottom-7 z-10 grid justify-items-center gap-2 font-mono text-[.66rem] uppercase tracking-[.1em]"><span className="text-white">Selected work</span><span className="text-xl text-white">↓</span></a>
   </section>
 }
@@ -970,7 +970,7 @@ function ProjectModal({ project, close, openOrigin }) {
         <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
           <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-white/70">{project.id} / {project.tag}</p>
           <h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2>
-          <p id="project-detail" className="mt-7 max-w-2xl text-base leading-7 text-white/80">{project.detail}</p>
+          <p id="project-detail" className="font-serif mt-7 max-w-2xl text-base leading-7 text-white/80">{project.detail}</p>
           {project.link && <a className="modal-link mt-10 w-fit border-b border-white pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}
         </div>
       </>}
@@ -1268,7 +1268,7 @@ function Work() {
 
         <div className="mx-auto max-w-5xl py-12 text-center sm:py-16">
           <h2 className="font-display text-[clamp(4rem,9vw,9rem)] font-black leading-[.76] tracking-[-.055em]">WHAT I’VE<br />BUILT.</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-[.96rem] leading-[1.75] text-white/65">These projects show the work I want to do more of: building dependable systems, studying model internals, and keeping private work within its limits.</p>
+          <p className="font-serif mx-auto mt-6 max-w-2xl text-[.96rem] leading-[1.75] text-white/65">These projects show the work I want to do more of: building dependable systems, studying model internals, and keeping private work within its limits.</p>
         </div>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1290,7 +1290,7 @@ function Work() {
                 <span className="shrink-0 whitespace-nowrap font-mono text-[.65rem] tracking-[.08em]">{selectedProject.id} / {String(featuredProjects.length).padStart(2, '0')}</span>
             </div>
             <h3 className="font-display mt-12 max-w-2xl text-[clamp(3.5rem,7vw,6.5rem)] font-black leading-[.8] tracking-[-.045em]">{selectedProject.name}</h3>
-            <p className={`mt-6 max-w-xl text-[.94rem] leading-[1.7] ${inkIsDark ? 'text-black/80' : 'text-white/80'}`}>{selectedProject.short}</p>
+            <p className={`font-serif mt-6 max-w-xl text-[.94rem] leading-[1.7] ${inkIsDark ? 'text-black/80' : 'text-white/80'}`}>{selectedProject.short}</p>
             <button type="button" onClick={(event) => { const bounds = event.currentTarget.getBoundingClientRect(); setOpenOrigin({ x: event.detail ? event.clientX : bounds.left + bounds.width / 2, y: event.detail ? event.clientY : bounds.top + bounds.height / 2 }); setActive(selectedProject) }} aria-haspopup="dialog" className={`mt-auto inline-flex w-fit items-center gap-3 border-b pt-8 pb-2 font-mono text-[.65rem] uppercase tracking-[.1em] transition-colors ${inkIsDark ? 'border-black/40 hover:border-black' : 'border-white/40 hover:border-white'}`}>Open case study <span aria-hidden="true">↗</span></button>
           </div>
           <ProjectVisual project={selectedProject} index={selectedIndex} nextProject={nextProject} advance={changeProject} />
@@ -1423,7 +1423,7 @@ function Method() {
           <h2 className="font-display text-[clamp(2.7rem,6vw,6.4rem)] font-black leading-[.82] tracking-[-.035em]">
             RESEARCH.<br />SYSTEMS.<br /><span className="text-white/55">EXPLORATION.</span>
           </h2>
-          <p className="mt-7 max-w-md text-sm leading-7 text-white/75">{content.philosophy}</p>
+          <p className="font-serif mt-7 max-w-md text-[1.0625rem] leading-7 text-white/75">{content.philosophy}</p>
         </div>
 
         <div>
@@ -1442,7 +1442,7 @@ function Method() {
               <div className="pt-7">
                 <p className="font-mono text-[.56rem] uppercase tracking-[.08em] text-white/55">{phase.topic}</p>
                 <h3 className="mt-3 max-w-xl font-display text-[clamp(2.5rem,4.7vw,4.5rem)] font-black leading-[.88] tracking-[-.025em]">{phase.title}</h3>
-                <p className="mt-5 max-w-2xl text-[.9rem] leading-[1.75] text-white/75">{phase.paragraph}</p>
+                <p className="font-serif mt-5 max-w-2xl text-[.9rem] leading-[1.75] text-white/75">{phase.paragraph}</p>
                 <div className="mt-7 grid grid-cols-2 gap-px border border-white/15 bg-white/15">
                   {phase.stats.map((stat) => <article className="metric min-h-32 bg-black p-4 sm:min-h-36 sm:p-5" key={`${phaseIndex}-${stat.label}`}>
                     <strong className="metric-number font-display block break-words text-[clamp(1.55rem,3.3vw,3rem)] font-black leading-[.85] tracking-[-.03em]">{stat.value}</strong>
@@ -1480,7 +1480,7 @@ function Now() {
       <div><p className="section-label">04 / In progress</p><h2 className="font-display mt-4 text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.72] tracking-[-.055em]">THE<br />WORKBENCH.</h2></div>
       <div className="divide-y divide-white/20" data-reveal-group>{content.now.map((item, index) => <article className="grid gap-4 py-8 sm:grid-cols-[4rem_1fr]" key={item.name}>
         <span className="font-mono text-[.68rem] text-white/50">0{index + 1}</span>
-        <div><h3 className="font-display text-4xl font-black tracking-tight">{item.name}</h3><p className="mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
+        <div><h3 className="font-display text-4xl font-black tracking-tight">{item.name}</h3><p className="font-serif mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
       </article>)}</div>
     </div>
   </Reveal>
