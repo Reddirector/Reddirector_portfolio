@@ -343,16 +343,6 @@ function SparsityTradeoffExplorer() {
   </div>
 }
 
-// Interactive: selecting a feature slot lists the evidence an interpretation would require.
-function FeatureProbeExplorer() {
-  const [probe, setProbe] = useState(null)
-  return <div className="sae-feature-probe" aria-label="Feature probe illustration">
-    <div className="sae-feature-probe-head"><span>Feature probe · interactive</span><small>Select a feature slot</small></div>
-    <div className="sae-feature-grid" role="group" aria-label="Feature slots">{Array.from({ length: 12 }, (_, slot) => <button key={slot} type="button" className={`sae-feature-cell${probe === slot ? ' is-probed' : ''}`} aria-pressed={probe === slot} aria-label={`Feature ${String(slot + 1).padStart(2, '0')}`} onClick={() => setProbe(slot)}><span>{String(slot + 1).padStart(2, '0')}</span></button>)}</div>
-    <p className="sae-feature-readout" role="status">{probe === null ? 'Select a feature to see what evidence an interpretation would require.' : `Feature ${String(probe + 1).padStart(2, '0')} · probed — an interpretation would need activating examples, counterexamples, a coherence check, and an intervention result. None of that evidence is in the current project notes.`}</p>
-  </div>
-}
-
 // Ambient background for the research case file — same passive language as the engine report.
 function SaeReportAmbience() {
   const field = useRef(null)
@@ -402,8 +392,8 @@ function SAEResearchReport({ entranceDelay = 0 }) {
     <main className="sae-report-main">
       <header className="sae-report-hero">
         <p className="sae-report-kicker">Independent reproduction · Mechanistic interpretability</p>
-        <h2 id="project-title">TOWARDS<br /><span>MONOSEMANTICITY.</span></h2>
-        <p id="project-detail" className="sae-report-intro">I’m testing whether a sparse, overcomplete dictionary makes a model’s internal activations easier to study than its neurons alone.</p>
+        <h2 id="project-title">TOWARDS<br /><span>MONOSEMANTICITY:</span><br />a small-scale reproduction on GELU-1L</h2>
+        <p id="project-detail" className="sae-report-intro">I’m testing whether a sparse, overcomplete dictionary makes a model’s internal activations easier to study than its neurons alone. These results come from my own run, not the paper’s.</p>
         <div className="sae-report-links">
           <a href="https://www.transformer-circuits.pub/2023/monosemantic-features/index.html" target="_blank" rel="noreferrer">Read the original paper <span aria-hidden="true">↗</span></a>
           <a href="https://reddirector.github.io/Towards_Monosemanticity_Reproduction/" target="_blank" rel="noreferrer">Open the reproduction project <span aria-hidden="true">↗</span></a>
@@ -485,8 +475,6 @@ function SAEResearchReport({ entranceDelay = 0 }) {
             <p><span>03</span><b>Intervention / steering</b><small>[Intervention, controls, result, and limitations, or “not run.”]</small></p>
             <p><span>04</span><b>Universality</b><small>[Second model, feature matching method, evidence, or “not run.”]</small></p>
           </div>
-          <FeatureProbeExplorer />
-          <p className="sae-report-note">I haven’t added feature interpretations or intervention results because my current notes don’t include that evidence.</p>
         </div>
       </section>
 
