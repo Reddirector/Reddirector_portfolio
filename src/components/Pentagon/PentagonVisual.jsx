@@ -208,17 +208,15 @@ export default function PentagonVisual() {
         ctx.fill()
       })
 
-      // ── 3. Central Brain Breathing & Ambient Glow ──
+      // ── 3. Central Brain Breathing, Ambient Glow & Super Slow Cosmic Rotation ──
       // Subtle organic float
       const floatOffset = reduced ? 0 : Math.sin(now * 0.0016) * 4.5
       const brainY = cy + floatOffset
 
-      // Scaled brain size (proportional, max-height bound)
-      const maxBrainW = Math.min(width * 0.76, 350)
+      // Scaled brain size (proportional, bounded by both width and height to fit during full rotation)
+      const maxBrainW = Math.min(width * 0.68, height * 0.82, 300)
       const brainW = maxBrainW
       const brainH = brainW * (576 / 1024)
-      const brainLeft = cx - brainW / 2
-      const brainTop = brainY - brainH / 2
 
       // Soft amber/cyan neural aura behind the brain
       const auraBreath = 0.85 + Math.sin(now * 0.002) * 0.15 + brainPulse * 0.6
@@ -234,12 +232,15 @@ export default function PentagonVisual() {
       ctx.fillStyle = auraGrad
       ctx.fill()
 
-      // Render Brain Image
+      // Render Brain Image with super slow continuous rotation
       if (brainLoaded) {
         ctx.save()
+        // Super slow, hypnotic cosmic rotation (approx 84 seconds per full revolution)
+        const brainAngle = reduced ? 0 : now * 0.000075
         // Slight scale breathing
         const scaleVal = reduced ? 1 : 1 + Math.sin(now * 0.0016) * 0.012 + brainPulse * 0.02
         ctx.translate(cx, brainY)
+        ctx.rotate(brainAngle)
         ctx.scale(scaleVal, scaleVal)
         ctx.drawImage(brainImg, -brainW / 2, -brainH / 2, brainW, brainH)
 
