@@ -9,8 +9,20 @@ button { cursor: pointer; }
 :root { --color-interactive: #E5484D; --color-brand: #A40000; --surface-deep: #060405; --surface-raised: #0B0708; --surface-hover: #150C0D; }
 ::selection { background: #A40000; color: #fff; }
 
+.hero-ring-mid { border-style: dashed; }
 .hero-ring-outer { border-style: dashed; }
 .hero-geometry::before { position:absolute; inset:0; background-image:radial-gradient(circle,rgb(255 255 255 / .18) 1px,transparent 1.5px); background-size:52px 52px; content:""; opacity:.16; mask-image:radial-gradient(ellipse at center,transparent 26%,#000 100%); }
+.hero-corner-reticle { position:absolute; width:1.5rem; height:1.5rem; border:0 solid rgb(255 255 255 / .24); pointer-events:none; z-index:1; }
+.hero-corner-reticle--tl { top:2.5rem; left:2.5rem; border-top-width:1px; border-left-width:1px; }
+.hero-corner-reticle--tr { top:2.5rem; right:2.5rem; border-top-width:1px; border-right-width:1px; }
+.hero-corner-reticle--bl { bottom:2.5rem; left:2.5rem; border-bottom-width:1px; border-left-width:1px; }
+.hero-corner-reticle--br { bottom:2.5rem; right:2.5rem; border-bottom-width:1px; border-right-width:1px; }
+.hero-axis-crosshair { position:absolute; top:50%; width:14px; height:14px; transform:translateY(-50%); opacity:.22; pointer-events:none; }
+.hero-axis-crosshair::before, .hero-axis-crosshair::after { content:""; position:absolute; background:#fff; }
+.hero-axis-crosshair::before { top:50%; left:0; width:100%; height:1px; transform:translateY(-50%); }
+.hero-axis-crosshair::after { left:50%; top:0; height:100%; width:1px; transform:translateX(-50%); }
+.hero-axis-crosshair--left { left:4.5rem; }
+.hero-axis-crosshair--right { right:4.5rem; }
 .geo-float { z-index:1; display:block; width:1.1rem; height:1.1rem; opacity:.12; }
 .geo-diamond::before { position:absolute; inset:2px; border:1px solid rgb(255 255 255 / .72); content:""; transform:rotate(45deg); }
 .geo-square { width:1.5rem; height:1.5rem; border:1px solid rgb(229 72 77 / .48); transform:rotate(12deg); }
@@ -20,19 +32,34 @@ button { cursor: pointer; }
 .geo-cross b:first-child { transform:rotate(45deg); }
 .geo-cross b:last-child { transform:rotate(-45deg); }
 .geo-orbit-path { width:6rem; height:3.4rem; border:1px dashed rgb(229 72 77 / .24); border-radius:50%; opacity:.65; }
+.geo-orbit-path--mirrored { transform:scaleX(-1); border-color:rgb(255 255 255 / .2); }
 .geo-orbit-dot { position:absolute; top:50%; right:-3px; width:5px; height:5px; border-radius:50%; background:rgb(229 72 77 / .7); transform:translateY(-50%); }
 .geo-line { width:clamp(3rem,8vw,7rem); height:1px; background:linear-gradient(90deg,transparent,rgb(255 255 255 / .24),transparent); }
 .section-geometry { position:absolute; z-index:0; inset:0; overflow:hidden; pointer-events:none; color:#fff; }
 .section-geometry[data-tone="light"] { color:#000; }
 .geometry-plane { position:absolute; inset:-7%; }
 .geometry-plane::before { position:absolute; inset:0; background-image:radial-gradient(circle,currentColor 1px,transparent 1.5px); background-size:54px 54px; content:""; opacity:.09; mask-image:radial-gradient(ellipse at 72% 36%,#000,transparent 78%); }
+.geometry-corner { position:absolute; width:12px; height:12px; border:0 solid currentColor; opacity:.16; }
+.geometry-corner--tl { top:2rem; left:2rem; border-top-width:1px; border-left-width:1px; }
+.geometry-corner--tr { top:2rem; right:2rem; border-top-width:1px; border-right-width:1px; }
+.geometry-corner--bl { bottom:2rem; left:2rem; border-bottom-width:1px; border-left-width:1px; }
+.geometry-corner--br { bottom:2rem; right:2rem; border-bottom-width:1px; border-right-width:1px; }
+.geometry-axis-mark { position:absolute; top:50%; width:10px; height:10px; opacity:.12; }
+.geometry-axis-mark::before, .geometry-axis-mark::after { content:""; position:absolute; background:currentColor; }
+.geometry-axis-mark::before { top:50%; left:0; width:100%; height:1px; transform:translateY(-50%); }
+.geometry-axis-mark::after { left:50%; top:0; height:100%; width:1px; transform:translateX(-50%); }
+.geometry-axis-mark--left { left:2.5rem; }
+.geometry-axis-mark--right { right:2.5rem; }
 .geometry-ring { position:absolute; display:block; aspect-ratio:1; border-radius:50%; }
 .geometry-orbit { top:-17%; right:-12%; width:clamp(22rem,48vw,48rem); border:1px dashed currentColor; opacity:.12; }
 .geometry-orbit::after { position:absolute; top:24%; right:12%; width:6px; height:6px; border-radius:50%; background:currentColor; content:""; }
+.geometry-orbit--left { top:-17%; left:-12%; right:auto; transform:scaleX(-1); border-color:currentColor; opacity:.09; }
+.geometry-orbit--left::after { position:absolute; top:24%; left:12%; right:auto; width:6px; height:6px; border-radius:50%; background:currentColor; content:""; }
 .geometry-orbit--secondary { top:44%; right:auto; left:58%; width:clamp(9rem,19vw,19rem); border-style:solid; opacity:.04; }
 .geometry-orbit--secondary::after { top:auto; right:auto; bottom:8%; left:23%; width:5px; height:5px; }
 .geometry-loop { bottom:-14%; left:-11%; width:clamp(15rem,31vw,30rem); border:1px solid currentColor; opacity:.075; }
 .geometry-diamond { position:absolute; top:36%; left:18%; width:1.15rem; height:1.15rem; border:1px solid currentColor; opacity:.16; }
+.geometry-diamond--left { top:36%; right:18%; left:auto; width:1.15rem; height:1.15rem; border:1px solid currentColor; opacity:.12; }
 .geometry-diamond--secondary { top:72%; right:27%; left:auto; width:.7rem; height:.7rem; opacity:.07; }
 .geometry-cross { position:absolute; right:17%; bottom:25%; width:1.1rem; height:1.1rem; opacity:.17; }
 .geometry-cross--secondary { top:22%; right:35%; bottom:auto; width:.75rem; height:.75rem; opacity:.07; }
@@ -42,14 +69,17 @@ button { cursor: pointer; }
 .geometry-rule { position:absolute; top:63%; left:10%; width:clamp(3rem,8vw,7rem); height:1px; background:linear-gradient(90deg,transparent,currentColor,transparent); opacity:.16; }
 .section-geometry[data-tone="light"] .geometry-plane::before { opacity:.045; }
 .section-geometry[data-tone="light"] .geometry-orbit { opacity:.07; }
+.section-geometry[data-tone="light"] .geometry-orbit--left { opacity:.05; }
 .section-geometry[data-tone="light"] .geometry-loop { opacity:.045; }
 .section-geometry[data-tone="light"] .geometry-diamond,
+.section-geometry[data-tone="light"] .geometry-diamond--left,
 .section-geometry[data-tone="light"] .geometry-cross,
 .section-geometry[data-tone="light"] .geometry-rule { opacity:.08; }
 .section-geometry[data-tone="light"] .geometry-orbit--secondary { opacity:.025; }
 .section-geometry[data-tone="light"] .geometry-diamond--secondary,
 .section-geometry[data-tone="light"] .geometry-cross--secondary { opacity:.035; }
 .section-geometry--now .geometry-orbit { right:auto; left:-13%; }
+.section-geometry--now .geometry-orbit--left { left:auto; right:-13%; }
 .section-geometry--now .geometry-loop { right:-10%; left:auto; }
 .section-geometry--now .geometry-diamond { right:18%; left:auto; }
 .section-geometry--now .geometry-cross { right:auto; left:15%; }
@@ -176,8 +206,9 @@ footer .footer-link:hover, footer .footer-link:focus-visible { border-color:#A40
 @media (max-width:640px) {
   #top { min-height:100svh; }
   #top .hero-ring { width:116vw; height:116vw; }
-  #top .hero-ring-outer { width:138vw; height:138vw; }
-  #top .hero-orb { top:35%; width:50vw; height:50vw; max-width:none; max-height:none; }
+  #top .hero-ring-mid { width:134vw; height:134vw; }
+  #top .hero-ring-outer { width:150vw; height:150vw; }
+  #top .hero-orb { width:74vw; height:74vw; max-width:none; max-height:none; }
   #top .hero-content { width:100%; margin-top:0; padding:5.5rem 0 6.5rem; }
   #top .hero-name { margin-top:.9rem; font-size:clamp(3.65rem,16vw,5.4rem) !important; line-height:.8 !important; }
   #top .hero-role { width:fit-content; max-width:88vw; margin:0 auto; font-size:.66rem; line-height:1.6 !important; letter-spacing:.055em !important; }

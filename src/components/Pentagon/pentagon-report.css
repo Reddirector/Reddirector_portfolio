@@ -1,0 +1,361 @@
+/* Pentagon Workstation Report Styles & Interactive Widgets */
+
+/* Editorial Typography & Human Title Styling */
+.oe-report-panel .oe-report-hero #project-title,
+.oe-report-hero #project-title.pentagon-report-title,
+.oe-report .oe-report-hero h2 {
+  font-family: var(--font-serif) !important;
+  font-size: clamp(2.35rem, 5.2vw, 4.2rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.16 !important;
+  letter-spacing: -0.015em !important;
+  color: #f7f7f7 !important;
+  text-transform: none !important;
+  margin: 1.5rem 0 1.4rem !important;
+}
+
+.oe-report-panel .oe-report-hero #project-title span,
+.oe-report-hero #project-title.pentagon-report-title span,
+.oe-report .oe-report-hero h2 span {
+  display: block !important;
+  font-style: italic !important;
+  font-weight: 300 !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 0.9em !important;
+  margin-top: 0.35rem !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.18 !important;
+}
+
+.oe-report .oe-report-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-interactive);
+}
+
+.oe-report .oe-report-intro {
+  font-family: var(--font-serif) !important;
+  font-size: clamp(1.0625rem, 1.6vw, 1.25rem) !important;
+  line-height: 1.72 !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  max-width: 52rem !important;
+}
+
+.oe-report .oe-report-section-body h3 {
+  font-family: var(--font-serif) !important;
+  font-size: clamp(1.4rem, 2.7vw, 2.1rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  color: #ffffff !important;
+  margin: 0 0 1rem !important;
+}
+
+.oe-report .oe-report-section-body p {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.72;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pentagon-report-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pentagon-report-badge--ok {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  color: #4ade80;
+}
+
+.pentagon-report-badge--warn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+}
+
+.pentagon-report-badge--danger {
+  background: rgba(229, 72, 77, 0.14);
+  border: 1px solid rgba(229, 72, 77, 0.55);
+  color: #f87171;
+}
+
+.pentagon-report-badge--neutral {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Interactive Card Container */
+.pentagon-interactive-box {
+  margin: 1.8rem 0 1.2rem;
+  border: 1px solid rgba(229, 72, 77, 0.24);
+  background: rgba(229, 72, 77, 0.03);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 4px;
+}
+
+.pentagon-interactive-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 0.85rem;
+}
+
+.pentagon-interactive-head > span {
+  color: var(--color-interactive);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.pentagon-preset-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.pentagon-preset-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.4rem 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.pentagon-preset-btn:hover {
+  border-color: rgba(229, 72, 77, 0.7);
+  color: #fff;
+  background: rgba(229, 72, 77, 0.08);
+}
+
+.pentagon-preset-btn.is-active {
+  border-color: var(--color-interactive);
+  background: rgba(229, 72, 77, 0.18);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(229, 72, 77, 0.25);
+}
+
+/* Permission Matrix Table */
+.pentagon-matrix-grid {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+}
+
+.pentagon-matrix-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1.2fr) minmax(11rem, 2fr) minmax(7rem, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 7, 8, 0.5);
+  border-radius: 2px;
+  transition: border-color 0.2s ease;
+}
+
+.pentagon-matrix-row:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.pentagon-matrix-cat {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.04em;
+}
+
+.pentagon-matrix-desc {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .pentagon-matrix-row {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+}
+
+/* LangGraph Agent State Visualizer */
+.pentagon-agent-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pentagon-step-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 5.5rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  border-radius: 2px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.pentagon-step-card:hover {
+  border-color: rgba(229, 72, 77, 0.5);
+  background: rgba(229, 72, 77, 0.05);
+}
+
+.pentagon-step-card.is-active {
+  border-color: var(--color-interactive);
+  background: rgba(229, 72, 77, 0.14);
+  box-shadow: 0 0 16px rgba(229, 72, 77, 0.22);
+}
+
+.pentagon-step-num {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+  color: var(--color-interactive);
+  text-transform: uppercase;
+}
+
+.pentagon-step-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+  margin-top: 0.35rem;
+}
+
+.pentagon-step-desc {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 2px solid var(--color-interactive);
+  background: rgba(0, 0, 0, 0.3);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* RAG Fallback Simulator */
+.pentagon-rag-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.pentagon-rag-card {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(11, 7, 8, 0.6);
+  border-radius: 3px;
+}
+
+.pentagon-rag-card strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0.3rem 0;
+}
+
+.pentagon-rag-card span {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Architecture Facts / Specifications Grid */
+.pentagon-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.2rem;
+  font-size: 0.82rem;
+}
+
+.pentagon-spec-table th,
+.pentagon-spec-table td {
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.pentagon-spec-table th {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pentagon-spec-table td:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-interactive);
+  white-space: nowrap;
+}
+
+/* Schema Code Box */
+.pentagon-code-container {
+  margin-top: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pentagon-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pentagon-code-body {
+  padding: 1rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  overflow-x: auto;
+}
+
+.pentagon-code-keyword { color: #f87171; }
+.pentagon-code-type { color: #60a5fa; }
+.pentagon-code-fn { color: #fde047; }
+.pentagon-code-comment { color: rgba(255, 255, 255, 0.4); font-style: italic; }

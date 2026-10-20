@@ -6,6 +6,8 @@ import { content } from './content'
 import About from './components/About/About'
 import Intro from './components/Intro/Intro'
 import { useIntro } from './components/Intro/useIntro'
+import PentagonVisual from './components/Pentagon/PentagonVisual'
+import PentagonWorkstationReport from './components/Pentagon/PentagonReport'
 
 gsap.registerPlugin(ScrollTrigger)
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -15,7 +17,7 @@ const logoLetters = [
   ['E', 18, 16], ['C', 21, 18], ['T', 24, 20], ['O', 27, 22], ['R', 30, 24],
 ]
 const featuredProjects = content.projects
-  .filter((project) => ['Orchestration Engine', 'SAE Reproduction'].includes(project.name))
+  .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
 const createOeWaypoints = () => {
   const stars = []
@@ -72,17 +74,27 @@ function SectionGeometry({ tone = 'dark', variant = 'work' }) {
     const section = field.current?.parentElement
     const context = gsap.context(() => {
       const scrollRange = { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 }
-      gsap.fromTo('.geometry-orbit', { yPercent: -14, rotate: -12 }, { yPercent: 14, rotate: 12, ease: 'none', scrollTrigger: scrollRange })
-      gsap.fromTo('.geometry-diamond', { y: 24, rotate: -18 }, { y: -24, rotate: 54, ease: 'none', scrollTrigger: scrollRange })
+      gsap.fromTo('.geometry-orbit:not(.geometry-orbit--left)', { yPercent: -14, rotate: -12 }, { yPercent: 14, rotate: 12, ease: 'none', scrollTrigger: scrollRange })
+      gsap.fromTo('.geometry-orbit--left', { yPercent: -14, rotate: 12 }, { yPercent: 14, rotate: -12, ease: 'none', scrollTrigger: scrollRange })
+      gsap.fromTo('.geometry-diamond:not(.geometry-diamond--left)', { y: 24, rotate: -18 }, { y: -24, rotate: 54, ease: 'none', scrollTrigger: scrollRange })
+      gsap.fromTo('.geometry-diamond--left', { y: 24, rotate: 18 }, { y: -24, rotate: -54, ease: 'none', scrollTrigger: scrollRange })
     }, field)
     return () => context.revert()
   }, [])
   return <div ref={field} className={`section-geometry section-geometry--${variant}`} data-tone={tone} aria-hidden="true">
     <div className="geometry-plane">
+      <span className="geometry-corner geometry-corner--tl" />
+      <span className="geometry-corner geometry-corner--tr" />
+      <span className="geometry-corner geometry-corner--bl" />
+      <span className="geometry-corner geometry-corner--br" />
+      <i className="geometry-axis-mark geometry-axis-mark--left" />
+      <i className="geometry-axis-mark geometry-axis-mark--right" />
       <i className="geometry-ring geometry-orbit" />
+      <i className="geometry-ring geometry-orbit geometry-orbit--left" />
       <i className="geometry-ring geometry-orbit geometry-orbit--secondary" />
       <i className="geometry-ring geometry-loop" />
       <i className="geometry-diamond" />
+      <i className="geometry-diamond geometry-diamond--left" />
       <i className="geometry-diamond geometry-diamond--secondary" />
       <i className="geometry-cross"><b /><b /></i>
       <i className="geometry-cross geometry-cross--secondary"><b /><b /></i>
@@ -271,27 +283,52 @@ function Hero({ shown }) {
     const context = gsap.context(() => {
       gsap.from('.hero-name > span', { opacity: 0, y: 42, stagger: .1, duration: .8, ease: 'power4.out', delay: .38 })
       gsap.from('.hero-intro', { opacity: 0, y: 22, duration: .7, ease: 'power3.out', delay: .85 })
-      gsap.to('.hero-ring', { rotate: 360, duration: 38, ease: 'none', repeat: -1 })
-      gsap.to('.hero-ring-outer', { rotate: -360, duration: 92, ease: 'none', repeat: -1 })
+      gsap.to('.hero-ring', { rotate: 360, duration: 42, ease: 'none', repeat: -1 })
+      gsap.to('.hero-ring-mid', { rotate: -360, duration: 68, ease: 'none', repeat: -1 })
+      gsap.to('.hero-ring-outer', { rotate: 360, duration: 110, ease: 'none', repeat: -1 })
       gsap.to('.geo-float', { y: -12, rotate: 8, opacity: .2, duration: 8, ease: 'sine.inOut', repeat: -1, yoyo: true, stagger: { each: 1.2, from: 'random' } })
-      gsap.to('.geo-orbit-path', { rotate: 360, duration: 48, ease: 'none', repeat: -1 })
-      gsap.to('.hero-orb', { y: 90, scale: .84, ease: 'none', scrollTrigger: { trigger: hero.current, start: 'top top', end: 'bottom top', scrub: 1 } })
+      gsap.to('.geo-orbit-path:not(.geo-orbit-path--mirrored)', { rotate: 360, duration: 48, ease: 'none', repeat: -1 })
+      gsap.to('.geo-orbit-path--mirrored', { rotate: -360, duration: 48, ease: 'none', repeat: -1 })
+      gsap.to('.hero-centerpiece', { y: 70, scale: .92, ease: 'none', scrollTrigger: { trigger: hero.current, start: 'top top', end: 'bottom top', scrub: 1 } })
     }, hero)
     return () => context.revert()
   }, [shown])
   return <section ref={hero} id="top" className="relative grid min-h-svh place-items-center overflow-hidden bg-black px-5">
-    <div className="hero-ring absolute h-[78vw] w-[78vw] max-h-[58rem] max-w-[58rem] rounded-full border border-white/15" />
-    <div className="hero-ring-outer absolute h-[104vw] w-[104vw] max-h-[76rem] max-w-[76rem] rounded-full border border-white/[.06]" />
-    <div className="hero-orb absolute left-1/2 top-[37%] h-[31vw] w-[31vw] max-h-[28rem] max-w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent opacity-85" />
     <div className="hero-geometry pointer-events-none absolute inset-0" aria-hidden="true">
-      <i className="geo-float geo-diamond absolute left-[15%] top-[25%]" />
-      <i className="geo-float geo-square absolute right-[16%] top-[31%]" />
-      <i className="geo-float geo-triangle absolute bottom-[24%] left-[18%]" />
-      <i className="geo-float geo-cross absolute bottom-[27%] right-[20%]"><b /><b /></i>
-      <i className="geo-orbit-path absolute right-[13%] top-[55%]"><b className="geo-orbit-dot" /></i>
-      <i className="geo-line absolute left-[8%] top-[47%]" />
+      <span className="hero-corner-reticle hero-corner-reticle--tl" />
+      <span className="hero-corner-reticle hero-corner-reticle--tr" />
+      <span className="hero-corner-reticle hero-corner-reticle--bl" />
+      <span className="hero-corner-reticle hero-corner-reticle--br" />
+      <div className="hero-axis-crosshair hero-axis-crosshair--left" />
+      <div className="hero-axis-crosshair hero-axis-crosshair--right" />
+      <i className="geo-orbit-path absolute right-[12%] top-[48%]"><b className="geo-orbit-dot" /></i>
+      <i className="geo-orbit-path geo-orbit-path--mirrored absolute left-[12%] top-[48%]"><b className="geo-orbit-dot" /></i>
+      <i className="geo-float geo-diamond absolute left-[15%] top-[24%]" />
+      <i className="geo-float geo-diamond absolute right-[15%] top-[24%]" />
+      <i className="geo-float geo-square absolute right-[18%] top-[34%]" />
+      <i className="geo-float geo-square absolute left-[18%] top-[34%]" />
+      <i className="geo-float geo-triangle absolute bottom-[22%] left-[18%]" />
+      <i className="geo-float geo-triangle absolute bottom-[22%] right-[18%]" />
+      <i className="geo-float geo-cross absolute bottom-[25%] left-[16%]"><b /><b /></i>
+      <i className="geo-float geo-cross absolute bottom-[25%] right-[16%]"><b /><b /></i>
+      <i className="geo-line absolute left-[8%] top-[50%]" />
+      <i className="geo-line absolute right-[8%] top-[50%]" />
     </div>
-    <div className="hero-content relative z-10 mt-18 max-w-6xl text-center"><h1 className="hero-name font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]"><span className="block">RED</span><span className="block">DIRECTOR</span></h1><p className="hero-intro font-serif mx-auto mt-8 max-w-xl text-[1.0625rem] leading-7 text-white/85">{content.intro}</p></div>
+    <div className="hero-content relative z-10 max-w-6xl text-center">
+      <div className="relative">
+        <div className="hero-centerpiece pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center" aria-hidden="true">
+          <div className="hero-ring absolute h-[76vw] w-[76vw] max-h-[56rem] max-w-[56rem] rounded-full border border-white/15" />
+          <div className="hero-ring-mid absolute h-[90vw] w-[90vw] max-h-[66rem] max-w-[66rem] rounded-full border border-white/[.08] border-dashed" />
+          <div className="hero-ring-outer absolute h-[106vw] w-[106vw] max-h-[78rem] max-w-[78rem] rounded-full border border-white/[.05]" />
+          <div className="hero-orb absolute h-[clamp(22rem,42vw,36rem)] w-[clamp(22rem,42vw,36rem)] rounded-full bg-accent opacity-90 shadow-[0_0_100px_rgba(164,0,0,0.38)]" />
+        </div>
+        <h1 className="hero-name relative z-10 font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]">
+          <span className="block">RED</span>
+          <span className="block">DIRECTOR</span>
+        </h1>
+      </div>
+      <p className="hero-intro font-serif mx-auto mt-8 max-w-xl text-[1.0625rem] leading-7 text-white/85">{content.intro}</p>
+    </div>
     <a href="#work" className="hero-scroll-cue absolute bottom-7 z-10 grid justify-items-center gap-2 font-mono text-[.66rem] uppercase tracking-[.1em]"><span className="text-white">Selected work</span><span className="text-xl text-white">↓</span></a>
   </section>
 }
@@ -860,10 +897,11 @@ function ProjectModal({ project, close, openOrigin }) {
   const [transitionDone, setTransitionDone] = useState(false)
   const isResearch = project?.name === 'SAE Reproduction'
   const isOrchestration = project?.name === 'Orchestration Engine'
-  const usesVenom = isResearch || isOrchestration
+  const isPentagon = project?.name === 'Pentagon'
+  const usesVenom = isResearch || isOrchestration || isPentagon
   // The venom blob fully covers the report until it starts shrinking away,
   // so the report's own entrance choreography begins as the blob recedes.
-  const entranceDelay = usesVenom ? (isOrchestration ? 1.7 : 1.75) : 0
+  const entranceDelay = usesVenom ? (isOrchestration || isPentagon ? 1.7 : 1.75) : 0
   useLayoutEffect(() => {
     if (!project || !panel.current) return undefined
     if (usesVenom) {
@@ -874,7 +912,7 @@ function ProjectModal({ project, close, openOrigin }) {
         setTransitionDone(true)
         return undefined
       }
-      if (isOrchestration) {
+      if (isOrchestration || isPentagon) {
         gsap.set(venom.current, { scale: 0, rotation: -8, autoAlpha: 1, transformOrigin: '50% 50%' })
         gsap.set(venomLabel.current, { autoAlpha: 0, y: 10 })
         const timeline = gsap.timeline({ onComplete: () => setTransitionDone(true) })
@@ -956,7 +994,7 @@ function ProjectModal({ project, close, openOrigin }) {
       <div role="status" aria-live="polite">{reportReady ? `${project.name} report ready.` : `Opening ${project.name} case study.`}</div>
       {!reportReady && <><h2 id="project-title">{project.name}</h2><p id="project-detail">Opening the {project.name} case study.</p></>}
     </div>}
-    <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'bg-accent text-white'}`}>
+    <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration || isPentagon ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'text-white'}`} style={!usesVenom ? { backgroundColor: project.color || 'var(--color-accent)' } : undefined}>
       {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-white/25" />}
       {reportReady && (!usesVenom || transitionDone) && <CaseFileProgress tone={usesVenom ? 'lime' : 'ink'} />}
       {isResearch && reportReady ? <>
@@ -965,24 +1003,33 @@ function ProjectModal({ project, close, openOrigin }) {
       </> : isOrchestration && reportReady ? <>
         <header className="oe-report-topbar"><p>01 / Engine case file <span>·</span> Orchestration Engine <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">overview</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">engine live</span>{closeControl}</div></header>
         <OrchestrationEngineReport entranceDelay={entranceDelay} />
+      </> : isPentagon && reportReady ? <>
+        <header className="oe-report-topbar"><p>03 / Workstation case file <span>·</span> Pentagon <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">architecture</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">workstation live</span>{closeControl}</div></header>
+        <PentagonWorkstationReport entranceDelay={entranceDelay} setupScrollFx={setupCaseFileScrollFx} useReadout={useCaseFileReadout} />
       </> : usesVenom ? null : <>
         {closeControl}
         <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
           <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-white/70">{project.id} / {project.tag}</p>
           <h2 id="project-title" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]">{project.name}</h2>
           <p id="project-detail" className="font-serif mt-7 max-w-2xl text-base leading-7 text-white/80">{project.detail}</p>
-          {project.link && <a className="modal-link mt-10 w-fit border-b border-white pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">View repository ↗</a>}
+          {project.link && <a className="modal-link mt-10 w-fit border-b border-white pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">{project.link.includes('github') ? 'View repository ↗' : 'Launch project ↗'}</a>}
         </div>
       </>}
     </article>
-    {usesVenom && !transitionDone && <div className={`sae-venom-transition ${isOrchestration ? 'oe-venom-transition' : ''}`} aria-hidden="true">
-      <div ref={venom} className={`sae-venom-blob ${isOrchestration ? 'oe-venom-blob' : ''}`} style={{ left: `${openOrigin?.x ?? window.innerWidth / 2}px`, top: `${openOrigin?.y ?? window.innerHeight / 2}px` }}>
-        {!isOrchestration && [-42, -18, 26, 52, 138].map((angle) => <i className="sae-venom-tendril" style={{ '--tendril-angle': `${angle}deg` }} key={angle} />)}
+    {usesVenom && !transitionDone && <div className={`sae-venom-transition ${isOrchestration || isPentagon ? 'oe-venom-transition' : ''}`} aria-hidden="true">
+      <div ref={venom} className={`sae-venom-blob ${isOrchestration || isPentagon ? 'oe-venom-blob' : ''}`} style={{ left: `${openOrigin?.x ?? window.innerWidth / 2}px`, top: `${openOrigin?.y ?? window.innerHeight / 2}px` }}>
+        {!isOrchestration && !isPentagon && [-42, -18, 26, 52, 138].map((angle) => <i className="sae-venom-tendril" style={{ '--tendril-angle': `${angle}deg` }} key={angle} />)}
       </div>
-      <div ref={venomLabel} className={`sae-venom-label ${isOrchestration ? 'oe-venom-label' : ''}`}>
+      <div ref={venomLabel} className={`sae-venom-label ${isOrchestration || isPentagon ? 'oe-venom-label' : ''}`}>
         {isOrchestration ? <>
           <svg className="oe-loader-graph" viewBox="0 0 180 64"><path d="M28 18 C65 18 68 32 90 32 M28 46 C65 46 68 32 90 32 H150" /><circle cx="28" cy="18" r="4" /><circle cx="28" cy="46" r="4" /><circle cx="90" cy="32" r="5" /><circle cx="150" cy="32" r="4" /></svg>
           <span>01 / Workflow file</span><strong>Orchestration Engine</strong>
+        </> : isPentagon ? <>
+          <svg className="oe-loader-graph" viewBox="0 0 180 64" fill="none">
+            <polygon points="90,12 122,34 110,64 70,64 58,34" fill="rgba(229,72,77,0.12)" stroke="var(--color-interactive)" strokeWidth="1.5" />
+            <circle cx="90" cy="40" r="4" fill="var(--color-interactive)" />
+          </svg>
+          <span>03 / Workstation file</span><strong>Pentagon Workstation</strong>
         </> : <><span>02 / Research file</span><strong>SAE reproduction</strong></>}
       </div>
     </div>}
@@ -1017,9 +1064,10 @@ function ProjectVisual({ project, index, nextProject, advance }) {
   const proof = {
     'Orchestration Engine': '58 / 58 tests passing',
     'SAE Reproduction': '0.897562 validation similarity',
+    'Pentagon': 'Zero-Leak BYOK · 80+ Models',
   }[project.name]
   useLayoutEffect(() => {
-    if (reduceMotion() || project.name === 'Orchestration Engine') return undefined
+    if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon') return undefined
     const section = visual.current?.closest('#work')
     const context = gsap.context(() => {
       gsap.fromTo(scene.current, { y: 18, rotate: -.7, scale: .985 }, { y: -18, rotate: .7, scale: 1.015, ease: 'none', scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 } })
@@ -1206,7 +1254,7 @@ function ProjectVisual({ project, index, nextProject, advance }) {
       <span>Project representation</span><span>{project.id} / {String(featuredProjects.length).padStart(2, '0')}</span>
     </div>
     <div ref={scene} className="project-visual-scene">
-      <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''}`} key={project.id} aria-hidden="true">
+      <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''} ${project.name === 'Pentagon' ? '!min-h-0 !p-0 !justify-stretch h-full flex flex-col' : ''}`} key={project.id} aria-hidden="true">
       {project.name === 'Orchestration Engine' && <>
         <OeVisualHalo />
         <div className="flex items-center justify-between relative z-10 font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">
@@ -1239,6 +1287,7 @@ function ProjectVisual({ project, index, nextProject, advance }) {
         <div className="sae-bars" aria-hidden="true">{[34, 58, 44, 78, 52, 92, 63, 40, 72, 50, 86, 60].map((height, bar) => <i key={bar} style={{ '--bar-height': `${height}%`, '--bar-delay': `${bar * .13}s` }} />)}</div>
         <div className="mt-7 grid grid-cols-2 gap-4 border-t border-white/15 pt-4 font-mono uppercase"><span><small>Features</small><strong>2,048 → 4,096</strong></span><span><small>Validation</small><strong>0.897562</strong></span></div>
       </>}
+      {project.name === 'Pentagon' && <PentagonVisual />}
       </div>
     </div>
     <div className="mt-6 flex items-end justify-between gap-3 border-t border-white/15 pt-4 text-left">
@@ -1262,7 +1311,7 @@ function Work() {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4">
           <p className="section-label">01 / Selected work</p>
-          <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">02 selected works <span aria-hidden="true">↘</span></p>
+          <p className="font-mono text-[.62rem] uppercase tracking-[.1em] text-white/55">{String(featuredProjects.length).padStart(2, '0')} selected works <span aria-hidden="true">↘</span></p>
         </div>
         <WorkScrollProgress />
 
@@ -1333,6 +1382,16 @@ const methodPhases = [
     stats: [
       { value: '58/58', label: 'Orchestration tests passing' },
       { value: 'v0.1.0', label: 'Apache 2.0 · Published' },
+    ],
+  },
+  {
+    project: 'Pentagon',
+    topic: 'Local-First Systems / AI Governance',
+    title: 'Can multimodal AI run private by default?',
+    paragraph: 'I engineered an enterprise-grade local-first AI workstation with zero-leak BYOK Fernet encryption, LangGraph state orchestration, ChromaDB RAG with automated CPU fallback, and six-tier autonomy governance across Web, Android, Electron, and bootable ISO.',
+    stats: [
+      { value: 'Zero-Leak', label: 'BYOK Fernet at rest' },
+      { value: '80+ Models', label: 'NVIDIA NIM catalog' },
     ],
   },
 ]
@@ -1462,7 +1521,7 @@ function Method() {
             </div>
           </article>
 
-          <div className="method-topic-picker mt-3 grid grid-cols-2 gap-2" role="group" aria-label="Choose a case" data-reveal-group>
+          <div className="method-topic-picker mt-3 grid grid-cols-3 gap-2" role="group" aria-label="Choose a case" data-reveal-group>
             {methodPhases.map((item, index) => <button type="button" onClick={() => choosePhase(index)} aria-pressed={phaseIndex === index} className="min-h-16 border border-white/30 px-2 py-3 text-left transition-colors" key={item.project}>
               <span className="block font-mono text-[.53rem] uppercase tracking-[.06em] opacity-65">0{index + 1}</span>
               <span className="mt-1 block font-display text-base font-bold leading-[.95] sm:text-lg">{item.project}</span>

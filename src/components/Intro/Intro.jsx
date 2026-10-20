@@ -6,31 +6,33 @@ import './intro.css'
 const WORDMARK = 'REDDIRECTOR' // must match the letters in wordmark.js (11 paths)
 const SUBLINE = 'ADITYA KUMAR SINGH' // set to null to disable
 
-// ── Timeline: every duration/easing lives here so the choreography is tunable.
-// Draw-on ≈ 4.8s, then a full 3s hold on the completed wordmark before the
-// site opens (owner spec). Total ≈ 9.5s.
+// ── Timeline: tuned for a slow, calm, cinematic entrance.
+// Sequence runs at a graceful, unhurried pace (~4.6s total) with smooth
+// stroke draw, gentle ink-bloom fill, center rule expansion, and curtain lift.
 const T = {
-  hold: 450,          // stillness before letters begin
-  draw: 1100,         // per-letter stroke draw
-  stagger: 160,       // per-letter offset, left to right
-  fill: 900,          // per-letter fill fade (starts as each stroke finishes)
-  rule: 700,          // hairline rule under the wordmark
-  subline: 500,       // subline fade-up
-  holdWordmark: 3000, // completed wordmark waits 3s before the site opens
-  exit: 1000,         // overlay curtain lift (clip-path)
-  exitDelay: 150,     // curtain starts after the wordmark begins leaving
-  pageRise: 700,      // page content rise + fade
-  pageStagger: 80,    // top-to-bottom block stagger (max 4 blocks)
-  cleanup: 250,       // final overlay fade before unmount
+  hold: 240,          // calm stillness before letters begin drawing
+  draw: 950,          // per-letter stroke draw (deliberate, steady tracing)
+  stagger: 110,       // per-letter offset, left to right (calm, rhythmic cadence)
+  fill: 650,          // per-letter fill bloom (soft, organic dissolve into white)
+  fillStartRatio: 0.55,// start fill when letter outline is 55% drawn
+  rule: 520,          // hairline rule under the wordmark
+  subline: 450,       // subline fade-up
+  holdWordmark: 1200, // completed wordmark hold before exit
+  exit: 700,          // overlay curtain lift (clip-path)
+  exitDelay: 140,     // curtain starts after the wordmark begins lifting
+  pageRise: 600,      // page content rise + fade
+  pageStagger: 70,    // top-to-bottom block stagger (max 4 blocks)
+  cleanup: 200,       // final overlay fade before unmount
   skipFade: 150,      // skip path fade
-  cap: 11000,         // hard force-finish cap (must exceed the full sequence)
-  fontsWait: 800,     // max wait for document.fonts.ready
+  cap: 8500,          // hard force-finish cap
+  fontsWait: 600,     // max wait for document.fonts.ready
 }
 
 const EASE = {
-  draw: 'cubic-bezier(0.65, 0, 0.35, 1)',
+  draw: 'cubic-bezier(0.4, 0, 0.2, 1)',  // calm, organic ease-in-out
+  fill: 'cubic-bezier(0.25, 1, 0.5, 1)',  // soft, smooth bloom settle
   exit: 'cubic-bezier(0.7, 0, 0.2, 1)',
-  out: 'cubic-bezier(0.2, 0.75, 0.25, 1)',
+  out: 'cubic-bezier(0.16, 1, 0.3, 1)',
 }
 
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -120,8 +122,7 @@ export default function Intro({ active, onDone, contentRef }) {
     const blocks = content?.querySelectorAll('.site-header, #top .hero-name, #top .hero-intro, #top .hero-scroll-cue') || []
     const run = async () => {
       try {
-        // Wait for the display font (cap 800ms) — the SVG outlines are static,
-        // but the subline uses live text and should not swap mid-animation.
+        // Wait for fonts (cap 600ms)
         await Promise.race([document.fonts?.ready, wait(T.fontsWait)])
         if (!alive()) return
 
@@ -134,17 +135,19 @@ export default function Intro({ active, onDone, contentRef }) {
             { duration: T.draw, delay: index * T.stagger, fill: 'forwards', easing: EASE.draw },
           )
         })
-        const lastStroke = T.hold + (glyphPaths.length - 1) * T.stagger + T.draw
 
-        // Phase 3 — fills fade in as each stroke finishes; stroke thins; rule; subline.
+        // Phase 3 — fills bloom smoothly as each stroke takes shape; stroke thins cleanly.
         glyphPaths.forEach((path, index) => {
-          const start = T.hold + index * T.stagger + T.draw * 0.72
-          play(path, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: T.fill, delay: start, easing: EASE.out })
-          play(path, [{ strokeWidth: 2 }, { strokeWidth: 1 }], { duration: T.fill, delay: start })
+          const start = index * T.stagger + T.draw * T.fillStartRatio
+          play(path, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: T.fill, delay: start, easing: EASE.fill })
+          play(path, [{ strokeWidth: 2 }, { strokeWidth: 1 }], { duration: T.fill, delay: start, easing: EASE.fill })
         })
-        const fillEnd = lastStroke + T.fill
-        await wait(fillEnd - (T.hold + (glyphPaths.length - 1) * T.stagger + T.draw * 0.72))
+
+        const totalLetterTime = (glyphPaths.length - 1) * T.stagger + T.draw * T.fillStartRatio + T.fill
+        await wait(totalLetterTime)
         if (!alive()) return
+
+        // Phase 4 — hairline rule and subline smoothly emerge.
         play(rule.current, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: T.rule, easing: EASE.out })
         if (subline.current) {
           play(subline.current, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: T.subline, easing: EASE.out })
@@ -152,11 +155,13 @@ export default function Intro({ active, onDone, contentRef }) {
         await wait(Math.max(T.rule, T.subline) + T.holdWordmark)
         if (!alive()) return
 
-        // Phase 5 — exit: wordmark lifts, curtain lifts away, page rises beneath.
-        play(svg.current, [{ transform: 'none' }, { transform: 'translateY(-24px)', opacity: 0 }], { duration: 640, easing: EASE.out })
-        play(subline.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 450 })
+        // Phase 5 — exit: wordmark lifts, rule & subline fade, curtain lifts away, page rises beneath.
+        play(svg.current, [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-20px)', opacity: 0 }], { duration: 520, easing: EASE.out })
+        if (rule.current) play(rule.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 320 })
+        if (subline.current) play(subline.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 350 })
         await wait(T.exitDelay)
         if (!alive()) return
+
         play(root, [{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }], { duration: T.exit, easing: EASE.exit })
         blocks.forEach((block, index) => {
           if (index > 3) return
@@ -166,7 +171,7 @@ export default function Intro({ active, onDone, contentRef }) {
           ], { duration: T.pageRise, delay: index * T.pageStagger, easing: EASE.out })
         })
         if (content) content.style.willChange = ''
-        await wait(T.exit + 60)
+        await wait(T.exit + 50)
         if (!alive()) return
 
         // Phase 6 — cleanup.
@@ -207,3 +212,4 @@ export default function Intro({ active, onDone, contentRef }) {
     </div>
   )
 }
+

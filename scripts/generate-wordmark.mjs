@@ -1,46 +1,92 @@
 // One-time generator for src/components/Intro/wordmark.js
-// Usage: cd scripts && npm init -y && npm i opentype.js && node generate-wordmark.mjs
-// Downloads Barlow Condensed 900 (OFL) once and emits outline paths for WORDMARK.
-// Edit WORDMARK here, run, then copy the printed JSON block into wordmark.js.
+// Extracts sharp, high-contrast typography:
+// - RED: Cinzel 900 (sharp monumental Roman serifs, scale 106)
+// - DIRECTOR: Chakra Petch 700 (sharp 45° chamfered technical cuts, scale 74, tracking +5)
 import opentype from 'opentype.js'
 import fs from 'fs'
 
-const WORDMARK = 'REDDIRECTOR'
-// Font file: download once into this folder as barlow900.ttf —
-// curl -o barlow900.ttf 'https://fonts.gstatic.com/s/barlowcondensed/v13/HTxwL3I-JCGChYJ8VI-L6OO_au7B45L0_3E.ttf'
-const buf = fs.readFileSync(new URL('./barlow900.ttf', import.meta.url))
-const font = opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
-const fontSize = 100
-const scale = fontSize / font.unitsPerEm
+function pathToSvgD(commands) {
+  let d = ''
+  for (let i = 0; i < commands.length; i++) {
+    const cmd = commands[i]
+    if (cmd.type === 'M') d += 'M' + cmd.x.toFixed(2) + ' ' + cmd.y.toFixed(2)
+    else if (cmd.type === 'L') d += 'L' + cmd.x.toFixed(2) + ' ' + cmd.y.toFixed(2)
+    else if (cmd.type === 'Q') d += 'Q' + cmd.x1.toFixed(2) + ' ' + cmd.y1.toFixed(2) + ' ' + cmd.x.toFixed(2) + ' ' + cmd.y.toFixed(2)
+    else if (cmd.type === 'C') d += 'C' + cmd.x1.toFixed(2) + ' ' + cmd.y1.toFixed(2) + ' ' + cmd.x2.toFixed(2) + ' ' + cmd.y2.toFixed(2) + ' ' + cmd.x.toFixed(2) + ' ' + cmd.y.toFixed(2)
+    else if (cmd.type === 'Z') d += 'Z'
+  }
+  return d
+}
 
-// Measure first: cap top (min y, negative) and advance width.
+function cleanCommands(commands) {
+  for (const cmd of commands) {
+    for (const key of ['x', 'y', 'x1', 'y1', 'x2', 'y2']) {
+      if (typeof cmd[key] === 'number') {
+        cmd[key] = Math.round(cmd[key] * 100) / 100
+      }
+    }
+  }
+}
+
+const fCinzel = opentype.parse(fs.readFileSync(new URL('./cinzel900.ttf', import.meta.url)).buffer)
+const fChakra = opentype.parse(fs.readFileSync(new URL('./chakra700.ttf', import.meta.url)).buffer)
+
+const sizeRed = 106
+const sizeDir = 74
+const trackingDir = 5
+const gap = 24
+
+const scaleRed = sizeRed / fCinzel.unitsPerEm
+const scaleDir = sizeDir / fChakra.unitsPerEm
+
+const letters = []
 let x = 0
-const raw = []
-for (const char of WORDMARK) {
-  const glyph = font.charToGlyph(char)
-  const path = glyph.getPath(x, 0, fontSize)
-  const box = path.getBoundingBox()
-  raw.push({ char, path, advance: glyph.advanceWidth * scale, y2: box.y2, y1: box.y1 })
-  x += glyph.advanceWidth * scale
+
+for (const ch of 'RED') {
+  const g = fCinzel.charToGlyph(ch)
+  const p = g.getPath(x, 0, sizeRed)
+  letters.push({ char: ch, part: 'red', glyph: g, path: p, scale: scaleRed })
+  x += g.advanceWidth * scaleRed
 }
-const minY = Math.min(...raw.map(l => l.y1))
-const shift = -minY + 2 // move cap top down to y=2
-const width = Math.round(x)
-const height = Math.round(raw[0].y2 + shift + 2)
-const letters = raw.map(l => ({ char: l.char, d: l.path.toPathData(2) }))
-// Shift: toPathData has no y-offset, so wrap each in a translate via re-gen on baseline y=shift.
-let x2 = 0
-const shifted = []
-for (const char of WORDMARK) {
-  const glyph = font.charToGlyph(char)
-  const path = glyph.getPath(x2, shift, fontSize)
-  shifted.push({ char, d: path.toPathData(2) })
-  x2 += glyph.advanceWidth * scale
+x += gap
+for (const ch of 'DIRECTOR') {
+  const g = fChakra.charToGlyph(ch)
+  const p = g.getPath(x, 0, sizeDir)
+  letters.push({ char: ch, part: 'director', glyph: g, path: p, scale: scaleDir })
+  x += g.advanceWidth * scaleDir + trackingDir
 }
-const out = {
-  font: 'Barlow Condensed 900 (Google Fonts, OFL)',
-  viewBox: `0 0 ${width} ${height}`,
-  letters: shifted,
+
+const boxes = letters.map(l => l.path.getBoundingBox())
+const minY = Math.min(...boxes.map(b => b.y1))
+const maxY = Math.max(...boxes.map(b => b.y2))
+const shiftY = -minY + 4
+const totalH = Math.round(maxY - minY + 8)
+const totalW = Math.round(x + 4)
+
+let curX = 0
+const outLetters = []
+for (const l of letters) {
+  const g = l.glyph
+  const sz = l.part === 'red' ? sizeRed : sizeDir
+  const p = g.getPath(curX, shiftY, sz)
+  cleanCommands(p.commands)
+  const d = pathToSvgD(p.commands)
+  outLetters.push({
+    char: l.char,
+    part: l.part,
+    d,
+  })
+  curX += g.advanceWidth * l.scale + (l.part === 'director' ? trackingDir : 0)
+  if (l.char === 'D' && l.part === 'red') curX += gap
 }
-fs.writeFileSync('wordmark.json', JSON.stringify(out, null, 1))
-console.log('viewBox:', out.viewBox, 'letters:', shifted.length)
+
+const code = `// Generated file — Cinematic Sharp Display Wordmark (RED in Cinzel 900, DIRECTOR in Chakra Petch 700).
+// Razor-sharp serifs, 45-degree chamfered cuts, differentiated font sizes and font styles.
+export const WORDMARK_VIEWBOX = "${`0 0 ${totalW} ${totalH}`}";
+
+export const WORDMARK_PATHS = ${JSON.stringify(outLetters, null, 2)};
+`
+
+fs.writeFileSync('../src/components/Intro/wordmark.js', code)
+console.log('Successfully wrote src/components/Intro/wordmark.js!')
+console.log('ViewBox:', `0 0 ${totalW} ${totalH}`, 'Letters:', outLetters.length)
