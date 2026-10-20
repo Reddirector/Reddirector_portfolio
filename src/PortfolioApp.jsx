@@ -1248,7 +1248,13 @@ function ProjectVisual({ project, index, nextProject, advance }) {
     advance(distance < 0 ? 1 : -1)
     window.setTimeout(() => { swiped.current = false }, 500)
   }
-  const handleClick = () => { if (swiped.current) { swiped.current = false; return } advance(1) }
+  const handleClick = (event) => {
+    if (project.name === 'Pentagon' && event?.target?.closest('.pentagon-cosmos-container, .sketchfab-brain-wrapper, iframe, canvas, [data-interactive]')) {
+      return
+    }
+    if (swiped.current) { swiped.current = false; return }
+    advance(1)
+  }
   return <button ref={visual} type="button" onClick={handleClick} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="project-visual group/visual" aria-label={`Project visual. Click to show ${nextProject.name}, or swipe to browse projects.`}>
     <div className="flex items-center justify-between gap-3 font-mono text-[.6rem] uppercase tracking-[.1em] text-white/55">
       <span>Project representation</span><span>{project.id} / {String(featuredProjects.length).padStart(2, '0')}</span>

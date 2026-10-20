@@ -1,9 +1,84 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export default function PentagonVisual() {
   const canvasRef = useRef(null)
+  const iframeRef = useRef(null)
+  const sketchfabApiRef = useRef(null)
+  const [isSpinning, setIsSpinning] = useState(true)
+
+  // Sketchfab 3D Model API Initialization & Background Calibration
+  useEffect(() => {
+    let unmounted = false
+
+    const initSketchfab = () => {
+      if (!iframeRef.current || !window.Sketchfab) return
+      const client = new window.Sketchfab('1.12.1', iframeRef.current)
+      client.init('2df234ff65b0483fb5b5e15e40efa65d', {
+        autostart: 1,
+        autospin: 0.2,
+        transparent: 1,
+        ui_controls: 0,
+        ui_infos: 0,
+        ui_watermark: 0,
+        ui_help: 0,
+        ui_settings: 0,
+        ui_inspector: 0,
+        ui_annotations: 0,
+        ui_hint: 0,
+        scrollwheel: 0,
+        dnt: 1,
+        annotations_visible: 0,
+        annotation_tooltip_visible: 0,
+        success: (api) => {
+          if (unmounted) return
+          sketchfabApiRef.current = api
+          api.start()
+          api.addEventListener('viewerready', () => {
+            if (unmounted) return
+            // Set 3D viewport background seamlessly to container's pitch-dark tone #070405
+            api.setBackground({ color: [0.027, 0.016, 0.02] })
+            api.setAutospin(0.2)
+          })
+        },
+        error: (err) => {
+          console.warn('Sketchfab viewer init fallback:', err)
+        },
+      })
+    }
+
+    if (!window.Sketchfab) {
+      const script = document.createElement('script')
+      script.src = 'https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js'
+      script.async = true
+      script.onload = () => {
+        if (!unmounted) initSketchfab()
+      }
+      document.head.appendChild(script)
+    } else {
+      initSketchfab()
+    }
+
+    return () => {
+      unmounted = true
+      sketchfabApiRef.current = null
+    }
+  }, [])
+
+  const toggleSpin = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation()
+    if (!sketchfabApiRef.current) return
+    const nextState = !isSpinning
+    setIsSpinning(nextState)
+    if (nextState) {
+      sketchfabApiRef.current.setAutospin(0.2)
+      sketchfabApiRef.current.resume()
+    } else {
+      sketchfabApiRef.current.setAutospin(0)
+      sketchfabApiRef.current.pause()
+    }
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -338,9 +413,12 @@ export default function PentagonVisual() {
   }, [])
 
   return (
-    <div className="pentagon-cosmos-container relative w-full h-full min-h-[16rem] flex flex-col justify-between overflow-hidden rounded-md bg-[#070405]" aria-label="Pentagon Neural Universe: Stars in cosmic orbit drawn and absorbed by the central neural intelligence engine">
-      {/* Top HUD Telemetry */}
-      <div className="relative z-10 flex items-center justify-between px-3 pt-2 font-mono text-[.58rem] sm:text-[.62rem] uppercase tracking-[.12em] text-white/55">
+    <div
+      className="pentagon-cosmos-container relative w-full h-full min-h-[18rem] sm:min-h-[22rem] md:min-h-[25rem] flex flex-col overflow-hidden rounded-md bg-[#070405]"
+      aria-label="Pentagon Neural Universe: Stars in cosmic orbit drawn and absorbed by the 3D neural brain model"
+    >
+      {/* Top HUD Telemetry & User 3D Model Spin Control */}
+      <div className="relative z-30 flex items-center justify-between px-3 pt-2.5 font-mono text-[.58rem] sm:text-[.62rem] uppercase tracking-[.12em] text-white/55">
         <span className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -348,29 +426,43 @@ export default function PentagonVisual() {
           </span>
           Neural cosmos · byok
         </span>
-        <span className="text-red-400/85">LangGraph state</span>
-      </div>
-
-      {/* Main Interactive Cosmic Canvas & Customized 3D Sketchfab Brain */}
-      <div className="relative flex-1 w-full min-h-[14rem] sm:min-h-[18rem] flex items-center justify-center overflow-hidden">
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block pointer-events-none" />
-        <div className="sketchfab-brain-wrapper absolute inset-0 flex items-center justify-center z-10">
-          <iframe
-            title="Plastinated Human Brain 3D Model"
-            className="sketchfab-brain-iframe w-full h-full border-0"
-            src="https://sketchfab.com/models/2df234ff65b0483fb5b5e15e40efa65d/embed?autostart=1&autospin=0.2&transparent=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_watermark=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_hint=0&scrollwheel=0&dnt=1&annotations_visible=0&annotation_tooltip_visible=0"
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            loading="lazy"
-          />
-          {/* Soft cosmic vignette to seamlessly blend edges into dark background */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(7,4,5,0.45)_62%,rgba(7,4,5,0.85)_82%,#070405_100%)]" aria-hidden="true" />
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={toggleSpin}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              toggleSpin(e)
+            }
+          }}
+          aria-label={isSpinning ? 'Pause 3D rotation' : 'Resume 3D rotation'}
+          className="flex items-center gap-1.5 rounded px-2 py-0.5 text-red-400/85 hover:text-red-300 transition-colors bg-white/[0.04] hover:bg-white/[0.08] cursor-pointer select-none"
+        >
+          <span className={`inline-block h-1.5 w-1.5 rounded-full ${isSpinning ? 'bg-red-400 animate-pulse' : 'bg-white/40'}`} />
+          <span>{isSpinning ? '3D Rotation: ON' : '3D Rotation: PAUSED'}</span>
         </div>
       </div>
 
-      {/* Bottom HUD Telemetry */}
-      <div className="relative z-10 flex items-center justify-between border-t border-white/10 px-3 py-2 font-mono text-[.58rem] sm:text-[.62rem] uppercase tracking-[.08em] text-white/60">
-        <span>ChromaDB · CPU Fallback</span>
-        <span className="text-white/80">80+ NIM models</span>
+      {/* Main Interactive Cosmic Screen (Entire Container Coverage) */}
+      <div className="relative flex-1 w-full h-full min-h-[16rem] sm:min-h-[20rem] flex items-center justify-center overflow-hidden">
+        {/* Customized Interactive 3D Sketchfab Brain Model (Layer 1 - Interactive) */}
+        <div className="sketchfab-brain-wrapper absolute inset-0 flex items-center justify-center z-10">
+          <iframe
+            ref={iframeRef}
+            title="Plastinated Human Brain 3D Model"
+            className="sketchfab-brain-iframe w-full h-full border-0"
+            src="https://sketchfab.com/models/2df234ff65b0483fb5b5e15e40efa65d/embed?autostart=1&autospin=0.2&transparent=1&ui_theme=dark&ui_infos=0&ui_controls=0&ui_watermark=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_hint=0&scrollwheel=0&dnt=1&annotations_visible=0&annotation_tooltip_visible=0"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            loading="lazy"
+          />
+        </div>
+
+        {/* Dynamic Cosmic Particle & Star Inflow Canvas (Layer 2 - Absorbed onto 3D Brain) */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full block pointer-events-none z-20"
+        />
       </div>
     </div>
   )
