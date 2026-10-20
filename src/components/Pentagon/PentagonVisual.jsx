@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import brainImgUrl from './pentagon-brain.png'
 
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -15,15 +14,6 @@ export default function PentagonVisual() {
     const reduced = reduceMotion()
     let animationFrameId
     let running = true
-
-    // Load brain image via Vite asset pipeline for GitHub Pages & local resilience
-    const brainImg = new Image()
-    brainImg.src = brainImgUrl
-    let brainLoaded = false
-    brainImg.onload = () => { brainLoaded = true }
-    if (brainImg.complete && brainImg.naturalWidth > 0) {
-      brainLoaded = true
-    }
 
     // Resize handling
     let width = 0
@@ -361,15 +351,19 @@ export default function PentagonVisual() {
         <span className="text-red-400/85">LangGraph state</span>
       </div>
 
-      {/* Main Interactive Cosmic Canvas & 3D Volumetric Rotating Brain */}
-      <div className="relative flex-1 w-full min-h-[12rem] flex items-center justify-center overflow-hidden">
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
-        <div className="portfolio-brain-stage pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-          <div className="portfolio-brain-3d-volume">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <img key={i} src={brainImgUrl} alt="" className="portfolio-brain-slice" />
-            ))}
-          </div>
+      {/* Main Interactive Cosmic Canvas & Customized 3D Sketchfab Brain */}
+      <div className="relative flex-1 w-full min-h-[14rem] sm:min-h-[18rem] flex items-center justify-center overflow-hidden">
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block pointer-events-none" />
+        <div className="sketchfab-brain-wrapper absolute inset-0 flex items-center justify-center z-10">
+          <iframe
+            title="Plastinated Human Brain 3D Model"
+            className="sketchfab-brain-iframe w-full h-full border-0"
+            src="https://sketchfab.com/models/2df234ff65b0483fb5b5e15e40efa65d/embed?autostart=1&autospin=0.2&transparent=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_watermark=0&ui_help=0&ui_settings=0&ui_inspector=0&ui_annotations=0&ui_hint=0&scrollwheel=0&dnt=1&annotations_visible=0&annotation_tooltip_visible=0"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            loading="lazy"
+          />
+          {/* Soft cosmic vignette to seamlessly blend edges into dark background */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(7,4,5,0.45)_62%,rgba(7,4,5,0.85)_82%,#070405_100%)]" aria-hidden="true" />
         </div>
       </div>
 
