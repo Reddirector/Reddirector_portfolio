@@ -681,3 +681,73 @@ button.oe-api-item:hover,button.oe-api-item:focus-visible { transform:translateY
 @keyframes nav-item-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 /* Persistent compositor layers for the slow infinite rotations (avoids per-frame repaints). */
 .hero-ring,.hero-ring-outer,.geo-orbit-path,.sae-ambience-ring--spin,.oe-visual-halo-ring--a,.oe-visual-halo-ring--b { will-change: transform; }
+
+/* ---- 3D Rotating Portfolio Brain (Horizontal X-Axis / Y-Turn from Left to Right) ---- */
+.hero-brain-viewport {
+  width: clamp(18rem, 34vw, 28rem);
+  height: clamp(18rem, 34vw, 28rem);
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-brain-3d {
+  width: 95%;
+  height: auto;
+  max-height: 95%;
+  object-fit: contain;
+  transform-style: preserve-3d;
+  animation: heroBrainRotateX 26s linear infinite;
+  filter: drop-shadow(0 0 35px rgba(229, 72, 77, 0.55)) drop-shadow(0 0 65px rgba(164, 0, 0, 0.35));
+  will-change: transform;
+}
+
+@keyframes heroBrainRotateX {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-brain-3d {
+    animation: none;
+    transform: rotateY(0deg);
+  }
+}
+
+/* ---- 3D Rotating Portfolio Brain Card in Selected Work ---- */
+.portfolio-brain-stage {
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+}
+
+.portfolio-brain-3d-model {
+  width: clamp(13rem, 24vw, 18rem);
+  height: auto;
+  max-height: 80%;
+  object-fit: contain;
+  transform-style: preserve-3d;
+  animation: brainRotateHorizontal 24s linear infinite;
+  filter: drop-shadow(0 0 25px rgba(229, 72, 77, 0.45));
+  will-change: transform;
+}
+
+@keyframes brainRotateHorizontal {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-brain-3d-model {
+    animation: none;
+    transform: rotateY(0deg);
+  }
+}

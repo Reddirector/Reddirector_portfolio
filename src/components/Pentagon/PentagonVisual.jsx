@@ -232,26 +232,7 @@ export default function PentagonVisual() {
       ctx.fillStyle = auraGrad
       ctx.fill()
 
-      // Render Brain Image with super slow continuous rotation
-      if (brainLoaded) {
-        ctx.save()
-        // Super slow, hypnotic cosmic rotation (approx 84 seconds per full revolution)
-        const brainAngle = reduced ? 0 : now * 0.000075
-        // Slight scale breathing
-        const scaleVal = reduced ? 1 : 1 + Math.sin(now * 0.0016) * 0.012 + brainPulse * 0.02
-        ctx.translate(cx, brainY)
-        ctx.rotate(brainAngle)
-        ctx.scale(scaleVal, scaleVal)
-        ctx.drawImage(brainImg, -brainW / 2, -brainH / 2, brainW, brainH)
 
-        // Subtle neural luminescence overlay upon star absorption
-        if (brainPulse > 0.02) {
-          ctx.globalCompositeOperation = 'screen'
-          ctx.globalAlpha = brainPulse * 0.42
-          ctx.drawImage(brainImg, -brainW / 2, -brainH / 2, brainW, brainH)
-        }
-        ctx.restore()
-      }
 
       // Decay brain pulse
       brainPulse *= 0.94
@@ -380,9 +361,12 @@ export default function PentagonVisual() {
         <span className="text-red-400/85">LangGraph state</span>
       </div>
 
-      {/* Main Interactive Cosmic Canvas */}
-      <div className="relative flex-1 w-full min-h-[12rem] flex items-center justify-center">
+      {/* Main Interactive Cosmic Canvas & 3D Rotating Brain (X-direction / Left to Right) */}
+      <div className="relative flex-1 w-full min-h-[12rem] flex items-center justify-center overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+        <div className="portfolio-brain-stage pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+          <img src={brainImgUrl} alt="" className="portfolio-brain-3d-model" />
+        </div>
       </div>
 
       {/* Bottom HUD Telemetry */}
