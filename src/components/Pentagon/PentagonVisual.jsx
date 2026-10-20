@@ -361,11 +361,15 @@ export default function PentagonVisual() {
         <span className="text-red-400/85">LangGraph state</span>
       </div>
 
-      {/* Main Interactive Cosmic Canvas & 3D Rotating Brain (X-direction / Left to Right) */}
+      {/* Main Interactive Cosmic Canvas & 3D Volumetric Rotating Brain */}
       <div className="relative flex-1 w-full min-h-[12rem] flex items-center justify-center overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
         <div className="portfolio-brain-stage pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-          <img src={brainImgUrl} alt="" className="portfolio-brain-3d-model" />
+          <div className="portfolio-brain-3d-volume">
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <img key={i} src={brainImgUrl} alt="" className="portfolio-brain-slice" />
+            ))}
+          </div>
         </div>
       </div>
 

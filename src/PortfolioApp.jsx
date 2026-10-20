@@ -8,7 +8,6 @@ import Intro from './components/Intro/Intro'
 import { useIntro } from './components/Intro/useIntro'
 import PentagonVisual from './components/Pentagon/PentagonVisual'
 import PentagonWorkstationReport from './components/Pentagon/PentagonReport'
-import portfolioBrainImg from './assets/portfolio-brain.png'
 
 gsap.registerPlugin(ScrollTrigger)
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -322,9 +321,6 @@ function Hero({ shown }) {
           <div className="hero-ring-mid absolute h-[90vw] w-[90vw] max-h-[66rem] max-w-[66rem] rounded-full border border-white/[.08] border-dashed" />
           <div className="hero-ring-outer absolute h-[106vw] w-[106vw] max-h-[78rem] max-w-[78rem] rounded-full border border-white/[.05]" />
           <div className="hero-orb absolute h-[clamp(22rem,42vw,36rem)] w-[clamp(22rem,42vw,36rem)] rounded-full bg-accent opacity-90 shadow-[0_0_100px_rgba(164,0,0,0.38)]" />
-          <div className="hero-brain-viewport absolute flex items-center justify-center pointer-events-none" aria-hidden="true">
-            <img src={portfolioBrainImg} alt="" className="hero-brain-3d" />
-          </div>
         </div>
         <h1 className="hero-name relative z-10 font-display text-white text-[clamp(4.5rem,15vw,13rem)] font-black leading-[.82] tracking-[-.035em]">
           <span className="block">RED</span>
