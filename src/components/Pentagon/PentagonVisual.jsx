@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import brainImgUrl from './pentagon-brain.png'
 
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -15,11 +16,14 @@ export default function PentagonVisual() {
     let animationFrameId
     let running = true
 
-    // Load brain image
+    // Load brain image via Vite asset pipeline for GitHub Pages & local resilience
     const brainImg = new Image()
-    brainImg.src = '/pentagon-brain.png'
+    brainImg.src = brainImgUrl
     let brainLoaded = false
     brainImg.onload = () => { brainLoaded = true }
+    if (brainImg.complete && brainImg.naturalWidth > 0) {
+      brainLoaded = true
+    }
 
     // Resize handling
     let width = 0
