@@ -3,7 +3,9 @@ import { createPortal } from 'react-dom'
 import {
   PROFILE_IMAGE, AVAILABILITY, NAME, ROLE, HEADLINE,
   STORY, SKILLS, SKILL_FILTERS, SKILLS_CAPTION, ACHIEVEMENTS, EDUCATION,
+  SKILL_IMAGES,
 } from '../../data/about'
+import HoverPreview from '../../HoverPreview'
 import Reveal from './Reveal'
 import AboutTabs from './AboutTabs'
 import './about.css'
@@ -378,21 +380,33 @@ function SkillsPanel() {
                     const tipKey = `${group.title}-${item.name}`
                     const isTipOpen = tip !== null && tip.fields === item
                     const open = (event, instant = false) => openTip(item, event.currentTarget, instant)
+                    const skillImg = SKILL_IMAGES[item.name]
                     return (
                       <li className={`about-chip-item${leaving ? ' is-leaving' : ''}`} style={{ '--i': itemIndex }} key={tipKey}>
-                        <span
-                          className={chipClass}
-                          tabIndex={0}
-                          aria-describedby={isTipOpen ? 'about-skill-tip' : undefined}
-                          onMouseEnter={(event) => { if (!coarsePointer()) open(event) }}
-                          onMouseLeave={() => { if (!coarsePointer()) closeTip() }}
-                          onFocus={(event) => open(event)}
-                          onBlur={closeTip}
-                          onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); closeTip() } }}
-                          onClick={(event) => { if (coarsePointer()) { isTipOpen ? closeTip() : open(event, true) } }}
+                        <HoverPreview
+                          image={skillImg}
+                          alt={`${item.name} preview`}
+                          width={310}
+                          height={182}
+                          borderRadius={14}
+                          offset={18}
+                          tilt={true}
+                          maxRotation={9}
+                          enterSpeed={0.2}
+                          exitSpeed={0.16}
                         >
-                          {item.name}
-                        </span>
+                          <span
+                            className={chipClass}
+                            tabIndex={0}
+                            aria-describedby={isTipOpen ? 'about-skill-tip' : undefined}
+                            onFocus={(event) => open(event)}
+                            onBlur={closeTip}
+                            onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); closeTip() } }}
+                            onClick={(event) => { if (coarsePointer()) { isTipOpen ? closeTip() : open(event, true) } }}
+                          >
+                            {item.name}
+                          </span>
+                        </HoverPreview>
                       </li>
                     )
                   })}

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 260" width="440" height="260">
+  <defs>
+    <linearGradient id="bg-linux" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#140E10" />
+      <stop offset="100%" stop-color="#080607" />
+    </linearGradient>
+    <radialGradient id="glow-linux" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#FCC624" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#FCC624" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="border-linux" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FCC624" stop-opacity="0.55" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#E5A808" stop-opacity="0.35" />
+    </linearGradient>
+    <pattern id="grid-linux" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.035)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="440" height="260" rx="16" fill="url(#bg-linux)" />
+  <rect width="440" height="260" rx="16" fill="url(#grid-linux)" />
+  <rect width="440" height="260" rx="16" fill="url(#glow-linux)" />
+  <rect width="438" height="258" x="1" y="1" rx="15" fill="none" stroke="url(#border-linux)" stroke-width="1.5" />
+
+  <!-- Category Tag -->
+  <rect x="28" y="24" width="130" height="22" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="38" y="39" fill="#E5A808" font-family="ui-monospace, monospace" font-size="10.5" font-weight="600" letter-spacing="1">OPERATING SYSTEMS</text>
+
+  <!-- Icon Graphic -->
+  <g transform="translate(348, 24)">
+    <svg viewBox="0 0 128 128" width="56" height="56"><path fill="#FCC624" d="M64 4C45 4 38 18 38 34c0 9 2 22 5 30-10 14-23 32-23 48 0 7 14 10 44 10s44-3 44-10c0-16-13-34-23-48 3-8 5-21 5-30 0-16-7-30-26-30z"/><circle cx="52" cy="30" r="4" fill="#000"/><circle cx="76" cy="30" r="4" fill="#000"/><polygon points="64,36 56,48 72,48" fill="#F7761F"/><path fill="#FFF" d="M64 66c-18 0-28 16-28 36 0 12 12 18 28 18s28-6 28-18c0-20-10-36-28-36z"/></svg>
+  </g>
+
+  <!-- Title -->
+  <text x="28" y="92" fill="#F5F5F5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5">Linux Environment</text>
+
+  <!-- Accent line -->
+  <rect x="28" y="112" width="48" height="2.5" rx="1" fill="#FCC624" />
+
+  <!-- Description -->
+  <foreignObject x="28" y="126" width="384" height="96">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="color: rgba(255,255,255,0.72); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13.5px; line-height: 1.55; margin: 0; padding: 0;">
+      Bash scripting, POSIX signals, process executors, daemon orchestration, systemd, and terminal tooling.
+    </div>
+  </foreignObject>
+
+  <!-- Verification Pill -->
+  <g transform="translate(28, 218)">
+    <circle cx="5" cy="5" r="3.5" fill="#E5A808" />
+    <text x="16" y="8.5" fill="rgba(255,255,255,0.5)" font-family="ui-monospace, monospace" font-size="10" letter-spacing="0.5">SHIPPED · APPLIED IN PROJECTS</text>
+  </g>
+</svg>

@@ -1,0 +1,56 @@
+.cipher-reveal {
+  position: relative;
+  user-select: text;
+}
+
+.cipher-reveal__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cipher-reveal__content {
+  display: inline;
+}
+
+.cipher-reveal__word {
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.cipher-reveal__cell {
+  position: relative !important;
+  display: inline-block !important;
+  vertical-align: baseline !important;
+}
+
+.cipher-reveal__ghost {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cipher-reveal__glyph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cipher-reveal__glyph--scrambling {
+  opacity: 0.9;
+  color: var(--cipher-scramble-color, currentColor);
+}

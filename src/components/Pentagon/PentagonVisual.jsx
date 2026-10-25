@@ -38,8 +38,8 @@ export default function PentagonVisual() {
           api.addEventListener('viewerready', () => {
             if (unmounted) return
             // Set 3D viewport background seamlessly to container's pitch-dark tone #070405
-            api.setBackground({ color: [0.027, 0.016, 0.02] })
-            api.setAutospin(0.2)
+            if (typeof api.setBackground === 'function') api.setBackground({ color: [0.027, 0.016, 0.02] })
+            if (typeof api.setAutospin === 'function') api.setAutospin(0.2)
           })
         },
         error: (err) => {
@@ -72,11 +72,11 @@ export default function PentagonVisual() {
     const nextState = !isSpinning
     setIsSpinning(nextState)
     if (nextState) {
-      sketchfabApiRef.current.setAutospin(0.2)
-      sketchfabApiRef.current.resume()
+      if (typeof sketchfabApiRef.current?.setAutospin === 'function') sketchfabApiRef.current.setAutospin(0.2)
+      if (typeof sketchfabApiRef.current?.resume === 'function') sketchfabApiRef.current.resume()
     } else {
-      sketchfabApiRef.current.setAutospin(0)
-      sketchfabApiRef.current.pause()
+      if (typeof sketchfabApiRef.current?.setAutospin === 'function') sketchfabApiRef.current.setAutospin(0)
+      if (typeof sketchfabApiRef.current?.pause === 'function') sketchfabApiRef.current.pause()
     }
   }
 
@@ -414,7 +414,7 @@ export default function PentagonVisual() {
 
   return (
     <div
-      className="pentagon-cosmos-container relative w-full h-full min-h-[18rem] sm:min-h-[22rem] md:min-h-[25rem] flex flex-col overflow-hidden rounded-md bg-[#070405]"
+      className="pentagon-cosmos-container relative w-full h-full min-h-0 sm:min-h-[18rem] md:min-h-[22rem] flex flex-col overflow-hidden rounded-md bg-[#070405]"
       aria-label="Pentagon Neural Universe: Stars in cosmic orbit drawn and absorbed by the 3D neural brain model"
     >
       {/* Top HUD Telemetry & User 3D Model Spin Control */}
@@ -445,7 +445,7 @@ export default function PentagonVisual() {
       </div>
 
       {/* Main Interactive Cosmic Screen (Entire Container Coverage) */}
-      <div className="relative flex-1 w-full h-full min-h-[16rem] sm:min-h-[20rem] flex items-center justify-center overflow-hidden">
+      <div className="relative flex-1 w-full h-full min-h-0 sm:min-h-[16rem] flex items-center justify-center overflow-hidden">
         {/* Customized Interactive 3D Sketchfab Brain Model (Layer 1 - Interactive) */}
         <div className="sketchfab-brain-wrapper absolute inset-0 flex items-center justify-center z-10">
           <iframe

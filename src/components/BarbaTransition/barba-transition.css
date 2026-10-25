@@ -1,0 +1,215 @@
+/* ==============================================================
+   BARBA.JS CINEMATIC TRANSITION OVERLAY
+   Red Director — Brutalist Systems & Engineering Aesthetics
+   ============================================================= */
+
+#barba-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+#barba-transition-overlay.is-active {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Dual shutter panels: matte void black with crimson boundary */
+.barba-shutter {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50.5%;
+  background: #000000;
+  will-change: transform;
+}
+
+.barba-shutter--top {
+  top: 0;
+  transform: translateY(-100%);
+  border-bottom: 1.5px solid var(--color-interactive, #E5484D);
+  box-shadow: 0 4px 30px rgba(229, 72, 77, 0.28);
+}
+
+.barba-shutter--bottom {
+  bottom: 0;
+  transform: translateY(100%);
+  border-top: 1.5px solid var(--color-interactive, #E5484D);
+  box-shadow: 0 -4px 30px rgba(229, 72, 77, 0.28);
+}
+
+/* Laser sweep hairline that leads the transition */
+.barba-laser {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #E5484D 20%, #ffffff 50%, #E5484D 80%, transparent);
+  transform: translateY(-50%) scaleX(0);
+  opacity: 0;
+  z-index: 10;
+  box-shadow: 0 0 24px rgba(229, 72, 77, 0.9), 0 0 8px #ffffff;
+}
+
+/* Central HUD Readout */
+.barba-hud {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  will-change: transform, opacity;
+  width: min(90vw, 520px);
+}
+
+/* Targeting reticle */
+.barba-reticle {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.barba-reticle__ring {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(229, 72, 77, 0.6);
+  border-radius: 50%;
+  animation: barba-spin 12s linear infinite;
+}
+
+.barba-reticle__inner-ring {
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  animation: barba-spin-reverse 7s linear infinite;
+}
+
+.barba-reticle__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-interactive, #E5484D);
+  box-shadow: 0 0 12px #E5484D;
+}
+
+.barba-reticle__cross-h {
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  right: -8px;
+  height: 1px;
+  background: rgba(229, 72, 77, 0.4);
+}
+
+.barba-reticle__cross-v {
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  bottom: -8px;
+  width: 1px;
+  background: rgba(229, 72, 77, 0.4);
+}
+
+/* HUD Text */
+.barba-hud__kicker {
+  font-family: var(--font-mono, "DM Mono", monospace);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-interactive, #E5484D);
+  margin-bottom: 0.4rem;
+}
+
+.barba-hud__title {
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+}
+
+/* Progress track */
+.barba-progress-wrap {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.barba-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+  border-radius: 1px;
+}
+
+.barba-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #A40000, #E5484D 80%, #ffffff);
+  transform: scaleX(0);
+  transform-origin: left;
+  box-shadow: 0 0 10px rgba(229, 72, 77, 0.8);
+}
+
+.barba-hud__meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono, "DM Mono", monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Coordinate ticks along screen edges */
+.barba-reticle-corner {
+  position: absolute;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-color: rgba(229, 72, 77, 0.5);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.barba-reticle-corner--tl { top: 2rem; left: 2rem; border-width: 1px 0 0 1px; }
+.barba-reticle-corner--tr { top: 2rem; right: 2rem; border-width: 1px 1px 0 0; }
+.barba-reticle-corner--bl { bottom: 2rem; left: 2rem; border-width: 0 0 1px 1px; }
+.barba-reticle-corner--br { bottom: 2rem; right: 2rem; border-width: 0 1px 1px 0; }
+
+@keyframes barba-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes barba-spin-reverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}

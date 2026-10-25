@@ -1,5 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import HoldButton from '../../HoldButton'
+import CipherReveal from '../../CipherReveal'
+import GlyphLottery from '../../GlyphLottery'
 import './pentagon-report.css'
 
 const PENTAGON_APP_URL = 'https://pentagon-bice.vercel.app'
@@ -354,10 +357,10 @@ export default function PentagonWorkstationReport({ entranceDelay = 0, setupScro
         {/* HERO SECTION */}
         <header className="oe-report-hero">
           <p className="oe-report-kicker">Independent systems project · Enterprise local first AI workstation</p>
-          <h2 id="project-title" className="pentagon-report-title">
-            A local first workstation
+          <CipherReveal id="project-title" as="h2" className="pentagon-report-title" duration={1.4} scramble={0.35} order="left" hover="trail">
+            A local first workstation{' '}
             <span>built for private, zero leak intelligence.</span>
-          </h2>
+          </CipherReveal>
           <p id="project-detail" className="oe-report-intro">
             I built Pentagon as a personal AI workstation that never hoards API credentials in the cloud or leaks data to third parties. Everything runs local first: keys stay encrypted on your own machine with Fernet, workflows execute deterministically through LangGraph state machines, and document search falls back cleanly to a local CPU model if cloud keys lapse. Six tiers of autonomy governance keep file and terminal tools strictly within bounds across web, mobile, desktop, and bootable offline media.
           </p>
@@ -369,9 +372,26 @@ export default function PentagonWorkstationReport({ entranceDelay = 0, setupScro
             <a href={PENTAGON_DOCS_URL} target="_blank" rel="noreferrer">
               Inspect architecture specification <span aria-hidden="true">↗</span>
             </a>
-            <a href="https://github.com/Reddirector" target="_blank" rel="noreferrer">
-              GitHub repository <span aria-hidden="true">↗</span>
-            </a>
+            <HoldButton
+              doneLabel="Opening..."
+              backgroundColor="#27272a"
+              fillColor="#ef4444"
+              textColor="#f5f5f5"
+              fillTextColor="#ffffff"
+              size="md"
+              radius={14}
+              fillDirection="right"
+              holdTime={2000}
+              releaseTime={200}
+              pressScale={0.97}
+              wave
+              waveAmplitude={6}
+              glow
+              resetAfter={1200}
+              onHold={() => window.open('https://github.com/Reddirector', '_blank')}
+            >
+              GitHub repository ↗
+            </HoldButton>
           </div>
 
           <div className="oe-hero-chips" aria-hidden="true">
@@ -392,22 +412,22 @@ export default function PentagonWorkstationReport({ entranceDelay = 0, setupScro
         <section className="oe-report-metrics" aria-label="Project snapshot">
           <article>
             <span>Security Model</span>
-            <strong>Fernet BYOK</strong>
+            <strong><GlyphLottery text="Fernet BYOK" accentColor="var(--color-interactive)" /></strong>
             <small>AES 128 bit encryption at rest</small>
           </article>
           <article>
             <span>Model Catalog</span>
-            <strong>80+ Models</strong>
+            <strong><GlyphLottery text="80+ Models" accentColor="var(--color-interactive)" /></strong>
             <small>NVIDIA NIM and streaming protocol</small>
           </article>
           <article>
             <span>RAG Fallback</span>
-            <strong>100% CPU</strong>
+            <strong><GlyphLottery text="100% CPU" accentColor="var(--color-interactive)" /></strong>
             <small>Automated local model degradation</small>
           </article>
           <article>
             <span>Distribution</span>
-            <strong>5 Targets</strong>
+            <strong><GlyphLottery text="5 Targets" accentColor="var(--color-interactive)" /></strong>
             <small>Web, Android APK, iOS, Electron, ISO</small>
           </article>
         </section>

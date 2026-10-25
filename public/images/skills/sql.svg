@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 260" width="440" height="260">
+  <defs>
+    <linearGradient id="bg-sql" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#140E10" />
+      <stop offset="100%" stop-color="#080607" />
+    </linearGradient>
+    <radialGradient id="glow-sql" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#336791" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#336791" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="border-sql" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#336791" stop-opacity="0.55" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#68B0E8" stop-opacity="0.35" />
+    </linearGradient>
+    <pattern id="grid-sql" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.035)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="440" height="260" rx="16" fill="url(#bg-sql)" />
+  <rect width="440" height="260" rx="16" fill="url(#grid-sql)" />
+  <rect width="440" height="260" rx="16" fill="url(#glow-sql)" />
+  <rect width="438" height="258" x="1" y="1" rx="15" fill="none" stroke="url(#border-sql)" stroke-width="1.5" />
+
+  <!-- Category Tag -->
+  <rect x="28" y="24" width="130" height="22" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="38" y="39" fill="#68B0E8" font-family="ui-monospace, monospace" font-size="10.5" font-weight="600" letter-spacing="1">DATA PERSISTENCE</text>
+
+  <!-- Icon Graphic -->
+  <g transform="translate(348, 24)">
+    <svg viewBox="0 0 128 128" width="56" height="56"><path fill="#336791" d="M64 12C33.1 12 8 20.1 8 30v68c0 9.9 25.1 18 56 18s56-8.1 56-18V30c0-9.9-25.1-18-56-18zm0 10c26.5 0 46 6.3 46 8s-19.5 8-46 8-46-6.3-46-8 19.5-8 46-8zm46 28c0 1.7-19.5 8-46 8s-46-6.3-46-8V43.5c10.8 4.7 27.4 7.5 46 7.5s35.2-2.8 46-7.5V50zm0 24c0 1.7-19.5 8-46 8s-46-6.3-46-8V67.5c10.8 4.7 27.4 7.5 46 7.5s35.2-2.8 46-7.5V74zm0 24c0 1.7-19.5 8-46 8s-46-6.3-46-8V91.5c10.8 4.7 27.4 7.5 46 7.5s35.2-2.8 46-7.5V98z"/></svg>
+  </g>
+
+  <!-- Title -->
+  <text x="28" y="92" fill="#F5F5F5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5">SQL & Relational Databases</text>
+
+  <!-- Accent line -->
+  <rect x="28" y="112" width="48" height="2.5" rx="1" fill="#336791" />
+
+  <!-- Description -->
+  <foreignObject x="28" y="126" width="384" height="96">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="color: rgba(255,255,255,0.72); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13.5px; line-height: 1.55; margin: 0; padding: 0;">
+      Schema design, parameterized queries, SQLite WAL (44.7k writes/sec), indexing, and ACID transactions.
+    </div>
+  </foreignObject>
+
+  <!-- Verification Pill -->
+  <g transform="translate(28, 218)">
+    <circle cx="5" cy="5" r="3.5" fill="#68B0E8" />
+    <text x="16" y="8.5" fill="rgba(255,255,255,0.5)" font-family="ui-monospace, monospace" font-size="10" letter-spacing="0.5">SHIPPED · APPLIED IN PROJECTS</text>
+  </g>
+</svg>

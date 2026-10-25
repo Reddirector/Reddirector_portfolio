@@ -16,6 +16,7 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined
           if (id.includes('gsap')) return 'gsap'
+          if (id.includes('barba')) return 'barba'
           if (id.includes('react') || id.includes('scheduler')) return 'react'
           return undefined
         },

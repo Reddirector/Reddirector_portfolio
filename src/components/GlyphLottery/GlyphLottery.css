@@ -1,0 +1,100 @@
+.glyph-lottery {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  position: relative;
+  vertical-align: baseline;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.glyph-lottery__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.glyph-lottery__reels {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.glyph-lottery__space {
+  display: inline-block;
+  white-space: pre;
+}
+
+.glyph-lottery__reel {
+  position: relative;
+  display: inline-block;
+  height: 1.15em;
+  line-height: 1.15em;
+  overflow: hidden;
+  vertical-align: -0.12em;
+}
+
+.glyph-lottery__reel[data-fade='true'] {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black calc(var(--gl-fade, 0.25) * 25%),
+    black calc(100% - var(--gl-fade, 0.25) * 25%),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black calc(var(--gl-fade, 0.25) * 25%),
+    black calc(100% - var(--gl-fade, 0.25) * 25%),
+    transparent 100%
+  );
+}
+
+.glyph-lottery__ghost {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  display: inline-block;
+  height: 1.15em;
+  line-height: 1.15em;
+}
+
+.glyph-lottery__strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.glyph-lottery__strip--spinning {
+  filter: blur(0 calc(var(--gl-blur, 0.3) * 1.5px));
+}
+
+.glyph-lottery__symbol {
+  height: 1.15em;
+  line-height: 1.15em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-shrink: 0;
+  color: inherit;
+  transition: color 0.32s ease, text-shadow 0.32s ease;
+}
+
+.glyph-lottery__reel--flashing .glyph-lottery__symbol--target {
+  color: var(--gl-accent, #ef4444);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--gl-accent, #ef4444) calc(var(--gl-flash, 0.85) * 100%), transparent);
+}

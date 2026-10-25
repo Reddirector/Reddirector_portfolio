@@ -1,9 +1,7 @@
 /* Pentagon Workstation Report Styles & Interactive Widgets */
 
-/* Editorial Typography & Human Title Styling */
-.oe-report-panel .oe-report-hero #project-title,
-.oe-report-hero #project-title.pentagon-report-title,
-.oe-report .oe-report-hero h2 {
+/* Editorial Typography & Human Title Styling for Pentagon Report only */
+.oe-report-hero #project-title.pentagon-report-title {
   font-family: var(--font-serif) !important;
   font-size: clamp(2.35rem, 5.2vw, 4.2rem) !important;
   font-weight: 400 !important;
@@ -14,9 +12,8 @@
   margin: 1.5rem 0 1.4rem !important;
 }
 
-.oe-report-panel .oe-report-hero #project-title span,
-.oe-report-hero #project-title.pentagon-report-title span,
-.oe-report .oe-report-hero h2 span {
+.oe-report-hero #project-title.pentagon-report-title > span:not([class*="cipher-reveal"]),
+.oe-report-hero #project-title.pentagon-report-title .cipher-reveal__content > span:not([class*="cipher-reveal"]) {
   display: block !important;
   font-style: italic !important;
   font-weight: 300 !important;

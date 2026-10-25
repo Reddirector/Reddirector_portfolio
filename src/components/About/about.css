@@ -105,7 +105,8 @@
    track is plain page black, never a grey block. Cards carry their own
    hairline border instead. */
 .about-skills { display: grid; gap: var(--about-gap); margin-top: 24px; counter-reset: about-skill; }
-@media (min-width: 640px) { .about-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 640px) and (max-width: 959px) { .about-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 960px) { .about-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* Cells stay page-black: a collapsed cell (mid-transition, or before its group
    is hidden) reads as background, never as a grey block. */
 .about-skill-cell { display: grid; grid-template-rows: 1fr; background: #000; transition: grid-template-rows .45s var(--about-ease); }

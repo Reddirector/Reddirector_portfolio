@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 260" width="440" height="260">
+  <defs>
+    <linearGradient id="bg-docker" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#140E10" />
+      <stop offset="100%" stop-color="#080607" />
+    </linearGradient>
+    <radialGradient id="glow-docker" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#2496ED" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#2496ED" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="border-docker" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2496ED" stop-opacity="0.55" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#68B8F6" stop-opacity="0.35" />
+    </linearGradient>
+    <pattern id="grid-docker" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.035)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="440" height="260" rx="16" fill="url(#bg-docker)" />
+  <rect width="440" height="260" rx="16" fill="url(#grid-docker)" />
+  <rect width="440" height="260" rx="16" fill="url(#glow-docker)" />
+  <rect width="438" height="258" x="1" y="1" rx="15" fill="none" stroke="url(#border-docker)" stroke-width="1.5" />
+
+  <!-- Category Tag -->
+  <rect x="28" y="24" width="130" height="22" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="38" y="39" fill="#68B8F6" font-family="ui-monospace, monospace" font-size="10.5" font-weight="600" letter-spacing="1">DEVOPS & PACKAGING</text>
+
+  <!-- Icon Graphic -->
+  <g transform="translate(348, 24)">
+    <svg viewBox="0 0 128 128" width="56" height="56"><path fill="#2496ED" d="M124 55.5c-3.2-1.8-10.4-1.9-15.6.8-1.5-10.1-9.5-17.7-19.4-18.7l-4.2-.4-1.4 4c-3.7 10.4-.6 21.6 7.4 28.5-4.5 2.5-12.7 2.4-17.1.8l-3.3-1.2-1.9 3c-8.9 14.1-23.7 22.7-40 23.3-14.7.6-28.9-6.3-37.3-17.6L9 75.3 6 78c-4.4 3.9-6 10.4-3.8 15.9C8.3 108 26.3 118 47 118c44.8 0 79-24.8 80.8-62.5h-3.8zM45 28H31v14h14V28zm18 0H49v14h14V28zm18 0H67v14h14V28zm-36 18H31v14h14V46zm18 0H49v14h14V46zm18 0H67v14h14V46zm18 0H85v14h14V46zM27 46H13v14h14V46z"/></svg>
+  </g>
+
+  <!-- Title -->
+  <text x="28" y="92" fill="#F5F5F5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5">Docker & Containerization</text>
+
+  <!-- Accent line -->
+  <rect x="28" y="112" width="48" height="2.5" rx="1" fill="#2496ED" />
+
+  <!-- Description -->
+  <foreignObject x="28" y="126" width="384" height="96">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="color: rgba(255,255,255,0.72); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13.5px; line-height: 1.55; margin: 0; padding: 0;">
+      Multi-stage builds, container isolation, environment parity, minimal base images, and local orchestration.
+    </div>
+  </foreignObject>
+
+  <!-- Verification Pill -->
+  <g transform="translate(28, 218)">
+    <circle cx="5" cy="5" r="3.5" fill="#68B8F6" />
+    <text x="16" y="8.5" fill="rgba(255,255,255,0.5)" font-family="ui-monospace, monospace" font-size="10" letter-spacing="0.5">SHIPPED · APPLIED IN PROJECTS</text>
+  </g>
+</svg>
