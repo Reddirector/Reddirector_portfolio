@@ -2392,26 +2392,26 @@ function Work() {
 
     if (w < 480) {
       // Small mobile phones (320px - 479px)
-      const width = Math.max(280, Math.min(w - 32, 350))
-      const height = Math.max(380, Math.min(Math.round(h * 0.55), 450))
+      const width = Math.max(280, Math.min(w - 24, 350))
+      const height = Math.max(420, Math.min(Math.round(h * 0.58), 470))
       return { width, height, tilt: 0, spread: 0.85, perspective: 1100 }
     }
     if (w < 640) {
       // Standard mobile (480px - 639px)
-      const width = Math.min(w - 40, 420)
-      const height = Math.max(400, Math.min(Math.round(h * 0.55), 460))
+      const width = Math.min(w - 32, 430)
+      const height = Math.max(430, Math.min(Math.round(h * 0.58), 480))
       return { width, height, tilt: 0, spread: 0.86, perspective: 1150 }
     }
     if (w < 768) {
       // Small tablet portrait / large phones (640px - 767px)
-      const width = Math.min(w - 80, 520)
-      const height = Math.min(Math.round(h * 0.54), 480)
+      const width = Math.min(w - 60, 560)
+      const height = Math.min(Math.round(h * 0.54), 490)
       return { width, height, tilt: 0, spread: 0.88, perspective: 1200 }
     }
     if (w < 1024) {
       // Tablet portrait (768px - 1023px)
-      const width = Math.min(w - 120, 620)
-      const height = Math.min(Math.round(h * 0.52), 490)
+      const width = Math.min(w - 80, 680)
+      const height = Math.min(Math.round(h * 0.54), 520)
       return { width, height, tilt: 0, spread: 0.90, perspective: 1300 }
     }
     if (w < 1280) {
@@ -2857,7 +2857,7 @@ function Method() {
 function Now() {
   return <Reveal id="now" className="px-5 py-24 sm:px-[8vw] sm:py-[12vw]">
     <div className="grid gap-8 lg:grid-cols-[.75fr_1.5fr]">
-      <div><p className="section-label">04 / In progress</p><h2 className="font-display mt-4 text-[clamp(4.8rem,11vw,10rem)] font-black leading-[.72] tracking-[-.055em]">THE<br />WORKBENCH.</h2></div>
+      <div><p className="section-label">04 / In progress</p><h2 className="font-display mt-4 text-[clamp(2.4rem,11vw,10rem)] font-black leading-[.78] sm:leading-[.72] tracking-[-.055em] break-words">THE<br />WORKBENCH.</h2></div>
       <div className="divide-y divide-white/20" data-reveal-group>{content.now.map((item, index) => <article className="grid gap-4 py-8 sm:grid-cols-[4rem_1fr]" key={item.name}>
         <span className="font-mono text-[.68rem] text-white/50">0{index + 1}</span>
         <div><h3 className="font-display text-4xl font-black tracking-tight">{item.name}</h3><p className="font-serif mt-3 max-w-xl text-[.95rem] leading-[1.7] text-white/65">{item.text}</p></div>
@@ -2879,7 +2879,7 @@ function Contact() {
           <p className="font-mono text-[.58rem] uppercase tracking-[.1em] text-black/50">Red Director · India</p>
         </div>
       </div>
-      <h2 className="font-display mt-10 text-[clamp(4.8rem,12vw,11rem)] font-black leading-[.7] tracking-[-.06em]">LET'S TALK<br />ABOUT YOUR<br />PROJECT.</h2>
+      <h2 className="font-display mt-10 text-[clamp(2.4rem,12vw,11rem)] font-black leading-[.78] sm:leading-[.7] tracking-[-.06em] break-words">LET'S TALK<br />ABOUT YOUR<br />PROJECT.</h2>
       <div className="mt-8 flex flex-wrap items-center gap-3.5 sm:gap-4">
         <HoldButton
           doneLabel="Opening GitHub..."

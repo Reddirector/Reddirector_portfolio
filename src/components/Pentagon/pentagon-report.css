@@ -10,6 +10,15 @@
   color: #f7f7f7 !important;
   text-transform: none !important;
   margin: 1.5rem 0 1.4rem !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+}
+
+@media (max-width: 640px) {
+  .oe-report-hero #project-title.pentagon-report-title {
+    font-size: clamp(1.65rem, 6.5vw, 2.3rem) !important;
+    line-height: 1.15 !important;
+  }
 }
 
 .oe-report-hero #project-title.pentagon-report-title > span:not([class*="cipher-reveal"]),

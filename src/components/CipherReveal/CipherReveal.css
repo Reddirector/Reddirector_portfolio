@@ -1,6 +1,8 @@
 .cipher-reveal {
   position: relative;
   user-select: text;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .cipher-reveal__sr {
@@ -17,11 +19,21 @@
 
 .cipher-reveal__content {
   display: inline;
+  max-width: 100%;
 }
 
 .cipher-reveal__word {
   display: inline-block !important;
   white-space: nowrap !important;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .cipher-reveal__word {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
 }
 
 .cipher-reveal__cell {

@@ -64,6 +64,24 @@
   font-size: 0.82rem;
 }
 
+@media (max-width: 480px) {
+  .hold-button--sm {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 0.58rem;
+  }
+  .hold-button--md {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 0.64rem;
+  }
+  .hold-button--lg {
+    height: 42px;
+    padding: 0 18px;
+    font-size: 0.74rem;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .hold-button:not(:disabled):hover {
     border-color: rgba(229, 72, 77, 0.85);
