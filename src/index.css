@@ -585,6 +585,12 @@ button.oe-api-item { cursor:pointer; }
 .oe-bench-track { height:5px; background:rgb(255 255 255 / .08); border-radius:2px; overflow:hidden; }
 .oe-bench-fill { height:100%; background:var(--color-interactive); transition:width .6s ease; }
 
+.oe-install-wrapper { margin-top:1.5rem; max-width:520px; width:100%; display:flex; flex-direction:column; gap:.45rem; }
+.oe-install-tabs { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+.oe-install-tab { background:rgb(255 255 255 / .04); border:1px solid rgb(255 255 255 / .12); color:rgb(255 255 255 / .6); padding:.22rem .65rem; border-radius:2px; font-family:var(--font-mono); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all .15s ease; }
+.oe-install-tab:hover { border-color:rgb(229 72 77 / .5); color:#ffffff; background:rgb(229 72 77 / .06); }
+.oe-install-tab.is-active { background:rgb(229 72 77 / .16); border-color:var(--color-interactive); color:#ffffff; font-weight:600; }
+.oe-install-wrapper .oe-install-bar { margin-top:0; max-width:100%; border-radius:2px; }
 .oe-install-bar { display:inline-flex; align-items:center; justify-content:space-between; gap:1.2rem; margin-top:1.5rem; padding:.55rem .95rem; background:rgb(0 0 0 / .65); border:1px solid rgb(229 72 77 / .35); border-radius:4px; font-family:var(--font-mono); font-size:.72rem; max-width:480px; width:100%; cursor:pointer; transition:border-color .2s ease,background-color .2s ease; }
 .oe-install-bar:hover { border-color:var(--color-interactive); background:rgb(229 72 77 / .08); }
 .oe-install-code { display:flex; align-items:center; gap:.6rem; color:#f5f5f5; }

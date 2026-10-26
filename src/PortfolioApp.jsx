@@ -675,33 +675,63 @@ const ORCHESTRATION_PYPI = 'https://pypi.org/project/orchestration-engine/'
 const ORCHESTRATION_DOCS = 'https://reddirector.github.io/Orchestration_Engine/'
 const ORCHESTRATION_RELEASE = 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v0.9.0'
 const ORCHESTRATION_INSTALL_CMD = 'pip install orchestration-engine'
+const ORCHESTRATION_INSTALL_COMMANDS = [
+  { id: 'pip', label: 'pip install', cmd: 'pip install orchestration-engine' },
+  { id: 'cli', label: 'install', cmd: 'install orchestration-engine' },
+  { id: 'uv', label: 'uv add', cmd: 'uv add orchestration-engine' },
+]
 
 function QuickInstallBar() {
+  const [activeTab, setActiveTab] = useState(0)
   const [copied, setCopied] = useState(false)
   const timer = useRef(null)
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  const currentCmd = ORCHESTRATION_INSTALL_COMMANDS[activeTab].cmd
+
   const handleCopy = () => {
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(ORCHESTRATION_INSTALL_CMD).then(() => {
+      navigator.clipboard.writeText(currentCmd).then(() => {
         setCopied(true)
         clearTimeout(timer.current)
         timer.current = setTimeout(() => setCopied(false), 2000)
       }).catch(() => {})
     }
   }
+
   return (
-    <div className="oe-install-bar" onClick={handleCopy} title="Click to copy command">
-      <div className="oe-install-code">
-        <span className="oe-install-prompt" aria-hidden="true">$</span>
-        <code>{ORCHESTRATION_INSTALL_CMD}</code>
+    <div className="oe-install-wrapper">
+      <div className="oe-install-tabs" role="tablist" aria-label="Installation commands">
+        {ORCHESTRATION_INSTALL_COMMANDS.map((item, idx) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === idx}
+            className={`oe-install-tab ${activeTab === idx ? 'is-active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              setActiveTab(idx)
+              setCopied(false)
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
-      <button type="button" className="oe-install-btn" aria-label="Copy install command">
-        {copied ? (
-          <span className="oe-install-copied"><span aria-hidden="true">✓</span> copied</span>
-        ) : (
-          <span>copy</span>
-        )}
-      </button>
+      <div className="oe-install-bar" onClick={handleCopy} title="Click to copy command">
+        <div className="oe-install-code">
+          <span className="oe-install-prompt" aria-hidden="true">$</span>
+          <code>{currentCmd}</code>
+        </div>
+        <button type="button" className="oe-install-btn" aria-label={`Copy ${currentCmd}`}>
+          {copied ? (
+            <span className="oe-install-copied"><span aria-hidden="true">✓</span> copied</span>
+          ) : (
+            <span>copy</span>
+          )}
+        </button>
+      </div>
     </div>
   )
 }
@@ -1350,6 +1380,12 @@ function OeCliReference() {
   useEffect(() => () => clearTimeout(timer.current), [])
 
   const commands = [
+    {
+      name: 'install',
+      syntax: 'pip install orchestration-engine  # or: install orchestration-engine',
+      desc: 'Installs the production-ready Orchestration Engine package from PyPI with zero external runtime dependencies.',
+      exitCode: 'Exit code 0 on successful installation into active Python 3.12+ environment.',
+    },
     {
       name: 'validate',
       syntax: 'orchestration-engine validate workflow.json',
