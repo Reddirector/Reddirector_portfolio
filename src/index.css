@@ -557,7 +557,7 @@ button.oe-api-item { cursor:pointer; }
 .oe-api-item:hover code,.oe-api-item:focus-visible code { border-color:rgb(229 72 77 / .7); background:rgb(229 72 77 / .12); color:#fff; }
 .oe-api-item.is-copied code { border-color:var(--color-interactive); background:rgb(229 72 77 / .16); color:var(--color-interactive); }
 
-/* Orchestration Engine v1.0.0 Master Spec Extensions */
+/* Orchestration Engine v0.9.0 Master Spec Extensions */
 .oe-matrix { margin:1.5rem 0; border:1px solid rgb(255 255 255 / .14); background:rgb(255 255 255 / .02); }
 .oe-matrix-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .oe-matrix-table { width:100%; border-collapse:collapse; font-size:.78rem; text-align:left; min-width:640px; }
@@ -581,10 +581,66 @@ button.oe-api-item { cursor:pointer; }
 .oe-bench-track { height:5px; background:rgb(255 255 255 / .08); border-radius:2px; overflow:hidden; }
 .oe-bench-fill { height:100%; background:var(--color-interactive); transition:width .6s ease; }
 
+.oe-install-bar { display:inline-flex; align-items:center; justify-content:space-between; gap:1.2rem; margin-top:1.5rem; padding:.55rem .95rem; background:rgb(0 0 0 / .65); border:1px solid rgb(229 72 77 / .35); border-radius:4px; font-family:var(--font-mono); font-size:.72rem; max-width:480px; width:100%; cursor:pointer; transition:border-color .2s ease,background-color .2s ease; }
+.oe-install-bar:hover { border-color:var(--color-interactive); background:rgb(229 72 77 / .08); }
+.oe-install-code { display:flex; align-items:center; gap:.6rem; color:#f5f5f5; }
+.oe-install-prompt { color:var(--color-interactive); user-select:none; font-weight:700; }
+.oe-install-btn { background:rgb(255 255 255 / .08); border:1px solid rgb(255 255 255 / .15); color:rgb(255 255 255 / .7); padding:.2rem .55rem; border-radius:3px; font-size:.58rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all .15s ease; }
+.oe-install-bar:hover .oe-install-btn { background:var(--color-interactive); color:#fff; border-color:var(--color-interactive); }
+.oe-install-copied { color:#22c55e; display:flex; align-items:center; gap:.25rem; font-weight:600; }
+
+.oe-formula-card { margin:1.5rem 0; padding:1.25rem; border:1px solid rgb(229 72 77 / .28); background:rgb(229 72 77 / .04); }
+.oe-formula-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:1px solid rgb(255 255 255 / .08); flex-wrap:wrap; gap:.4rem; }
+.oe-formula-head span { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--color-interactive); }
+.oe-formula-head small { color:rgb(255 255 255 / .4); font-family:var(--font-mono); font-size:.56rem; }
+.oe-formula-math { margin:.6rem 0 1rem; padding:.75rem 1rem; background:rgb(0 0 0 / .6); border:1px solid rgb(255 255 255 / .12); font-family:var(--font-mono); font-size:.8rem; color:#ffffff; overflow-x:auto; }
+.oe-formula-explanation { font-size:.74rem; line-height:1.6; color:rgb(255 255 255 / .7); margin:0; }
+
+.oe-arch-card { margin:1.5rem 0; border:1px solid rgb(255 255 255 / .14); background:rgb(255 255 255 / .02); padding:1.25rem; }
+.oe-arch-head { display:flex; flex-direction:column; gap:.25rem; margin-bottom:1.25rem; border-bottom:1px solid rgb(255 255 255 / .1); padding-bottom:.75rem; }
+.oe-arch-head span { font-family:var(--font-mono); font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--color-interactive); }
+.oe-arch-head small { color:rgb(255 255 255 / .5); font-size:.72rem; }
+.oe-arch-visual { background:rgb(0 0 0 / .4); border:1px solid rgb(255 255 255 / .08); padding:1rem; margin-bottom:1.25rem; }
+.oe-arch-svg { width:100%; height:auto; display:block; }
+.oe-arch-box { fill:rgb(15 15 18 / .9); stroke:rgb(255 255 255 / .18); stroke-width:1.2; }
+.oe-arch-box--coord { stroke:var(--color-interactive); fill:rgb(229 72 77 / .08); }
+.oe-arch-box--db { stroke:rgb(229 72 77 / .4); }
+.oe-arch-box--workers { stroke:rgb(255 255 255 / .25); }
+.oe-arch-title { font-family:var(--font-mono); font-size:12px; font-weight:600; fill:#ffffff; }
+.oe-arch-title--highlight { fill:var(--color-interactive); }
+.oe-arch-subtitle { font-family:var(--font-mono); font-size:9.5px; fill:rgba(255, 255, 255, 0.65); }
+.oe-arch-subdetail { font-family:var(--font-mono); font-size:8.5px; fill:rgba(255, 255, 255, 0.45); }
+.oe-arch-badge-text { font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; fill:#f87171; font-weight:600; }
+.oe-arch-badge-text--secure { fill:#4ade80; }
+.oe-arch-edge-label { font-family:var(--font-mono); font-size:8.5px; fill:rgba(255, 255, 255, 0.55); letter-spacing:.04em; }
+.oe-arch-edge-label--highlight { fill:var(--color-interactive); font-weight:600; }
+.oe-arch-points { display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; }
+.oe-arch-point strong { display:block; font-family:var(--font-mono); font-size:.64rem; color:#f0f0f0; margin-bottom:.35rem; letter-spacing:.04em; }
+.oe-arch-point p { font-size:.72rem; line-height:1.5; color:rgb(255 255 255 / .6); margin:0; }
+
+.oe-cli-panel { margin:1.5rem 0; border:1px solid rgb(255 255 255 / .14); background:rgb(255 255 255 / .02); }
+.oe-cli-tabs { display:flex; flex-wrap:wrap; border-bottom:1px solid rgb(255 255 255 / .12); background:rgb(0 0 0 / .2); }
+.oe-cli-tab { border:0; background:transparent; padding:.65rem 1rem; cursor:pointer; font-family:var(--font-mono); font-size:.68rem; color:rgb(255 255 255 / .6); border-right:1px solid rgb(255 255 255 / .08); transition:background .15s, color .15s; }
+.oe-cli-tab.is-active { background:rgb(229 72 77 / .12); color:var(--color-interactive); font-weight:600; }
+.oe-cli-body { padding:1.25rem; }
+.oe-cli-command-box { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; background:rgb(0 0 0 / .6); border:1px solid rgb(255 255 255 / .12); font-family:var(--font-mono); font-size:.74rem; cursor:pointer; margin-bottom:.85rem; transition:border-color .15s; }
+.oe-cli-command-box:hover { border-color:var(--color-interactive); }
+.oe-cli-prompt { color:var(--color-interactive); margin-right:.65rem; font-weight:700; }
+.oe-cli-copy-btn { font-size:.56rem; text-transform:uppercase; letter-spacing:.08em; background:rgb(255 255 255 / .08); border:1px solid rgb(255 255 255 / .15); color:rgb(255 255 255 / .7); padding:.2rem .5rem; border-radius:2px; }
+.oe-cli-desc { font-size:.76rem; line-height:1.55; color:rgb(255 255 255 / .75); margin:0 0 .5rem; }
+.oe-cli-exit-note { display:inline-block; font-family:var(--font-mono); font-size:.62rem; color:var(--color-interactive); background:rgb(229 72 77 / .08); padding:.2rem .5rem; border:1px solid rgb(229 72 77 / .2); }
+.oe-exit-codes-block { border-top:1px solid rgb(255 255 255 / .1); padding:1.25rem; background:rgb(0 0 0 / .15); }
+.oe-exit-codes-title { display:block; font-family:var(--font-mono); font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:rgb(255 255 255 / .5); margin-bottom:.75rem; }
+.oe-exit-codes-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:.75rem; }
+.oe-exit-item { display:flex; gap:.65rem; align-items:flex-start; }
+.oe-exit-badge { font-family:var(--font-mono); font-size:.66rem; font-weight:700; padding:.15rem .45rem; background:rgb(255 255 255 / .08); border:1px solid rgb(255 255 255 / .18); color:var(--color-interactive); }
+.oe-exit-item strong { display:block; font-family:var(--font-mono); font-size:.62rem; color:#f0f0f0; }
+.oe-exit-item p { font-size:.64rem; line-height:1.4; color:rgb(255 255 255 / .5); margin:.15rem 0 0; }
+
 .oe-blueprints { margin:1.5rem 0; border:1px solid rgb(255 255 255 / .14); background:rgb(255 255 255 / .02); }
-.oe-blueprints-nav { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid rgb(255 255 255 / .12); }
-.oe-blueprint-tab { display:flex; flex-direction:column; gap:.25rem; padding:.85rem 1rem; border:0; background:transparent; color:rgb(255 255 255 / .6); text-align:left; cursor:pointer; font-family:inherit; transition:background .2s,color .2s; }
-.oe-blueprint-tab:first-child { border-right:1px solid rgb(255 255 255 / .12); }
+.oe-blueprints-nav { display:grid; grid-template-columns:repeat(3, 1fr); border-bottom:1px solid rgb(255 255 255 / .12); }
+.oe-blueprint-tab { display:flex; flex-direction:column; gap:.25rem; padding:.85rem 1rem; border:0; background:transparent; color:rgb(255 255 255 / .6); text-align:left; cursor:pointer; font-family:inherit; transition:background .2s,color .2s; border-right:1px solid rgb(255 255 255 / .12); }
+.oe-blueprint-tab:last-child { border-right:none; }
 .oe-blueprint-tab span { font-family:var(--font-mono); font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:rgb(255 255 255 / .4); }
 .oe-blueprint-tab strong { font-size:.78rem; font-weight:600; color:#f0f0f0; }
 .oe-blueprint-tab.is-active { background:rgb(229 72 77 / .08); color:var(--color-interactive); }

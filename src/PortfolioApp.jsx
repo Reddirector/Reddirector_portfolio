@@ -543,6 +543,132 @@ function SAEResearchReport({ entranceDelay = 0 }) {
 }
 
 const ORCHESTRATION_REPO = 'https://github.com/Reddirector/Orchestration_Engine'
+const ORCHESTRATION_PYPI = 'https://pypi.org/project/orchestration-engine/'
+const ORCHESTRATION_DOCS = 'https://reddirector.github.io/Orchestration_Engine/'
+const ORCHESTRATION_RELEASE = 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v0.9.0'
+const ORCHESTRATION_INSTALL_CMD = 'pip install orchestration-engine'
+
+function QuickInstallBar() {
+  const [copied, setCopied] = useState(false)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const handleCopy = () => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(ORCHESTRATION_INSTALL_CMD).then(() => {
+        setCopied(true)
+        clearTimeout(timer.current)
+        timer.current = setTimeout(() => setCopied(false), 2000)
+      }).catch(() => {})
+    }
+  }
+  return (
+    <div className="oe-install-bar" onClick={handleCopy} title="Click to copy command">
+      <div className="oe-install-code">
+        <span className="oe-install-prompt" aria-hidden="true">$</span>
+        <code>{ORCHESTRATION_INSTALL_CMD}</code>
+      </div>
+      <button type="button" className="oe-install-btn" aria-label="Copy install command">
+        {copied ? (
+          <span className="oe-install-copied"><span aria-hidden="true">✓</span> copied</span>
+        ) : (
+          <span>copy</span>
+        )}
+      </button>
+    </div>
+  )
+}
+
+function SingleWriterArchitectureDiagram() {
+  return (
+    <div className="oe-arch-card">
+      <div className="oe-arch-head">
+        <span>Architectural Topology · Single-Writer SQLite Protocol</span>
+        <small>Zero Worker DB Access · Exclusive Coordinator Ownership · Write-Ahead WAL Audit Logging</small>
+      </div>
+      <div className="oe-arch-visual">
+        <svg viewBox="0 0 880 340" className="oe-arch-svg" role="img" aria-label="Single-Writer SQLite Architecture Diagram">
+          <defs>
+            <marker id="oe-arrow-main" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--color-interactive)" />
+            </marker>
+            <marker id="oe-arrow-dim" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="rgba(255,255,255,0.45)" />
+            </marker>
+          </defs>
+
+          {/* Client API / CLI Tool */}
+          <rect x="290" y="16" width="300" height="52" rx="3" className="oe-arch-box" />
+          <text x="440" y="38" className="oe-arch-title" textAnchor="middle">Client API / CLI Tool</text>
+          <text x="440" y="54" className="oe-arch-subtitle" textAnchor="middle">WorkflowBuilder · CLI (validate / run / resume)</text>
+
+          {/* Line Client -> Coordinator */}
+          <line x1="440" y1="68" x2="440" y2="104" stroke="var(--color-interactive)" strokeWidth="2" markerEnd="url(#oe-arrow-main)" />
+
+          {/* Coordinator */}
+          <rect x="240" y="106" width="400" height="74" rx="4" className="oe-arch-box oe-arch-box--coord" />
+          <text x="440" y="130" className="oe-arch-title oe-arch-title--highlight" textAnchor="middle">Coordinator (Exclusive Single-Writer)</text>
+          <text x="440" y="148" className="oe-arch-subtitle" textAnchor="middle">Event Loop & Scheduler · 627 µs Overhead · 1,594 tasks/sec</text>
+          <text x="440" y="165" className="oe-arch-subdetail" textAnchor="middle">PRAGMA busy_timeout=5000 · synchronous=NORMAL · WAL mode</text>
+
+          {/* Down-Left Arrow: Coordinator -> Workers */}
+          <path d="M 320 180 L 320 216 L 190 216 L 190 236" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" markerEnd="url(#oe-arrow-dim)" />
+          <text x="215" y="208" className="oe-arch-edge-label" textAnchor="middle">Dispatch Task</text>
+
+          {/* Down-Right Arrow: Coordinator -> SQLite */}
+          <path d="M 560 180 L 560 216 L 690 216 L 690 236" fill="none" stroke="var(--color-interactive)" strokeWidth="2" markerEnd="url(#oe-arrow-main)" />
+          <text x="670" y="208" className="oe-arch-edge-label oe-arch-edge-label--highlight" textAnchor="middle">WAL Event Write (22.36 µs)</text>
+
+          {/* Worker Pool */}
+          <rect x="40" y="238" width="300" height="82" rx="3" className="oe-arch-box oe-arch-box--workers" />
+          <text x="190" y="262" className="oe-arch-title" textAnchor="middle">Worker Pool Backend</text>
+          <text x="190" y="280" className="oe-arch-subtitle" textAnchor="middle">ThreadPoolExecutor & Spawned ProcessExecutor</text>
+          <text x="190" y="300" className="oe-arch-badge-text" textAnchor="middle">ZERO WORKER DATABASE ACCESS</text>
+
+          {/* TaskResult Future Pipe */}
+          <path d="M 230 238 L 230 200 L 360 200 L 360 182" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="4 3" markerEnd="url(#oe-arrow-dim)" />
+          <text x="295" y="194" className="oe-arch-edge-label" textAnchor="middle">TaskResult Future</text>
+
+          {/* SQLite DB */}
+          <rect x="540" y="238" width="300" height="82" rx="3" className="oe-arch-box oe-arch-box--db" />
+          <text x="690" y="262" className="oe-arch-title" textAnchor="middle">SQLite WAL Database</text>
+          <text x="690" y="280" className="oe-arch-subtitle" textAnchor="middle">task_events (44.7k writes/s) · runs · task_outputs</text>
+          <text x="690" y="300" className="oe-arch-badge-text oe-arch-badge-text--secure" textAnchor="middle">100% Parameterized SQL · Zero Injections</text>
+        </svg>
+      </div>
+      <div className="oe-arch-points">
+        <div className="oe-arch-point">
+          <strong>1. Zero Worker DB Access</strong>
+          <p>Worker threads and child processes never receive SQLite connection handles, eliminating database lock contention at the architectural root.</p>
+        </div>
+        <div className="oe-arch-point">
+          <strong>2. Exclusive Coordinator Ownership</strong>
+          <p>A single dedicated coordinator thread owns the SQLite handle, writing state transitions to task_events before updating in-memory status.</p>
+        </div>
+        <div className="oe-arch-point">
+          <strong>3. Hardened WAL Pragma Rules</strong>
+          <p>Engineered with PRAGMA journal_mode = WAL, PRAGMA synchronous = NORMAL, and PRAGMA busy_timeout = 5000 for 44,730 writes/sec durability.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FinishTimeBackoffFormula() {
+  return (
+    <div className="oe-formula-card">
+      <div className="oe-formula-head">
+        <span>Finish-Time Exponential Backoff Invariant</span>
+        <small>Section 5.3 · Anti-Drift Coordinator Guarantee</small>
+      </div>
+      <div className="oe-formula-math">
+        <code>next_retry_at = finished_at + (delay_seconds × 2^(attempt - 1))</code>
+      </div>
+      <p className="oe-formula-explanation">
+        Traditional schedulers compute retry delays from the scheduled start timestamp. When a task runs for 30–60 seconds before throwing an HTTP 429 rate limit or network timeout, a 5-second backoff expires immediately in the past, triggering stampeding thundering herds. Orchestration Engine anchors exponential backoff strictly to <code>finished_at</code>, guaranteeing a predictable cooling-off duration regardless of how long the failing task was executing.
+      </p>
+    </div>
+  )
+}
 
 function OrchestrationDependencyGraph() {
   return <figure className="oe-dependency-graph">
@@ -625,14 +751,14 @@ function DurabilityStepper() {
 
 function OeDecisionMatrix() {
   const dimensions = [
-    { name: 'Runtime Dependencies', engine: '0 (Pure Standard Library)', airflow: '100+ packages', temporal: 'Client SDK + Cluster', celery: 'Redis/RabbitMQ + billiard', scripts: '0 to N' },
-    { name: 'Infrastructure Setup', engine: 'Zero (Embedded SQLite)', airflow: 'Docker, Postgres, Redis', temporal: 'Temporal Cluster (Go/DB)', celery: 'Broker + Result Backend', scripts: 'None' },
-    { name: 'Startup / Cold-Start', engine: '< 10 milliseconds', airflow: '30 - 120 seconds', temporal: 'Seconds (cluster RPC)', celery: '5 - 15 seconds', scripts: '~0 ms' },
-    { name: 'Memory Footprint', engine: '~25 MB', airflow: '500 MB - 2 GB+', temporal: '250 MB - 1 GB+', celery: '100 MB - 300 MB', scripts: '~20 MB' },
-    { name: 'Crash Durability', engine: 'SQLite WAL write-ahead', airflow: 'Postgres DB state', temporal: 'Event History Server', celery: 'Broker ack / persistent queue', scripts: 'None (State lost on kill)' },
-    { name: 'In-Process Crash Resume', engine: 'Yes (resume_run)', airflow: 'Yes (via Scheduler)', temporal: 'Yes (Event replay)', celery: 'Manual idempotency', scripts: 'None' },
-    { name: 'Timeout Termination', engine: 'True SIGKILL (process)', airflow: 'Celery soft/hard', temporal: 'Activity Timeouts', celery: 'time_limit signal', scripts: 'Complex threading bugs' },
-    { name: 'Data Passing', engine: 'TaskResult → task.inputs', airflow: 'XComs (size-limited)', temporal: 'Activity return types', celery: 'AsyncResult backend', scripts: 'In-memory variables' },
+    { name: 'External Dependencies', engine: '0 (Pure Python Stdlib)', airflow: '100+ pip packages', temporal: 'Client SDK + Cluster', celery: 'Redis/RabbitMQ + billiard', scripts: '0 to N' },
+    { name: 'Setup Overhead', engine: 'Zero (pip install)', airflow: 'Docker, Postgres, Redis', temporal: 'Temporal Cluster (Go/DB)', celery: 'Broker & Worker Daemon', scripts: 'None' },
+    { name: 'Startup / Cold-Start', engine: '< 10 milliseconds', airflow: '30 – 120 seconds', temporal: 'Seconds (cluster RPC)', celery: '5 – 15 seconds', scripts: '~0 ms' },
+    { name: 'Memory Footprint', engine: '~25 MB', airflow: '500 MB – 2 GB+', temporal: '250 MB – 1 GB+', celery: '100 MB – 300 MB', scripts: '~20 MB' },
+    { name: 'Crash Durability', engine: 'SQLite WAL write-ahead', airflow: 'Postgres state tables', temporal: 'Event History Server', celery: 'Broker persistent queue', scripts: 'None (State lost on kill)' },
+    { name: 'In-Process Resume', engine: 'Yes (resume_run)', airflow: 'Scheduler re-run', temporal: 'Event replay', celery: 'Manual idempotency', scripts: 'None' },
+    { name: 'Timeout Enforcement', engine: 'True SIGKILL (Process)', airflow: 'Worker soft/hard kills', temporal: 'Activity Heartbeats', celery: 'OS signal limits', scripts: 'Complex threading bugs' },
+    { name: 'Data Propagation', engine: 'TaskResult → task.inputs', airflow: 'XComs (size-limited)', temporal: 'Activity return types', celery: 'AsyncResult backend', scripts: 'In-memory variables' },
   ]
 
   return (
@@ -641,12 +767,11 @@ function OeDecisionMatrix() {
         <table className="oe-matrix-table" role="table" aria-label="Comparative Decision Matrix">
           <thead>
             <tr>
-              <th>Dimension</th>
-              <th className="oe-matrix-highlight">Orchestration Engine (v1.0.0)</th>
+              <th>Capability</th>
+              <th className="oe-matrix-highlight">Orchestration Engine (v0.9.0)</th>
               <th>Apache Airflow</th>
               <th>Temporal.io</th>
               <th>Celery</th>
-              <th>Ad-Hoc Scripts</th>
             </tr>
           </thead>
           <tbody>
@@ -657,7 +782,6 @@ function OeDecisionMatrix() {
                 <td>{dim.airflow}</td>
                 <td>{dim.temporal}</td>
                 <td>{dim.celery}</td>
-                <td>{dim.scripts}</td>
               </tr>
             ))}
           </tbody>
@@ -711,21 +835,29 @@ function OeBlueprintsPanel() {
           className={`oe-blueprint-tab${activeTab === 'agent' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('agent')}
         >
-          <span>Blueprint A</span>
-          <strong>Autonomous AI Agent Pipeline</strong>
+          <span>Blueprint 01</span>
+          <strong>AI Agent Pipeline</strong>
+        </button>
+        <button
+          type="button"
+          className={`oe-blueprint-tab${activeTab === 'rag' ? ' is-active' : ''}`}
+          onClick={() => setActiveTab('rag')}
+        >
+          <span>Blueprint 02</span>
+          <strong>RAG Document Indexer</strong>
         </button>
         <button
           type="button"
           className={`oe-blueprint-tab${activeTab === 'sre' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('sre')}
         >
-          <span>Blueprint B</span>
-          <strong>SRE Incident Remediation</strong>
+          <span>Blueprint 03</span>
+          <strong>SRE Incident Triage</strong>
         </button>
       </div>
 
       <div className="oe-blueprint-content">
-        {activeTab === 'agent' ? (
+        {activeTab === 'agent' && (
           <div>
             <div className="oe-blueprint-header">
               <h4>Multi-Step AI Agent Pipeline with HTTP 429 Exponential Backoff & Evaluation</h4>
@@ -752,7 +884,8 @@ function OeBlueprintsPanel() {
               </div>
             </div>
             <pre className="oe-blueprint-code">
-{`builder = WorkflowBuilder(workflow_id="rag_agent_v1")
+{`# Blueprint 1: examples/agent_pipeline.py
+builder = WorkflowBuilder(workflow_id="rag_agent_v1")
 builder.add_step(
     "fetch_context",
     fn=query_vector_store,
@@ -776,7 +909,77 @@ builder.add_step(
 engine.run(builder.build())`}
             </pre>
           </div>
-        ) : (
+        )}
+
+        {activeTab === 'rag' && (
+          <div>
+            <div className="oe-blueprint-header">
+              <h4>RAG Document Ingestion & Batch Embedding Indexer</h4>
+              <p>Robust multi-stage document processing pipeline with chunking, token estimation, parallel vector embedding generation via ProcessExecutor, and transactional index commits.</p>
+            </div>
+            <div className="oe-blueprint-dag">
+              <div className="oe-blueprint-node">
+                extract_pdf_pages
+                <small>Source stream ingestion · timeout: 15s</small>
+              </div>
+              <div className="oe-blueprint-branch">
+                <div className="oe-blueprint-node">
+                  clean_and_chunk_text
+                  <small>CPU-bound token chunking with overlap</small>
+                </div>
+                <div className="oe-blueprint-node">
+                  extract_metadata
+                  <small>Author, date & header extraction</small>
+                </div>
+              </div>
+              <div className="oe-blueprint-node">
+                generate_embeddings
+                <small>Parallel vectorization with ProcessExecutor · timeout: 60s</small>
+              </div>
+              <div className="oe-blueprint-node oe-blueprint-node--target">
+                upsert_to_vector_index
+                <small>Depends on [generate_embeddings, extract_metadata] · atomic commit</small>
+              </div>
+            </div>
+            <pre className="oe-blueprint-code">
+{`# Blueprint 2: examples/rag_document_indexer.py
+builder = WorkflowBuilder(workflow_id="rag_indexer_v1")
+builder.add_step(
+    "extract_pdf_pages",
+    fn=extract_pdf_stream,
+    inputs={"source_path": "/data/docs/architecture_spec.pdf"},
+    timeout_seconds=15.0,
+    retry_policy=RetryPolicy(max_retries=2, backoff_base=1.5)
+)
+builder.add_step(
+    "clean_and_chunk_text",
+    fn=semantic_chunker,
+    dependencies=["extract_pdf_pages"],
+    inputs={"chunk_size": 512, "overlap": 64}
+)
+builder.add_step(
+    "extract_metadata",
+    fn=parse_doc_metadata,
+    dependencies=["extract_pdf_pages"]
+)
+builder.add_step(
+    "generate_embeddings",
+    fn=batch_embed_vectors,
+    dependencies=["clean_and_chunk_text"],
+    executor="process",  # True POSIX SIGKILL process isolation for heavy native tokenizer
+    timeout_seconds=60.0
+)
+builder.add_step(
+    "upsert_to_vector_index",
+    fn=commit_vector_records,
+    dependencies=["generate_embeddings", "extract_metadata"]
+)
+engine.run(builder.build())`}
+            </pre>
+          </div>
+        )}
+
+        {activeTab === 'sre' && (
           <div>
             <div className="oe-blueprint-header">
               <h4>Automated SRE Remediation & Crash Resumption</h4>
@@ -807,7 +1010,8 @@ engine.run(builder.build())`}
               </div>
             </div>
             <pre className="oe-blueprint-code">
-{`# Coordinator crash recovery:
+{`# Blueprint 3: examples/incident_triage.py
+# Coordinator crash recovery:
 # If host process dies during isolate_node, state is safe in SQLite WAL.
 recovered_run = resume_run(
     workflow_id="sre_incident_842",
@@ -869,7 +1073,7 @@ function OeTransformationGrid() {
         <div>
           <span className="oe-transform-badge oe-transform-badge--before">v0.1.0 Prototype</span>
           <span className="oe-transform-arrow"> → </span>
-          <span className="oe-transform-badge oe-transform-badge--after">v1.0.0 Production Release</span>
+          <span className="oe-transform-badge oe-transform-badge--after">v0.9.0 Production Beta</span>
         </div>
         <small style={{ color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'var(--font-mono)', fontSize: '0.62rem' }}>
           All 13 Architectural Gaps (G1–G13) Closed via ADRs
@@ -885,7 +1089,7 @@ function OeTransformationGrid() {
                 <p>{gap.before}</p>
               </div>
               <div className="oe-transform-cell oe-transform-cell--after">
-                <span className="oe-transform-tag">v1.0.0 Production</span>
+                <span className="oe-transform-tag">v0.9.0 Beta</span>
                 <p>{gap.after}</p>
               </div>
             </div>
@@ -1011,6 +1215,108 @@ function ApiSurfaceExplorer() {
   </div>
 }
 
+function OeCliReference() {
+  const [activeCmd, setActiveCmd] = useState(0)
+  const [copiedIndex, setCopiedIndex] = useState(null)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  const commands = [
+    {
+      name: 'validate',
+      syntax: 'orchestration-engine validate workflow.json',
+      desc: 'Performs pre-flight cyclic dependency detection, task schema verification, and input parameter validation without execution.',
+      exitCode: 'Exit code 0 on success; exit code 2 on DAG cycle or schema errors.',
+    },
+    {
+      name: 'run',
+      syntax: 'orchestration-engine run workflow.json --db production.db --workers 8',
+      desc: 'Executes the workflow with single-writer SQLite WAL persistence, thread/process pools, and specified maximum concurrency.',
+      exitCode: 'Exit code 0 when all tasks succeed; exit code 1 if task retries exhaust.',
+    },
+    {
+      name: 'status',
+      syntax: 'orchestration-engine status <run_id> --db production.db',
+      desc: 'Inspects real-time state machine counters (PENDING, RUNNING, SUCCEEDED, FAILED) of any active or archived run.',
+      exitCode: 'Exit code 0 on query success; exit code 3 if DB unreadable.',
+    },
+    {
+      name: 'history',
+      syntax: 'orchestration-engine history <run_id> --db production.db',
+      desc: 'Streams the linear, immutable audit log of all task_events, timestamps, retry counts, and payloads in chronological sequence.',
+      exitCode: 'Exit code 0 on query success.',
+    },
+    {
+      name: 'resume',
+      syntax: 'orchestration-engine resume <run_id> --db production.db',
+      desc: 'Recovers an interrupted or crashed workflow directly from SQLite WAL; skips completed steps and re-queues ready nodes.',
+      exitCode: 'Exit code 0 upon resume initiation.',
+    },
+  ]
+
+  const copy = (text, idx) => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedIndex(idx)
+        clearTimeout(timer.current)
+        timer.current = setTimeout(() => setCopiedIndex(null), 1400)
+      }).catch(() => {})
+    }
+  }
+
+  const exitCodes = [
+    { code: '0', meaning: 'Success', detail: 'All workflow steps reached terminal SUCCEEDED state.' },
+    { code: '1', meaning: 'Task Failure', detail: 'Task failed and exhausted its RetryPolicy budget; engine healthy.' },
+    { code: '2', meaning: 'Validation Error', detail: 'DAG cycle detected, missing inputs, or invalid schema.' },
+    { code: '3', meaning: 'Fatal Engine Error', detail: 'Unrecoverable I/O exception, SQLite lock timeout, or OS error.' },
+  ]
+
+  return (
+    <div className="oe-cli-panel">
+      <div className="oe-cli-tabs">
+        {commands.map((cmd, idx) => (
+          <button
+            key={cmd.name}
+            type="button"
+            className={`oe-cli-tab${activeCmd === idx ? ' is-active' : ''}`}
+            onClick={() => setActiveCmd(idx)}
+          >
+            <code>{cmd.name}</code>
+          </button>
+        ))}
+      </div>
+      <div className="oe-cli-body">
+        <div className="oe-cli-command-box" onClick={() => copy(commands[activeCmd].syntax, activeCmd)} title="Click to copy command">
+          <div className="flex items-center gap-2">
+            <span className="oe-cli-prompt" aria-hidden="true">$</span>
+            <code>{commands[activeCmd].syntax}</code>
+          </div>
+          <button type="button" className="oe-cli-copy-btn">
+            {copiedIndex === activeCmd ? 'copied ✓' : 'copy'}
+          </button>
+        </div>
+        <p className="oe-cli-desc">{commands[activeCmd].desc}</p>
+        <span className="oe-cli-exit-note">{commands[activeCmd].exitCode}</span>
+      </div>
+
+      <div className="oe-exit-codes-block">
+        <span className="oe-exit-codes-title">Strict Deterministic Exit Codes</span>
+        <div className="oe-exit-codes-grid">
+          {exitCodes.map((item) => (
+            <div key={item.code} className="oe-exit-item">
+              <span className="oe-exit-badge">{item.code}</span>
+              <div>
+                <strong>{item.meaning}</strong>
+                <p>{item.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const OE_TICKER_EVENTS = [
   'WAL WRITE (22.36 µs) INSERT INTO task_events (workflow_id="wf_v1_prod", task="embed_docs", state="RUNNING", attempt=1)',
   'COORDINATOR DISPATCH overhead=627 µs · max_concurrency=8 (7.86x speedup)',
@@ -1069,7 +1375,7 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
     ['Single-Pass Fixpoint Cancellation', 'Recursive transitive cancellation across deep downstream branches with zero orphaned tasks, while parallel unaffected branches complete.'],
     ['SIGKILL Child Process Isolation', 'ProcessExecutor enforces hard execution timeouts via POSIX SIGKILL termination, preventing zombie worker stalls.'],
     ['Durable Crash Recovery (resume_run)', 'In-process crash resumption restores terminal task_outputs and resumes interrupted workflows without re-executing succeeded tasks.'],
-    ['Production Packaging & Strict Typing', '162 automated tests (100% pass, 0 flakes across 20 runs, 91.45% coverage), 100% strict mypy compliance, zero external dependencies.'],
+    ['Production Packaging & Strict Typing', '162 automated tests (100% pass, 0 flakes across 20 runs, 91.45% coverage), 100% strict mypy compliance across 36 source files, zero runtime dependencies.'],
   ]
   const sectionAnchors = [
     { id: 'oe-s01', label: 'why & alternatives' },
@@ -1094,9 +1400,12 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
       <header className="oe-report-hero">
         <p className="oe-report-kicker">Technical Master Specification & Production Case Study · Python 3.12+ Workflow Orchestration</p>
         <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
-          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span>PRODUCTION SPECIFICATION (v1.0.0)</span>
+          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span>PRODUCTION-READY BETA (v0.9.0)</span>
         </CipherReveal>
-        <p id="project-detail" className="oe-report-intro">A zero-dependency, high-reliability DAG workflow orchestrator for Python 3.12+ standard library. Built specifically for deterministic multi-step workflows—including autonomous AI agent pipelines, resilient ETL graphs, and automated SRE triage—featuring single-writer SQLite WAL write-ahead durability, 627 µs scheduling latency, SIGKILL child process isolation, and crash resumption.</p>
+        <p id="project-detail" className="oe-report-intro">A fault-tolerant, dependency-aware workflow orchestration engine for Python with zero external runtime dependencies. Built specifically for mission-critical automation pipelines—autonomous AI agent loops, RAG document indexing, data ingestion, and cloud incident triage—featuring single-writer SQLite WAL write-ahead durability, 627 µs scheduling latency, SIGKILL child process isolation, and in-process crash resumption.</p>
+
+        <QuickInstallBar />
+
         <div className="oe-report-links">
           <HoldButton
             doneLabel="Opening..."
@@ -1114,26 +1423,37 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
             waveAmplitude={6}
             glow
             resetAfter={1200}
-            onHold={() => window.open(ORCHESTRATION_REPO, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_PYPI, '_blank')}
           >
-            Open source repository ↗
+            PyPI Package (v0.9.0) ↗
           </HoldButton>
-          <a href={`${ORCHESTRATION_REPO}/blob/main/README.md`} target="_blank" rel="noreferrer">Whitepaper & API documentation <span aria-hidden="true">↗</span></a>
-          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Dual MIT / Apache 2.0 license <span aria-hidden="true">↗</span></a>
+          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noreferrer">Official Documentation <span aria-hidden="true">↗</span></a>
+          <a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer">GitHub Repository <span aria-hidden="true">↗</span></a>
+          <a href={ORCHESTRATION_RELEASE} target="_blank" rel="noreferrer">Release v0.9.0 notes <span aria-hidden="true">↗</span></a>
+          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Dual MIT / Apache 2.0 <span aria-hidden="true">↗</span></a>
         </div>
-        <div className="oe-hero-chips" aria-hidden="true"><span>python 3.12+</span><span>sqlite3 WAL (44.7k writes/s)</span><span>627 µs latency</span><span>0 dependencies</span><span>162 / 162 tests (91.5% cov)</span><span>7.86x concurrency</span></div>
+        <div className="oe-hero-chips" aria-hidden="true">
+          <span>v0.9.0 Beta</span>
+          <span>pure python stdlib</span>
+          <span>sqlite3 WAL (44.7k writes/s)</span>
+          <span>627 µs latency</span>
+          <span>0 dependencies</span>
+          <span>162 / 162 tests (91.5% cov)</span>
+          <span>7.86x concurrency</span>
+          <span>100% strict mypy</span>
+        </div>
         <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" /><i className="oe-hero-bracket oe-hero-bracket--br" aria-hidden="true" />
       </header>
 
       <OeEventTicker />
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
-        <article><span>Project version</span><strong><GlyphLottery text="v1.0.0" accentColor="var(--color-interactive)" /></strong><small>Production release · 13 ADRs closed</small></article>
+        <article><span>Latest release</span><strong><GlyphLottery text="v0.9.0" accentColor="var(--color-interactive)" /></strong><small>Production Beta · PyPI package</small></article>
         <article><span>Automated tests</span><strong><GlyphLottery text="162 / 162" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 91.45% line cov</small></article>
-        <article><span>Runtime dependencies</span><strong><GlyphLottery text="0" accentColor="var(--color-interactive)" /></strong><small>Python standard library only</small></article>
-        <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594.3 tasks / second throughput</small></article>
+        <article><span>Runtime dependencies</span><strong><GlyphLottery text="0" accentColor="var(--color-interactive)" /></strong><small>Pure Python standard library</small></article>
+        <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594 tasks / second throughput</small></article>
       </section>
-      <p className="oe-report-note">Production v1.0.0 eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, robust CLI, and in-process crash recovery.</p>
+      <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.12+ stdlib, robust CLI, and in-process crash recovery.</p>
 
       <section className="oe-report-section" id="oe-s01">
         <div className="oe-report-section-label"><span>01</span><p>Why build this? (Engine vs. Alternatives)</p></div>
@@ -1153,7 +1473,8 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
         <div className="oe-report-section-label"><span>02</span><p>Concurrency & scheduling model</p></div>
         <div className="oe-report-section-body">
           <h3>Decoupled single-writer coordination with linear multi-worker scaling.</h3>
-          <p>The coordinator runs an event-driven dispatch loop with an average scheduling latency of 627.23 µs per task. Concurrency scales linearly: executing 16 parallel tasks achieves a 7.86x speedup across 8 workers (98.2% scaling efficiency) with near-zero coordinator lock contention.</p>
+          <p>The coordinator runs an event-driven dispatch loop with an average scheduling latency of 627.23 µs per task (~1,594 tasks/sec). Concurrency scales linearly: executing 16 parallel tasks achieves a 7.86x speedup across 8 workers (98.2% scaling efficiency) with near-zero coordinator lock contention.</p>
+          <SingleWriterArchitectureDiagram />
           <OeConcurrencyBenchmarks />
           <OrchestrationDependencyGraph />
           <FailureDrillPanel />
@@ -1167,8 +1488,9 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
           <h3>Write-ahead SQLite WAL event persistence before live state mutation.</h3>
           <p>State transitions are durably committed to the SQLite <code>task_events</code> table at 44,730.5 writes/sec (22.36 µs per event) with WAL mode enabled. In-memory state only advances after disk commitment. If a process crash or SIGKILL occurs, <code>resume_run()</code> restores the workflow's state directly from SQLite without re-running completed tasks.</p>
           <DurabilityStepper />
+          <FinishTimeBackoffFormula />
           <div className="oe-report-checks">
-            <article><span>RETRY BUDGET</span><p>Timeouts and transient errors spend the task's configurable RetryPolicy (linear or exponential backoff with jitter).</p></article>
+            <article><span>RETRY BUDGET</span><p>Timeouts and transient errors spend the task's configurable RetryPolicy with finish-time exponential backoff and jitter.</p></article>
             <article><span>FIXPOINT CANCEL</span><p>Single-pass fixpoint cancellation recursively flags downstream dependents as CANCELLED while unaffected parallel branches complete.</p></article>
             <article><span>SIGKILL ISOLATION</span><p>ProcessExecutor terminates untrusted tasks with true POSIX SIGKILL upon timeout, preventing thread-stall leaks.</p></article>
             <article><span>CRASH RESUMPTION</span><p>resume_run() reads durable SQLite task_events and task_outputs, skipping completed tasks and seamlessly re-queueing unfinished nodes.</p></article>
@@ -1180,7 +1502,7 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
           <h3>162 automated tests, 0 flakes, and quantitative performance profiling.</h3>
-          <p>The v1.0.0 test suite was expanded by 179% from 58 to 162 tests, achieving 91.45% line coverage across all 15 core engine modules with 0 flakes across 20 consecutive stress runs.</p>
+          <p>The v0.9.0 test suite was expanded by 179% from 58 to 162 tests across 20 test modules, achieving 91.45% line coverage across all 15 core engine modules with 0 flakes across 20 consecutive stress runs and 100% strict mypy compliance across 36 source files.</p>
           <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Empirical Evidence & Invariants</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
           <div className="oe-verification-strip">
             <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, symbols, and packaging verified without side effects.</span></p>
@@ -1196,6 +1518,7 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
           <h3>25 frozen public symbols, typed TaskResult passing, and robust CLI exit codes.</h3>
           <p>The public API exposes a clean, functional surface including WorkflowBuilder, TaskResult, and lifecycle hooks (on_task_start, on_task_complete, on_workflow_finish). The built-in CLI provides complete workflow orchestration from the terminal with deterministic exit codes: 0 (Success), 1 (Task Failure), 2 (Validation Error), 3 (Fatal Runtime Error).</p>
           <ApiSurfaceExplorer />
+          <OeCliReference />
           <p>Workflow definitions are JSON or Python fluent builder objects. They decouple identity and task intent from runtime state, allowing identical workflows to run ephemerally in-memory or persisted across SQLite restarts.</p>
         </div>
       </section>
@@ -1203,7 +1526,7 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
       <section className="oe-report-section" id="oe-s06">
         <div className="oe-report-section-label"><span>06</span><p>Production blueprints</p></div>
         <div className="oe-report-section-body">
-          <h3>Real-world battle-tested patterns: AI agent graphs & automated SRE triage.</h3>
+          <h3>Real-world battle-tested patterns: AI agent graphs, document indexers & automated SRE triage.</h3>
           <p>The engine is engineered for mission-critical workloads where execution steps require strict dependency management, transient failure recovery, and audited persistence.</p>
           <OeBlueprintsPanel />
         </div>
@@ -1213,35 +1536,40 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
         <div className="oe-report-section-label"><span>07</span><p>Engineering transformation (G1–G13)</p></div>
         <div className="oe-report-section-body">
           <h3>Systematic elimination of all 13 architectural gaps from prototype to release.</h3>
-          <p>During the transition from v0.1.0 prototype to v1.0.0 production, every architectural gap—from thread timeout leaks and unhandled transitive cancellations to untyped data passing and process resumption—was systematically resolved and locked with formal Architectural Decision Records (ADRs).</p>
+          <p>During the transition from v0.1.0 prototype to v0.9.0 production beta, every architectural gap—from thread timeout leaks and unhandled transitive cancellations to untyped data passing and process resumption—was systematically resolved and locked with formal Architectural Decision Records (ADRs).</p>
           <OeTransformationGrid />
         </div>
       </section>
 
       <footer className="oe-report-footer">
         <span>01 / Fault-Tolerant Orchestration Engine</span>
-        <span>v1.0.0 · Production Release · Dual MIT / Apache-2.0</span>
-        <p>Source for this case file: Portfolio Master Specification v1.0.0, GitHub Repository, and Empirical Benchmarks.</p>
-        <HoldButton
-          doneLabel="Opening..."
-          backgroundColor="#27272a"
-          fillColor="#ef4444"
-          textColor="#f5f5f5"
-          fillTextColor="#ffffff"
-          size="sm"
-          radius={14}
-          fillDirection="right"
-          holdTime={2000}
-          releaseTime={200}
-          pressScale={0.97}
-          wave
-          waveAmplitude={6}
-          glow
-          resetAfter={1200}
-          onHold={() => window.open(ORCHESTRATION_REPO, '_blank')}
-        >
-          github.com/Reddirector/Orchestration_Engine ↗
-        </HoldButton>
+        <span>v0.9.0 · Production-Ready Beta · Dual MIT / Apache-2.0</span>
+        <p>Source for this case file: Portfolio Master Specification v0.9.0, PyPI Package, Documentation Site, and Empirical Benchmarks.</p>
+        <div className="flex flex-wrap gap-4 items-center mt-3">
+          <HoldButton
+            doneLabel="Opening..."
+            backgroundColor="#27272a"
+            fillColor="#ef4444"
+            textColor="#f5f5f5"
+            fillTextColor="#ffffff"
+            size="sm"
+            radius={14}
+            fillDirection="right"
+            holdTime={2000}
+            releaseTime={200}
+            pressScale={0.97}
+            wave
+            waveAmplitude={6}
+            glow
+            resetAfter={1200}
+            onHold={() => window.open(ORCHESTRATION_PYPI, '_blank')}
+          >
+            pypi.org/project/orchestration-engine/ ↗
+          </HoldButton>
+          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">Official Docs ↗</a>
+          <a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">GitHub Repo ↗</a>
+          <a href={ORCHESTRATION_RELEASE} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">Release Notes ↗</a>
+        </div>
       </footer>
     </main>
   </div>
@@ -1931,7 +2259,7 @@ const methodPhases = [
     paragraph: 'I hand-wrote a zero-dependency DAG execution engine from first principles for Python 3.12+. I engineered SQLite WAL write-ahead durability (44.7k writes/sec), 627 µs scheduling latency, SIGKILL isolation, and in-process crash resumption, closing all 13 architectural gaps with 162 automated tests.',
     stats: [
       { value: '162/162', label: '100% tests passing · 91.5% cov' },
-      { value: 'v1.0.0', label: 'Production release · Dual licensed' },
+      { value: 'v0.9.0', label: 'Production beta · PyPI release' },
     ],
   },
   {
