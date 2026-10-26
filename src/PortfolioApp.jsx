@@ -1803,7 +1803,6 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
   const panel = useRef(null)
   const overlay = useRef(null)
-  const closeButton = useRef(null)
   const venom = useRef(null)
   const venomLabel = useRef(null)
   const [reportReady, setReportReady] = useState(true)
@@ -1822,7 +1821,10 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
     return () => reveal.kill()
   }, [project])
   useEffect(() => {
-    if (usesVenom && reportReady) closeButton.current?.focus({ preventScroll: true })
+    if (usesVenom && reportReady) {
+      const backBtn = overlay.current?.querySelector('.oe-topbar-back-btn')
+      backBtn?.focus?.({ preventScroll: true })
+    }
   }, [usesVenom, reportReady])
   // Same smoothed wheel feel as the main page: a dedicated Lenis scoped to the
   // overlay, using the site-wide sensitivity (lerp .08, wheelMultiplier .86).
@@ -1844,7 +1846,10 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     if (usesVenom && !reportReady) overlay.current?.focus({ preventScroll: true })
-    else closeButton.current?.focus({ preventScroll: true })
+    else {
+      const backBtn = overlay.current?.querySelector('.oe-topbar-back-btn')
+      backBtn?.focus?.({ preventScroll: true })
+    }
     const onKeyDown = (event) => {
       if (event.key === 'Escape') { event.preventDefault(); close(); return }
       if (event.key !== 'Tab') return
@@ -1862,7 +1867,6 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
     }
   }, [project, close, usesVenom, reportReady])
   if (!project) return null
-  const closeControl = <button ref={closeButton} onClick={close} type="button" className="icon-button" aria-label="Close project details">×</button>
   const modalMarkup = (
     <div ref={overlay} tabIndex="-1" className={`project-overlay fixed inset-0 z-50 overflow-y-auto overflow-x-hidden ${usesVenom ? 'bg-transparent' : 'bg-black/80 backdrop-blur-xl'}`} role="dialog" aria-modal="true" aria-labelledby="project-title" aria-describedby="project-detail" onClick={(event) => { if (event.target === overlay.current) close() }}>
       {usesVenom && !transitionDone && <div className="sr-only">
@@ -1878,24 +1882,21 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
             <div className="oe-topbar-meta">
               <span className="oe-live-dot" aria-hidden="true" />
               <span className="oe-live-label" aria-hidden="true">research live</span>
-              <div className="oe-topbar-nav">
-                <HoldButton
-                  size="sm"
-                  radius={2}
-                  holdTime={500}
-                  backgroundColor="#141417"
-                  fillColor="#e5484d"
-                  textColor="#ffffff"
-                  fillTextColor="#ffffff"
-                  className="oe-topbar-back-btn"
-                  doneLabel="Returning..."
-                  onTap={close}
-                  onHold={close}
-                >
-                  ← Back to Overview
-                </HoldButton>
-                {closeControl}
-              </div>
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={500}
+                backgroundColor="#141417"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                className="oe-topbar-back-btn"
+                doneLabel="Returning..."
+                onTap={close}
+                onHold={close}
+              >
+                ← Back to Overview
+              </HoldButton>
             </div>
           </header>
           <SAEResearchReport
@@ -1909,24 +1910,21 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
             <div className="oe-topbar-meta">
               <span className="oe-live-dot" aria-hidden="true" />
               <span className="oe-live-label" aria-hidden="true">engine live</span>
-              <div className="oe-topbar-nav">
-                <HoldButton
-                  size="sm"
-                  radius={2}
-                  holdTime={500}
-                  backgroundColor="#141417"
-                  fillColor="#e5484d"
-                  textColor="#ffffff"
-                  fillTextColor="#ffffff"
-                  className="oe-topbar-back-btn"
-                  doneLabel="Returning..."
-                  onTap={close}
-                  onHold={close}
-                >
-                  ← Back to Overview
-                </HoldButton>
-                {closeControl}
-              </div>
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={500}
+                backgroundColor="#141417"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                className="oe-topbar-back-btn"
+                doneLabel="Returning..."
+                onTap={close}
+                onHold={close}
+              >
+                ← Back to Overview
+              </HoldButton>
             </div>
           </header>
           <OrchestrationEngineReport
@@ -1940,24 +1938,21 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
             <div className="oe-topbar-meta">
               <span className="oe-live-dot" aria-hidden="true" />
               <span className="oe-live-label" aria-hidden="true">workstation live</span>
-              <div className="oe-topbar-nav">
-                <HoldButton
-                  size="sm"
-                  radius={2}
-                  holdTime={500}
-                  backgroundColor="#141417"
-                  fillColor="#e5484d"
-                  textColor="#ffffff"
-                  fillTextColor="#ffffff"
-                  className="oe-topbar-back-btn"
-                  doneLabel="Returning..."
-                  onTap={close}
-                  onHold={close}
-                >
-                  ← Back to Overview
-                </HoldButton>
-                {closeControl}
-              </div>
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={500}
+                backgroundColor="#141417"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                className="oe-topbar-back-btn"
+                doneLabel="Returning..."
+                onTap={close}
+                onHold={close}
+              >
+                ← Back to Overview
+              </HoldButton>
             </div>
           </header>
           <PentagonWorkstationReport
@@ -1968,7 +1963,23 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
             onNavigateProject={onNavigateProject}
           />
         </> : usesVenom ? null : <>
-          {closeControl}
+          <div className="fixed top-6 right-6 z-20">
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={500}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              className="oe-topbar-back-btn"
+              doneLabel="Returning..."
+              onTap={close}
+              onHold={close}
+            >
+              ← Back to Overview
+            </HoldButton>
+          </div>
           <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
             <p className="font-mono text-[.68rem] uppercase tracking-[.1em] text-white/70">{project.id} / {project.tag}</p>
             <CipherReveal id="project-title" as="h2" className="font-display mt-4 text-[clamp(4.5rem,12vw,11rem)] font-black leading-[.82] tracking-[-.035em]" duration={1.4} scramble={0.35} order="left" hover="trail">
