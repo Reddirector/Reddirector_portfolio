@@ -398,50 +398,6 @@ function Hero({ shown }) {
         </h1>
       </div>
       <p className="hero-intro font-serif mx-auto mt-8 max-w-xl text-[1.0625rem] leading-7 text-white/85">{content.intro}</p>
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3 relative z-10">
-        <HoldButton
-          size="sm"
-          radius={2}
-          holdTime={700}
-          backgroundColor="#141417"
-          fillColor="#e5484d"
-          textColor="#ffffff"
-          fillTextColor="#ffffff"
-          doneLabel="Opening..."
-          onTap={() => window.open(content.links.github, '_blank')}
-          onHold={() => window.open(content.links.github, '_blank')}
-        >
-          GitHub ↗
-        </HoldButton>
-        <HoldButton
-          size="sm"
-          radius={2}
-          holdTime={700}
-          backgroundColor="#141417"
-          fillColor="#e5484d"
-          textColor="#ffffff"
-          fillTextColor="#ffffff"
-          doneLabel="Opening..."
-          onTap={() => window.open(content.links.linkedin, '_blank')}
-          onHold={() => window.open(content.links.linkedin, '_blank')}
-        >
-          LinkedIn ↗
-        </HoldButton>
-        <HoldButton
-          size="sm"
-          radius={2}
-          holdTime={700}
-          backgroundColor="#141417"
-          fillColor="#e5484d"
-          textColor="#ffffff"
-          fillTextColor="#ffffff"
-          doneLabel="Opening..."
-          onTap={() => window.open(content.links.x, '_blank')}
-          onHold={() => window.open(content.links.x, '_blank')}
-        >
-          X ↗
-        </HoldButton>
-      </div>
     </div>
     <a href="#work" className="hero-scroll-cue absolute bottom-7 z-10 grid justify-items-center gap-2 font-mono text-[.66rem] uppercase tracking-[.1em]"><span className="text-white">Selected work</span><span className="text-xl text-white">↓</span></a>
   </section>
@@ -2897,7 +2853,7 @@ function Contact() {
           onTap={() => window.open(content.links.github, '_blank')}
           onHold={() => window.open(content.links.github, '_blank')}
         >
-          Hold to Connect / GitHub ↗
+          GitHub ↗
         </HoldButton>
         <HoldButton
           doneLabel="Opening LinkedIn..."
@@ -2939,80 +2895,12 @@ function Contact() {
           onTap={() => window.open(content.links.x, '_blank')}
           onHold={() => window.open(content.links.x, '_blank')}
         >
-          X (Twitter) ↗
+          X ↗
         </HoldButton>
       </div>
-      <div className="mt-14 border-t border-black/15 pt-8">
-        <div>
-          <p className="font-mono text-[.62rem] uppercase tracking-[.12em] text-black/55">Find me online</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3.5 font-mono text-[.68rem] uppercase tracking-[.12em]" data-reveal-group>
-            <HoldButton
-              doneLabel="Opening..."
-              backgroundColor="#141417"
-              fillColor="#e5484d"
-              textColor="#ffffff"
-              fillTextColor="#ffffff"
-              size="sm"
-              radius={2}
-              fillDirection="right"
-              holdTime={700}
-              releaseTime={180}
-              pressScale={0.98}
-              wave
-              waveAmplitude={6}
-              glow
-              resetAfter={1200}
-              onTap={() => window.open(content.links.github, '_blank')}
-              onHold={() => window.open(content.links.github, '_blank')}
-            >
-              GitHub ↗
-            </HoldButton>
-            <HoldButton
-              doneLabel="Opening..."
-              backgroundColor="#141417"
-              fillColor="#e5484d"
-              textColor="#ffffff"
-              fillTextColor="#ffffff"
-              size="sm"
-              radius={2}
-              fillDirection="right"
-              holdTime={700}
-              releaseTime={180}
-              pressScale={0.98}
-              wave
-              waveAmplitude={6}
-              glow
-              resetAfter={1200}
-              onTap={() => window.open(content.links.linkedin, '_blank')}
-              onHold={() => window.open(content.links.linkedin, '_blank')}
-            >
-              LinkedIn ↗
-            </HoldButton>
-            <HoldButton
-              doneLabel="Opening..."
-              backgroundColor="#141417"
-              fillColor="#e5484d"
-              textColor="#ffffff"
-              fillTextColor="#ffffff"
-              size="sm"
-              radius={2}
-              fillDirection="right"
-              holdTime={700}
-              releaseTime={180}
-              pressScale={0.98}
-              wave
-              waveAmplitude={6}
-              glow
-              resetAfter={1200}
-              onTap={() => window.open(content.links.x, '_blank')}
-              onHold={() => window.open(content.links.x, '_blank')}
-            >
-              X ↗
-            </HoldButton>
-          </div>
-          <a href="#work" className="contact-work-link mt-10 inline-flex items-center gap-3 font-mono text-[.62rem] uppercase tracking-[.1em]">Back to selected work <span aria-hidden="true">↑</span></a>
-          <p className="mt-16 font-mono text-[.58rem] uppercase tracking-[.12em] text-black/50">© 2026 {content.name} · {content.handle}</p>
-        </div>
+      <div className="mt-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 border-t border-black/15 pt-8">
+        <a href="#work" className="contact-work-link inline-flex items-center gap-3 font-mono text-[.62rem] uppercase tracking-[.1em]">Back to selected work <span aria-hidden="true">↑</span></a>
+        <p className="font-mono text-[.58rem] uppercase tracking-[.12em] text-black/50">© 2026 {content.name} · {content.handle}</p>
       </div>
     </div>
   </footer>
