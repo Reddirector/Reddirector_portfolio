@@ -31,6 +31,56 @@ const logoLetters = [
 const featuredProjects = content.projects
   .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
+
+const SLUG_TO_PROJECT_NAME = {
+  'orchestration-engine': 'Orchestration Engine',
+  'sae-reproduction': 'SAE Reproduction',
+  'pentagon': 'Pentagon',
+  '01': 'Orchestration Engine',
+  '02': 'SAE Reproduction',
+  '03': 'Pentagon',
+}
+
+const PROJECT_NAME_TO_SLUG = {
+  'Orchestration Engine': 'orchestration-engine',
+  'SAE Reproduction': 'sae-reproduction',
+  'Pentagon': 'pentagon',
+}
+
+function parseCurrentRoute() {
+  if (typeof window === 'undefined') return { page: 'home', project: null }
+  const path = window.location.pathname.toLowerCase()
+  const hash = window.location.hash.toLowerCase()
+
+  // 1. Check pathname: /projects/<slug> or /<slug>
+  const pathMatch = path.match(/\/(?:projects\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)/)
+  if (pathMatch) {
+    const slug = pathMatch[1]
+    const projName = SLUG_TO_PROJECT_NAME[slug]
+    const proj = featuredProjects.find((p) => p.name === projName)
+    if (proj) return { page: 'project', slug, project: proj }
+  }
+
+  // 2. Check hash: #/projects/<slug> or #<slug>
+  const hashMatch = hash.match(/#(?:(?:\/projects\/)?|\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)/)
+  if (hashMatch) {
+    const slug = hashMatch[1]
+    const projName = SLUG_TO_PROJECT_NAME[slug]
+    const proj = featuredProjects.find((p) => p.name === projName)
+    if (proj) return { page: 'project', slug, project: proj }
+  }
+
+  // 3. Check search query: ?project=<slug>
+  const params = new URLSearchParams(window.location.search)
+  const qProj = params.get('project')?.toLowerCase()
+  if (qProj && SLUG_TO_PROJECT_NAME[qProj]) {
+    const projName = SLUG_TO_PROJECT_NAME[qProj]
+    const proj = featuredProjects.find((p) => p.name === projName)
+    if (proj) return { page: 'project', slug: qProj, project: proj }
+  }
+
+  return { page: 'home', project: null }
+}
 const createOeWaypoints = () => {
   const stars = []
   let attempts = 0
@@ -428,7 +478,7 @@ function SaeReportAmbience() {
   </div>
 }
 
-function SAEResearchReport({ entranceDelay = 0 }) {
+function SAEResearchReport({ entranceDelay = 0, onBackToHome, onNavigateProject }) {
   const report = useRef(null)
   const saeSectionAnchors = [
     { id: 'sae-s01', label: 'question' },
@@ -453,9 +503,35 @@ function SAEResearchReport({ entranceDelay = 0 }) {
           TOWARDS<br /><span>MONOSEMANTICITY:</span><br />a small-scale reproduction on GELU-1L
         </CipherReveal>
         <p id="project-detail" className="sae-report-intro">I’m testing whether a sparse, overcomplete dictionary makes a model’s internal activations easier to study than its neurons alone. These results come from my own run, not the paper’s.</p>
-        <div className="sae-report-links">
-          <a href="https://www.transformer-circuits.pub/2023/monosemantic-features/index.html" target="_blank" rel="noreferrer">Read the original paper <span aria-hidden="true">↗</span></a>
-          <a href="https://reddirector.github.io/Towards_Monosemanticity_Reproduction/" target="_blank" rel="noreferrer">Open the reproduction project <span aria-hidden="true">↗</span></a>
+        <div className="oe-report-btn-group">
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open('https://www.transformer-circuits.pub/2023/monosemantic-features/index.html', '_blank')}
+            onHold={() => window.open('https://www.transformer-circuits.pub/2023/monosemantic-features/index.html', '_blank')}
+          >
+            Original Paper ↗
+          </HoldButton>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open('https://reddirector.github.io/Towards_Monosemanticity_Reproduction/', '_blank')}
+            onHold={() => window.open('https://reddirector.github.io/Towards_Monosemanticity_Reproduction/', '_blank')}
+          >
+            Reproduction Site ↗
+          </HoldButton>
         </div>
         <div className="oe-hero-chips" aria-hidden="true"><span>gelu-1l</span><span>2,048 → 4,096 features</span><span>0.897562 cosine</span><span>0.10% dead</span></div>
         <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" /><i className="oe-hero-bracket oe-hero-bracket--br" aria-hidden="true" />
@@ -537,7 +613,59 @@ function SAEResearchReport({ entranceDelay = 0 }) {
         </div>
       </section>
 
-      <footer className="sae-report-footer"><span>Research file · 02 / SAE reproduction</span><span>Updated: [Date]</span><p>Primary source: Bricken et al., “Towards Monosemanticity: Decomposing Language Models With Dictionary Learning” (2023). The project link is above. I’ve left gaps where I still need to add run details or evidence.</p></footer>
+      <footer className="sae-report-footer">
+        <span>Research file · 02 / SAE reproduction</span>
+        <span>Updated: 2026 · Mechanistic Interpretability</span>
+        <p>Primary source: Bricken et al., “Towards Monosemanticity: Decomposing Language Models With Dictionary Learning” (2023). Independent reproduction on GELU-1L.</p>
+        <div className="oe-report-btn-group mt-5">
+          {onBackToHome && (
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={600}
+              backgroundColor="#161619"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Returning..."
+              onTap={onBackToHome}
+              onHold={onBackToHome}
+            >
+              ← Back to Overview
+            </HoldButton>
+          )}
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open('https://reddirector.github.io/Towards_Monosemanticity_Reproduction/', '_blank')}
+            onHold={() => window.open('https://reddirector.github.io/Towards_Monosemanticity_Reproduction/', '_blank')}
+          >
+            Reproduction Site ↗
+          </HoldButton>
+          {onNavigateProject && (
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={600}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Opening..."
+              onTap={() => onNavigateProject('pentagon')}
+              onHold={() => onNavigateProject('pentagon')}
+            >
+              Next: Pentagon →
+            </HoldButton>
+          )}
+        </div>
+      </footer>
     </main>
   </div>
 }
@@ -1365,7 +1493,7 @@ function OeReportAmbience() {
   </div>
 }
 
-function OrchestrationEngineReport({ entranceDelay = 0 }) {
+function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigateProject }) {
   const report = useRef(null)
   const testSubjects = [
     ['State Machine Invariants', 'Formal validation of legal task transitions across PENDING, READY, RUNNING, SUCCEEDED, FAILED, RETRY_WAIT, and CANCELLED; persistence commits before memory mutation.'],
@@ -1406,31 +1534,77 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
 
         <QuickInstallBar />
 
-        <div className="oe-report-links">
+        <div className="oe-report-btn-group">
           <HoldButton
-            doneLabel="Opening..."
-            backgroundColor="#27272a"
-            fillColor="#ef4444"
-            textColor="#f5f5f5"
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
             fillTextColor="#ffffff"
-            size="md"
-            radius={14}
-            fillDirection="right"
-            holdTime={2000}
-            releaseTime={200}
-            pressScale={0.97}
-            wave
-            waveAmplitude={6}
-            glow
-            resetAfter={1200}
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_PYPI, '_blank')}
             onHold={() => window.open(ORCHESTRATION_PYPI, '_blank')}
           >
-            PyPI Package (v0.9.0) ↗
+            PyPI ↗
           </HoldButton>
-          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noreferrer">Official Documentation <span aria-hidden="true">↗</span></a>
-          <a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer">GitHub Repository <span aria-hidden="true">↗</span></a>
-          <a href={ORCHESTRATION_RELEASE} target="_blank" rel="noreferrer">Release v0.9.0 notes <span aria-hidden="true">↗</span></a>
-          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Dual MIT / Apache 2.0 <span aria-hidden="true">↗</span></a>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_DOCS, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_DOCS, '_blank')}
+          >
+            Docs ↗
+          </HoldButton>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_REPO, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_REPO, '_blank')}
+          >
+            GitHub ↗
+          </HoldButton>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_RELEASE, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_RELEASE, '_blank')}
+          >
+            v0.9.0 Notes ↗
+          </HoldButton>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(`${ORCHESTRATION_REPO}/blob/main/LICENSE`, '_blank')}
+            onHold={() => window.open(`${ORCHESTRATION_REPO}/blob/main/LICENSE`, '_blank')}
+          >
+            License ↗
+          </HoldButton>
         </div>
         <div className="oe-hero-chips" aria-hidden="true">
           <span>v0.9.0 Beta</span>
@@ -1545,37 +1719,88 @@ function OrchestrationEngineReport({ entranceDelay = 0 }) {
         <span>01 / Fault-Tolerant Orchestration Engine</span>
         <span>v0.9.0 · Production-Ready Beta · Dual MIT / Apache-2.0</span>
         <p>Source for this case file: Portfolio Master Specification v0.9.0, PyPI Package, Documentation Site, and Empirical Benchmarks.</p>
-        <div className="flex flex-wrap gap-4 items-center mt-3">
+        <div className="oe-report-btn-group mt-5">
+          {onBackToHome && (
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={600}
+              backgroundColor="#161619"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Returning..."
+              onTap={onBackToHome}
+              onHold={onBackToHome}
+            >
+              ← Back to Overview
+            </HoldButton>
+          )}
           <HoldButton
-            doneLabel="Opening..."
-            backgroundColor="#27272a"
-            fillColor="#ef4444"
-            textColor="#f5f5f5"
-            fillTextColor="#ffffff"
             size="sm"
-            radius={14}
-            fillDirection="right"
-            holdTime={2000}
-            releaseTime={200}
-            pressScale={0.97}
-            wave
-            waveAmplitude={6}
-            glow
-            resetAfter={1200}
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_PYPI, '_blank')}
             onHold={() => window.open(ORCHESTRATION_PYPI, '_blank')}
           >
-            pypi.org/project/orchestration-engine/ ↗
+            PyPI ↗
           </HoldButton>
-          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">Official Docs ↗</a>
-          <a href={ORCHESTRATION_REPO} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">GitHub Repo ↗</a>
-          <a href={ORCHESTRATION_RELEASE} target="_blank" rel="noreferrer" className="text-white/70 hover:text-white font-mono text-[.64rem] uppercase">Release Notes ↗</a>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_DOCS, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_DOCS, '_blank')}
+          >
+            Docs ↗
+          </HoldButton>
+          <HoldButton
+            size="sm"
+            radius={2}
+            holdTime={700}
+            backgroundColor="#141417"
+            fillColor="#e5484d"
+            textColor="#ffffff"
+            fillTextColor="#ffffff"
+            doneLabel="Opening..."
+            onTap={() => window.open(ORCHESTRATION_REPO, '_blank')}
+            onHold={() => window.open(ORCHESTRATION_REPO, '_blank')}
+          >
+            GitHub ↗
+          </HoldButton>
+          {onNavigateProject && (
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={600}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Opening..."
+              onTap={() => onNavigateProject('sae-reproduction')}
+              onHold={() => onNavigateProject('sae-reproduction')}
+            >
+              Next: SAE Reproduction →
+            </HoldButton>
+          )}
         </div>
       </footer>
     </main>
   </div>
 }
 
-function ProjectModal({ project, close, openOrigin }) {
+function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
   const panel = useRef(null)
   const overlay = useRef(null)
   const closeButton = useRef(null)
@@ -1648,14 +1873,100 @@ function ProjectModal({ project, close, openOrigin }) {
         {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-white/25" />}
         {reportReady && (!usesVenom || transitionDone) && <CaseFileProgress tone={usesVenom ? 'lime' : 'ink'} />}
         {isResearch && reportReady ? <>
-          <header className="sae-report-topbar"><p>02 / Research case file <span>·</span> SAE reproduction <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">question</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">research live</span>{closeControl}</div></header>
-          <SAEResearchReport entranceDelay={entranceDelay} />
+          <header className="sae-report-topbar">
+            <p>02 / Research case file <span>·</span> SAE reproduction <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">question</span></p>
+            <div className="oe-topbar-meta">
+              <span className="oe-live-dot" aria-hidden="true" />
+              <span className="oe-live-label" aria-hidden="true">research live</span>
+              <div className="oe-topbar-nav">
+                <HoldButton
+                  size="sm"
+                  radius={2}
+                  holdTime={500}
+                  backgroundColor="#141417"
+                  fillColor="#e5484d"
+                  textColor="#ffffff"
+                  fillTextColor="#ffffff"
+                  className="oe-topbar-back-btn"
+                  doneLabel="Returning..."
+                  onTap={close}
+                  onHold={close}
+                >
+                  ← Back to Overview
+                </HoldButton>
+                {closeControl}
+              </div>
+            </div>
+          </header>
+          <SAEResearchReport
+            entranceDelay={entranceDelay}
+            onBackToHome={close}
+            onNavigateProject={onNavigateProject}
+          />
         </> : isOrchestration && reportReady ? <>
-          <header className="oe-report-topbar"><p>01 / Engine case file <span>·</span> Orchestration Engine <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">overview</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">engine live</span>{closeControl}</div></header>
-          <OrchestrationEngineReport entranceDelay={entranceDelay} />
+          <header className="oe-report-topbar">
+            <p>01 / Engine case file <span>·</span> Orchestration Engine <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">overview</span></p>
+            <div className="oe-topbar-meta">
+              <span className="oe-live-dot" aria-hidden="true" />
+              <span className="oe-live-label" aria-hidden="true">engine live</span>
+              <div className="oe-topbar-nav">
+                <HoldButton
+                  size="sm"
+                  radius={2}
+                  holdTime={500}
+                  backgroundColor="#141417"
+                  fillColor="#e5484d"
+                  textColor="#ffffff"
+                  fillTextColor="#ffffff"
+                  className="oe-topbar-back-btn"
+                  doneLabel="Returning..."
+                  onTap={close}
+                  onHold={close}
+                >
+                  ← Back to Overview
+                </HoldButton>
+                {closeControl}
+              </div>
+            </div>
+          </header>
+          <OrchestrationEngineReport
+            entranceDelay={entranceDelay}
+            onBackToHome={close}
+            onNavigateProject={onNavigateProject}
+          />
         </> : isPentagon && reportReady ? <>
-          <header className="oe-report-topbar"><p>03 / Workstation case file <span>·</span> Pentagon <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">architecture</span></p><div className="oe-topbar-meta"><span className="oe-live-dot" aria-hidden="true" /><span className="oe-live-label" aria-hidden="true">workstation live</span>{closeControl}</div></header>
-          <PentagonWorkstationReport entranceDelay={entranceDelay} setupScrollFx={setupCaseFileScrollFx} useReadout={useCaseFileReadout} />
+          <header className="oe-report-topbar">
+            <p>03 / Workstation case file <span>·</span> Pentagon <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">architecture</span></p>
+            <div className="oe-topbar-meta">
+              <span className="oe-live-dot" aria-hidden="true" />
+              <span className="oe-live-label" aria-hidden="true">workstation live</span>
+              <div className="oe-topbar-nav">
+                <HoldButton
+                  size="sm"
+                  radius={2}
+                  holdTime={500}
+                  backgroundColor="#141417"
+                  fillColor="#e5484d"
+                  textColor="#ffffff"
+                  fillTextColor="#ffffff"
+                  className="oe-topbar-back-btn"
+                  doneLabel="Returning..."
+                  onTap={close}
+                  onHold={close}
+                >
+                  ← Back to Overview
+                </HoldButton>
+                {closeControl}
+              </div>
+            </div>
+          </header>
+          <PentagonWorkstationReport
+            entranceDelay={entranceDelay}
+            setupScrollFx={setupCaseFileScrollFx}
+            useReadout={useCaseFileReadout}
+            onBackToHome={close}
+            onNavigateProject={onNavigateProject}
+          />
         </> : usesVenom ? null : <>
           {closeControl}
           <div className="modal-copy relative z-10 flex min-h-svh max-w-4xl flex-col justify-end p-7 sm:p-20">
@@ -1668,27 +1979,43 @@ function ProjectModal({ project, close, openOrigin }) {
               <div className="mt-10 w-fit">
                 <HoldButton
                   doneLabel="Opening..."
-                  backgroundColor="#27272a"
-                  fillColor="#ef4444"
-                  textColor="#f5f5f5"
+                  backgroundColor="#141417"
+                  fillColor="#e5484d"
+                  textColor="#ffffff"
                   fillTextColor="#ffffff"
-                  size="md"
-                  radius={14}
+                  size="sm"
+                  radius={2}
                   fillDirection="right"
-                  holdTime={2000}
-                  releaseTime={200}
-                  pressScale={0.97}
+                  holdTime={700}
+                  releaseTime={180}
+                  pressScale={0.98}
                   wave
                   waveAmplitude={6}
                   glow
                   resetAfter={1200}
+                  onTap={() => window.open(project.link, '_blank')}
                   onHold={() => window.open(project.link, '_blank')}
                 >
                   View repository ↗
                 </HoldButton>
               </div>
             ) : (
-              <a className="modal-link mt-10 w-fit border-b border-white pb-2 font-mono text-[.7rem] uppercase tracking-[.08em]" href={project.link} target="_blank" rel="noreferrer">Launch project ↗</a>
+              <div className="mt-10 w-fit">
+                <HoldButton
+                  doneLabel="Opening..."
+                  backgroundColor="#141417"
+                  fillColor="#e5484d"
+                  textColor="#ffffff"
+                  fillTextColor="#ffffff"
+                  size="sm"
+                  radius={2}
+                  holdTime={700}
+                  onTap={() => window.open(project.link, '_blank')}
+                  onHold={() => window.open(project.link, '_blank')}
+                >
+                  Launch project ↗
+                </HoldButton>
+              </div>
             ))}
           </div>
         </>}
@@ -2063,6 +2390,68 @@ function Work() {
     setSelectedIndex((index) => (index + step + featuredProjects.length) % featuredProjects.length)
   }
 
+  const updateUrlForProject = useCallback((project) => {
+    if (!project) {
+      if (window.location.pathname.includes('/projects/') || window.location.hash.includes('project')) {
+        const base = window.location.pathname.replace(/\/projects\/.*$/, '') || '/'
+        window.history.pushState(null, '', base)
+      }
+      document.title = 'Reddirector · Engineering Portfolio'
+      return
+    }
+    const slug = PROJECT_NAME_TO_SLUG[project.name] || project.id
+    const targetUrl = `/projects/${slug}`
+    if (window.location.pathname !== targetUrl && !window.location.hash.includes(slug)) {
+      window.history.pushState({ project: slug }, '', targetUrl)
+    }
+    document.title = `${project.name} | Reddirector`
+  }, [])
+
+  // Auto-open project if URL points to it on mount
+  useEffect(() => {
+    const route = parseCurrentRoute()
+    if (route.page === 'project' && route.project) {
+      setActive(route.project)
+      const foundIdx = featuredProjects.findIndex((p) => p.name === route.project.name)
+      if (foundIdx !== -1) setSelectedIndex(foundIdx)
+      document.title = `${route.project.name} | Reddirector`
+    }
+  }, [])
+
+  // Handle browser back / forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseCurrentRoute()
+      if (route.page === 'project' && route.project) {
+        setActive(route.project)
+        const foundIdx = featuredProjects.findIndex((p) => p.name === route.project.name)
+        if (foundIdx !== -1) setSelectedIndex(foundIdx)
+        document.title = `${route.project.name} | Reddirector`
+      } else {
+        setActive(null)
+        document.title = 'Reddirector · Engineering Portfolio'
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const handleNavigateProject = useCallback((targetSlug) => {
+    const projName = SLUG_TO_PROJECT_NAME[targetSlug]
+    const proj = featuredProjects.find((p) => p.name === projName)
+    if (proj) {
+      const targetIdx = featuredProjects.findIndex((p) => p.name === projName)
+      if (targetIdx !== -1) setSelectedIndex(targetIdx)
+      updateUrlForProject(proj)
+      setActive(proj)
+    }
+  }, [updateUrlForProject])
+
+  const handleCloseProject = useCallback(() => {
+    updateUrlForProject(null)
+    triggerBarbaTransition(null, { type: 'case-study-close' })
+  }, [updateUrlForProject])
+
   const openProjectDetails = useCallback((project, event) => {
     if (!project) return
     if (event) {
@@ -2077,19 +2466,24 @@ function Work() {
         y: window.innerHeight / 2
       })
     }
+    updateUrlForProject(project)
     triggerBarbaTransition(null, { type: 'case-study-open', meta: project })
-  }, [])
+  }, [updateUrlForProject])
 
   useEffect(() => {
     setBarbaCaseStudyHandlers({
       open: (project) => {
-        if (project) setActive(project)
+        if (project) {
+          setActive(project)
+          updateUrlForProject(project)
+        }
       },
       close: () => {
         setActive(null)
+        updateUrlForProject(null)
       },
     })
-  }, [])
+  }, [updateUrlForProject])
 
   const renderProjectCard = (project, index) => {
     const inkIsDark = project.ink === 'dark'
@@ -2134,23 +2528,25 @@ function Work() {
             </p>
           </div>
 
-          <div className="pt-3 sm:pt-6">
-            <button
-              type="button"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
+          <div className="pt-3 sm:pt-6" onPointerDown={(event) => event.stopPropagation()}>
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={600}
+              backgroundColor={inkIsDark ? '#0b0708' : '#141417'}
+              fillColor="#e5484d"
+              textColor={inkIsDark ? '#ffffff' : '#f5f5f5'}
+              fillTextColor="#ffffff"
+              doneLabel="Opening..."
+              onTap={(event) => {
                 openProjectDetails(project, event)
               }}
-              onDoubleClick={(event) => {
-                event.stopPropagation()
+              onHold={(event) => {
                 openProjectDetails(project, event)
               }}
-              aria-haspopup="dialog"
-              className={`inline-flex w-fit items-center gap-2 sm:gap-3 border-b pb-1.5 sm:pb-2 font-mono text-[.62rem] sm:text-[.68rem] uppercase tracking-[.1em] transition-colors cursor-pointer ${inkIsDark ? 'border-black/40 hover:border-black' : 'border-white/40 hover:border-white'}`}
             >
-              Open case study <span aria-hidden="true">↗</span>
-            </button>
+              Open case study ↗
+            </HoldButton>
           </div>
         </div>
 
@@ -2237,7 +2633,7 @@ function Work() {
         />
       </div>
     </Reveal>
-    <ProjectModal key={active?.id ?? 'closed'} project={active} openOrigin={openOrigin} close={() => triggerBarbaTransition(null, { type: 'case-study-close' })} />
+    <ProjectModal key={active?.id ?? 'closed'} project={active} openOrigin={openOrigin} close={handleCloseProject} onNavigateProject={handleNavigateProject} />
   </>
 }
 
@@ -2440,20 +2836,21 @@ function Contact() {
       <div className="mt-8 flex items-center">
         <HoldButton
           doneLabel="Opening GitHub..."
-          backgroundColor="#27272a"
-          fillColor="#ef4444"
-          textColor="#f5f5f5"
+          backgroundColor="#141417"
+          fillColor="#e5484d"
+          textColor="#ffffff"
           fillTextColor="#ffffff"
           size="md"
-          radius={14}
+          radius={2}
           fillDirection="right"
-          holdTime={2000}
-          releaseTime={200}
-          pressScale={0.97}
+          holdTime={800}
+          releaseTime={180}
+          pressScale={0.98}
           wave
           waveAmplitude={6}
           glow
           resetAfter={1200}
+          onTap={() => window.open(content.links.github, '_blank')}
           onHold={() => window.open(content.links.github, '_blank')}
         >
           Hold to Connect / GitHub ↗
@@ -2465,20 +2862,21 @@ function Contact() {
           <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-4 font-mono text-[.68rem] uppercase tracking-[.12em]" data-reveal-group>
             <HoldButton
               doneLabel="Opening..."
-              backgroundColor="#27272a"
-              fillColor="#ef4444"
-              textColor="#f5f5f5"
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
               fillTextColor="#ffffff"
               size="sm"
-              radius={14}
+              radius={2}
               fillDirection="right"
-              holdTime={2000}
-              releaseTime={200}
-              pressScale={0.97}
+              holdTime={700}
+              releaseTime={180}
+              pressScale={0.98}
               wave
               waveAmplitude={6}
               glow
               resetAfter={1200}
+              onTap={() => window.open(content.links.github, '_blank')}
               onHold={() => window.open(content.links.github, '_blank')}
             >
               GitHub / {content.handle} ↗

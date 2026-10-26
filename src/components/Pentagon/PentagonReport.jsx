@@ -325,7 +325,7 @@ function RagFallbackSimulator() {
 }
 
 // Main Pentagon Case File Report Component
-export default function PentagonWorkstationReport({ entranceDelay = 0, setupScrollFx, useReadout }) {
+export default function PentagonWorkstationReport({ entranceDelay = 0, setupScrollFx, useReadout, onBackToHome, onNavigateProject }) {
   const report = useRef(null)
 
   const sectionAnchors = [
@@ -365,32 +365,48 @@ export default function PentagonWorkstationReport({ entranceDelay = 0, setupScro
             I built Pentagon as a personal AI workstation that never hoards API credentials in the cloud or leaks data to third parties. Everything runs local first: keys stay encrypted on your own machine with Fernet, workflows execute deterministically through LangGraph state machines, and document search falls back cleanly to a local CPU model if cloud keys lapse. Six tiers of autonomy governance keep file and terminal tools strictly within bounds across web, mobile, desktop, and bootable offline media.
           </p>
 
-          <div className="oe-report-links">
-            <a href={PENTAGON_APP_URL} target="_blank" rel="noreferrer">
-              Launch live workstation <span aria-hidden="true">↗</span>
-            </a>
-            <a href={PENTAGON_DOCS_URL} target="_blank" rel="noreferrer">
-              Inspect architecture specification <span aria-hidden="true">↗</span>
-            </a>
+          <div className="oe-report-btn-group">
             <HoldButton
-              doneLabel="Opening..."
-              backgroundColor="#27272a"
-              fillColor="#ef4444"
-              textColor="#f5f5f5"
+              size="sm"
+              radius={2}
+              holdTime={700}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
               fillTextColor="#ffffff"
-              size="md"
-              radius={14}
-              fillDirection="right"
-              holdTime={2000}
-              releaseTime={200}
-              pressScale={0.97}
-              wave
-              waveAmplitude={6}
-              glow
-              resetAfter={1200}
+              doneLabel="Launching..."
+              onTap={() => window.open(PENTAGON_APP_URL, '_blank')}
+              onHold={() => window.open(PENTAGON_APP_URL, '_blank')}
+            >
+              Launch Live ↗
+            </HoldButton>
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={700}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Opening..."
+              onTap={() => window.open(PENTAGON_DOCS_URL, '_blank')}
+              onHold={() => window.open(PENTAGON_DOCS_URL, '_blank')}
+            >
+              Architecture Spec ↗
+            </HoldButton>
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={700}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Opening..."
+              onTap={() => window.open('https://github.com/Reddirector', '_blank')}
               onHold={() => window.open('https://github.com/Reddirector', '_blank')}
             >
-              GitHub repository ↗
+              GitHub ↗
             </HoldButton>
           </div>
 
@@ -789,9 +805,54 @@ CREATE TABLE IF NOT EXISTS autonomy_settings (
           <p>
             Source: Pentagon Comprehensive Systems Deep Dive and deployed production application. All cryptographic keys are encrypted locally at rest with zero external key hoarding.
           </p>
-          <a href={PENTAGON_APP_URL} target="_blank" rel="noreferrer">
-            pentagon-bice.vercel.app ↗
-          </a>
+          <div className="oe-report-btn-group mt-5">
+            {onBackToHome && (
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={600}
+                backgroundColor="#161619"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                doneLabel="Returning..."
+                onTap={onBackToHome}
+                onHold={onBackToHome}
+              >
+                ← Back to Overview
+              </HoldButton>
+            )}
+            <HoldButton
+              size="sm"
+              radius={2}
+              holdTime={700}
+              backgroundColor="#141417"
+              fillColor="#e5484d"
+              textColor="#ffffff"
+              fillTextColor="#ffffff"
+              doneLabel="Launching..."
+              onTap={() => window.open(PENTAGON_APP_URL, '_blank')}
+              onHold={() => window.open(PENTAGON_APP_URL, '_blank')}
+            >
+              Launch Live ↗
+            </HoldButton>
+            {onNavigateProject && (
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={600}
+                backgroundColor="#141417"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                doneLabel="Opening..."
+                onTap={() => onNavigateProject('orchestration-engine')}
+                onHold={() => onNavigateProject('orchestration-engine')}
+              >
+                First: Orchestration Engine →
+              </HoldButton>
+            )}
+          </div>
         </footer>
       </main>
     </div>

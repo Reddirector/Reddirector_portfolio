@@ -10,24 +10,24 @@ const LINEAR = t => t;
 const EASE_OUT = t => 1 - Math.pow(1 - t, 3);
 
 export default function HoldButton({
-  children = 'Hold to delete',
-  doneLabel = 'Deleted',
+  children = 'Hold to confirm',
+  doneLabel = 'Confirmed',
   icon = null,
   doneIcon = null,
-  backgroundColor = '#27272a',
-  fillColor = '#5227FF',
+  backgroundColor = '#141417',
+  fillColor = '#e5484d',
   textColor = '#f5f5f5',
   fillTextColor = '#ffffff',
   size = 'md',
-  radius = 14,
+  radius = 2,
   fillDirection = 'right',
-  holdTime = 2000,
-  releaseTime = 200,
-  pressScale = 0.97,
+  holdTime = 800,
+  releaseTime = 180,
+  pressScale = 0.98,
   wave = true,
   waveAmplitude = 6,
   glow = true,
-  resetAfter = 1200,
+  resetAfter = 1000,
   disabled = false,
   onHold,
   onTap,
@@ -41,7 +41,16 @@ export default function HoldButton({
   const buttonRef = useRef(null);
   const gesture = useRef({ pointerId: null, start: 0, rect: null });
   const timers = useRef({ complete: 0, reset: 0 });
+  const lastTriggered = useRef(0);
   const hintId = useId();
+
+  const triggerAction = (e) => {
+    const now = performance.now();
+    if (now - lastTriggered.current < 450) return;
+    lastTriggered.current = now;
+    if (onTap) onTap(e);
+    else if (onHold) onHold(e);
+  };
 
   const go = (next, kind = null) => {
     phaseRef.current = next;
@@ -81,6 +90,7 @@ export default function HoldButton({
     if (performance.now() - gesture.current.start < holdTime - 50) return;
     clearTimers();
     go('done', inputRef.current);
+    lastTriggered.current = performance.now();
     onHold?.();
     if (resetAfter > 0) {
       timers.current.reset = setTimeout(() => {
@@ -108,7 +118,9 @@ export default function HoldButton({
     const held = performance.now() - gesture.current.start;
     go('idle');
     drive(0, releaseTime, EASE_OUT);
-    if (!drifted && held < TAP_MS) onTap?.();
+    if (!drifted && held < TAP_MS) {
+      triggerAction();
+    }
   };
   const releaseRef = useRef(release);
   releaseRef.current = release;
@@ -248,6 +260,7 @@ export default function HoldButton({
       onPointerLeave={handlePointerLeave}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
+      onClick={triggerAction}
       onContextMenu={e => e.preventDefault()}
     >
       <span className="hold-button__pulse" aria-hidden="true" />

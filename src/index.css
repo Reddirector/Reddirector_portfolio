@@ -384,6 +384,10 @@ footer .footer-link:hover, footer .footer-link:focus-visible { border-color:#A40
 .oe-report-links { display:flex; flex-wrap:wrap; gap:1rem 2rem; margin-top:2rem; align-items:center; }
 .oe-report-links a,.oe-report-footer>a { display:inline-flex; align-items:center; gap:.55rem; border-bottom:1px solid rgb(229 72 77 / .58); padding:0 0 .45rem; color:#f2f2f2; font-family:var(--font-mono); font-size:.64rem; letter-spacing:.065em; text-decoration:none; text-transform:uppercase; transition:color .2s ease,border-color .2s ease; }
 .oe-report-links a:hover,.oe-report-links a:focus-visible,.oe-report-footer>a:hover,.oe-report-footer>a:focus-visible { border-color:var(--color-interactive); color:var(--color-interactive); }
+
+.oe-report-btn-group { display:flex; flex-wrap:wrap; align-items:center; gap:.65rem .85rem; margin-top:1.5rem; }
+.oe-topbar-back-btn { font-size:.62rem !important; height:32px !important; padding:0 12px !important; }
+.oe-topbar-nav { display:flex; align-items:center; gap:.85rem; }
 .oe-report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid rgb(255 255 255 / .16); background:rgb(255 255 255 / .025); }
 .oe-report-metrics article { display:flex; min-height:9.5rem; flex-direction:column; justify-content:space-between; gap:.75rem; border-right:1px solid rgb(255 255 255 / .13); padding:1.15rem; }
 .oe-report-metrics article:last-child { border-right:0; }
