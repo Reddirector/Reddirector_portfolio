@@ -365,7 +365,11 @@ function CaseFileProgress({ tone = 'lime' }) {
 }
 
 function Header({ shown }) {
-  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" aria-label="REDIRECTOR" className="brand-lockup font-display font-black uppercase">{logoLetters.map(([letter, desktopSize, mobileSize], index) => <span className="brand-letter" style={{ '--brand-size': `${desktopSize}px`, '--brand-size-mobile': `${mobileSize}px` }} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#about">About</a><a className="link-line" href="#work">Work</a><a className="link-line" href="#method">Method</a><a className="link-line" href="#now">Now</a><a className="link-line" href="#contact">Contact</a></nav></header>
+  const handleNav = (target, e) => {
+    e.preventDefault()
+    triggerBarbaTransition(target, { type: 'section' })
+  }
+  return <header className={`site-header fixed inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-6 mix-blend-difference transition-all duration-700 sm:px-10 lg:px-16 ${shown ? 'translate-y-0 opacity-100' : '-translate-y-5 opacity-0'}`}><a href="#top" onClick={(e) => handleNav('#top', e)} aria-label="REDIRECTOR" className="brand-lockup font-display font-black uppercase">{logoLetters.map(([letter, desktopSize, mobileSize], index) => <span className="brand-letter" style={{ '--brand-size': `${desktopSize}px`, '--brand-size-mobile': `${mobileSize}px` }} key={index}>{letter}</span>)}</a><nav className="site-nav flex gap-4 font-mono text-[.68rem] uppercase tracking-[.08em] sm:gap-8" aria-label="Portfolio navigation"><a className="link-line" href="#about" onClick={(e) => handleNav('#about', e)}>About</a><a className="link-line" href="#work" onClick={(e) => handleNav('#work', e)}>Work</a><a className="link-line" href="#method" onClick={(e) => handleNav('#method', e)}>Method</a><a className="link-line" href="#now" onClick={(e) => handleNav('#now', e)}>Now</a><a className="link-line" href="#contact" onClick={(e) => handleNav('#contact', e)}>Contact</a></nav></header>
 }
 
 function Hero({ shown }) {
@@ -2297,8 +2301,41 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
     setReportReady(true)
     setTransitionDone(true)
     if (reduceMotion()) return undefined
-    const reveal = gsap.fromTo(panel.current, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'power3.out' })
-    return () => reveal.kill()
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    tl.fromTo(panel.current, { opacity: 0, scale: 0.985 }, { opacity: 1, scale: 1, duration: 0.5 }, 0)
+
+    const topbar = overlay.current?.querySelector('header[class*="-topbar"]')
+    if (topbar) {
+      tl.fromTo(topbar, { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.4 }, 0.08)
+    }
+
+    const kicker = panel.current.querySelector('.oe-report-kicker, .sae-report-kicker')
+    if (kicker) {
+      tl.fromTo(kicker, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.4 }, 0.14)
+    }
+
+    const intro = panel.current.querySelector('.oe-report-intro, .sae-report-intro')
+    if (intro) {
+      tl.fromTo(intro, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4 }, 0.2)
+    }
+
+    const installBar = panel.current.querySelector('.oe-install-bar')
+    if (installBar) {
+      tl.fromTo(installBar, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, 0.24)
+    }
+
+    const btnGroup = panel.current.querySelector('.oe-report-btn-group')
+    if (btnGroup) {
+      tl.fromTo(btnGroup, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, 0.28)
+    }
+
+    const metricArticles = panel.current.querySelectorAll('.oe-report-metrics article')
+    if (metricArticles.length > 0) {
+      tl.fromTo(metricArticles, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.07 }, 0.32)
+    }
+
+    return () => tl.kill()
   }, [project])
   useEffect(() => {
     if (usesVenom && reportReady) {
@@ -2937,9 +2974,15 @@ function Work() {
     const proj = featuredProjects.find((p) => p.name === projName)
     if (proj) {
       const targetIdx = featuredProjects.findIndex((p) => p.name === projName)
-      if (targetIdx !== -1) setSelectedIndex(targetIdx)
-      updateUrlForProject(proj)
-      setActive(proj)
+      triggerBarbaTransition(null, {
+        type: 'case-study-switch',
+        meta: proj,
+        onSwitch: () => {
+          if (targetIdx !== -1) setSelectedIndex(targetIdx)
+          updateUrlForProject(proj)
+          setActive(proj)
+        }
+      })
     }
   }, [updateUrlForProject])
 

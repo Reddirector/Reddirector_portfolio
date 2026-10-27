@@ -3,9 +3,14 @@ import './barba-transition.css'
 export default function BarbaTransitionOverlay() {
   return (
     <div id="barba-transition-overlay" aria-hidden="true">
-      <div className="barba-shutter barba-shutter--top" />
-      <div className="barba-shutter barba-shutter--bottom" />
+      <div className="barba-shutter barba-shutter--top">
+        <div className="barba-shutter-grid" />
+      </div>
+      <div className="barba-shutter barba-shutter--bottom">
+        <div className="barba-shutter-grid" />
+      </div>
       <div className="barba-laser" />
+      <div className="barba-laser-glow" />
 
       <span className="barba-reticle-corner barba-reticle-corner--tl" />
       <span className="barba-reticle-corner barba-reticle-corner--tr" />
@@ -23,6 +28,10 @@ export default function BarbaTransitionOverlay() {
 
         <p className="barba-hud__kicker" id="barba-hud-kicker">SYSTEM ROUTE // 0x2A</p>
         <h2 className="barba-hud__title" id="barba-hud-title">INITIALIZING</h2>
+
+        <div className="barba-freq-visualizer">
+          <span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span /><span />
+        </div>
 
         <div className="barba-progress-wrap">
           <div className="barba-progress-bar">

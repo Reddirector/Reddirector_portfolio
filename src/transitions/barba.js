@@ -19,15 +19,17 @@ let lenisInstance = null
 let caseStudyHandlers = {
   open: null,
   close: null,
+  switch: null,
 }
 
 export function setBarbaLenis(lenis) {
   lenisInstance = lenis
 }
 
-export function setBarbaCaseStudyHandlers({ open, close }) {
+export function setBarbaCaseStudyHandlers({ open, close, switch: switchHandler }) {
   caseStudyHandlers.open = open
   caseStudyHandlers.close = close
+  caseStudyHandlers.switch = switchHandler
 }
 
 export function getIsTransitioning() {
@@ -57,7 +59,9 @@ function animateShuttersIn(label = 'TRANSITION // BUFFERING', kicker = 'SYSTEM R
     const shutterTop = overlay?.querySelector('.barba-shutter--top')
     const shutterBottom = overlay?.querySelector('.barba-shutter--bottom')
     const laser = overlay?.querySelector('.barba-laser')
+    const laserGlow = overlay?.querySelector('.barba-laser-glow')
     const hud = overlay?.querySelector('.barba-hud')
+    const corners = overlay?.querySelectorAll('.barba-reticle-corner')
     const hudTitle = document.getElementById('barba-hud-title')
     const hudKicker = document.getElementById('barba-hud-kicker')
     const progressFill = document.getElementById('barba-progress-fill')
@@ -66,7 +70,7 @@ function animateShuttersIn(label = 'TRANSITION // BUFFERING', kicker = 'SYSTEM R
 
     if (hudTitle) hudTitle.textContent = label
     if (hudKicker) hudKicker.textContent = kicker
-    if (hudStatus) hudStatus.textContent = 'ROUTING: 60%'
+    if (hudStatus) hudStatus.textContent = 'ROUTING: 68%'
     if (overlay) overlay.classList.add('is-active')
 
     // Reset initial states
@@ -74,7 +78,9 @@ function animateShuttersIn(label = 'TRANSITION // BUFFERING', kicker = 'SYSTEM R
     if (shutterBottom) gsap.set(shutterBottom, { yPercent: 100 })
     if (progressFill) gsap.set(progressFill, { scaleX: 0 })
     if (laser) gsap.set(laser, { scaleX: 0, opacity: 0 })
-    if (hud) gsap.set(hud, { opacity: 0, scale: 0.94, y: 10 })
+    if (laserGlow) gsap.set(laserGlow, { scaleX: 0, opacity: 0 })
+    if (hud) gsap.set(hud, { opacity: 0, scale: 0.9, y: 14 })
+    if (corners) gsap.set(corners, { opacity: 0, scale: 1.35 })
 
     const tl = gsap.timeline({
       defaults: { ease: 'power4.inOut' },
@@ -83,14 +89,16 @@ function animateShuttersIn(label = 'TRANSITION // BUFFERING', kicker = 'SYSTEM R
       },
     })
 
-    tl.to(laser, { scaleX: 1, opacity: 1, duration: 0.18, ease: 'power2.out' }, 0)
-      .to(shutterTop, { yPercent: 0, duration: 0.36 }, 0.02)
-      .to(shutterBottom, { yPercent: 0, duration: 0.36 }, 0.02)
-      .to(hud, { opacity: 1, scale: 1, y: 0, duration: 0.22, ease: 'power3.out' }, 0.12)
-      .to(progressFill, { scaleX: 0.65, duration: 0.3, ease: 'power1.inOut' }, 0.08)
+    tl.to(laser, { scaleX: 1, opacity: 1, duration: 0.22, ease: 'power2.out' }, 0)
+      .to(laserGlow, { scaleX: 1, opacity: 1, duration: 0.22, ease: 'power2.out' }, 0)
+      .to(shutterTop, { yPercent: 0, duration: 0.42, ease: 'power4.inOut' }, 0.02)
+      .to(shutterBottom, { yPercent: 0, duration: 0.42, ease: 'power4.inOut' }, 0.02)
+      .to(corners, { opacity: 1, scale: 1, duration: 0.32, ease: 'back.out(1.8)' }, 0.15)
+      .to(hud, { opacity: 1, scale: 1, y: 0, duration: 0.28, ease: 'power3.out' }, 0.16)
+      .to(progressFill, { scaleX: 0.72, duration: 0.35, ease: 'power1.inOut' }, 0.1)
 
     if (mainContent) {
-      tl.to(mainContent, { scale: 0.985, opacity: 0.35, duration: 0.3, ease: 'power2.in' }, 0)
+      tl.to(mainContent, { scale: 0.98, opacity: 0.3, duration: 0.35, ease: 'power2.in' }, 0)
     }
   })
 }
@@ -111,7 +119,9 @@ function animateShuttersOut() {
     const shutterTop = overlay?.querySelector('.barba-shutter--top')
     const shutterBottom = overlay?.querySelector('.barba-shutter--bottom')
     const laser = overlay?.querySelector('.barba-laser')
+    const laserGlow = overlay?.querySelector('.barba-laser-glow')
     const hud = overlay?.querySelector('.barba-hud')
+    const corners = overlay?.querySelectorAll('.barba-reticle-corner')
     const progressFill = document.getElementById('barba-progress-fill')
     const hudStatus = document.getElementById('barba-hud-status')
     const mainContent = document.querySelector('[data-barba="container"]') || document.getElementById('main')
@@ -128,14 +138,16 @@ function animateShuttersOut() {
       },
     })
 
-    tl.to(progressFill, { scaleX: 1, duration: 0.14, ease: 'power2.out' }, 0)
-      .to(hud, { opacity: 0, scale: 1.04, y: -8, duration: 0.16, ease: 'power2.in' }, 0.06)
-      .to(shutterTop, { yPercent: -100, duration: 0.4 }, 0.14)
-      .to(shutterBottom, { yPercent: 100, duration: 0.4 }, 0.14)
-      .to(laser, { opacity: 0, scaleX: 0, duration: 0.22, ease: 'power2.in' }, 0.2)
+    tl.to(progressFill, { scaleX: 1, duration: 0.16, ease: 'power2.out' }, 0)
+      .to(hud, { opacity: 0, scale: 1.05, y: -10, duration: 0.2, ease: 'power2.in' }, 0.08)
+      .to(corners, { opacity: 0, scale: 0.85, duration: 0.2, ease: 'power2.in' }, 0.08)
+      .to(shutterTop, { yPercent: -100, duration: 0.46, ease: 'power4.inOut' }, 0.16)
+      .to(shutterBottom, { yPercent: 100, duration: 0.46, ease: 'power4.inOut' }, 0.16)
+      .to(laser, { opacity: 0, scaleX: 0, duration: 0.24, ease: 'power2.in' }, 0.24)
+      .to(laserGlow, { opacity: 0, scaleX: 0, duration: 0.24, ease: 'power2.in' }, 0.24)
 
     if (mainContent) {
-      tl.fromTo(mainContent, { scale: 0.985, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out', clearProps: 'all' }, 0.18)
+      tl.fromTo(mainContent, { scale: 0.98, opacity: 0.3 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'power3.out', clearProps: 'all' }, 0.2)
     }
   })
 }
@@ -143,7 +155,7 @@ function animateShuttersOut() {
 /**
  * Orchestrate transition to target section or view
  */
-export async function triggerBarbaTransition(target, { type = 'section', meta = null } = {}) {
+export async function triggerBarbaTransition(target, { type = 'section', meta = null, onSwitch = null } = {}) {
   if (isTransitioning) return
   isTransitioning = true
 
@@ -159,10 +171,13 @@ export async function triggerBarbaTransition(target, { type = 'section', meta = 
     kicker = `NAVIGATION // ${cleanId.toUpperCase()}`
   } else if (type === 'case-study-open') {
     label = `CASE FILE // ${meta?.name?.toUpperCase() || 'PROJECT'}`
-    kicker = 'AUTHORIZATION // BYOK ACCESS'
+    kicker = 'AUTHORIZATION // ACCESS GRANTED'
   } else if (type === 'case-study-close') {
     label = 'SELECTED WORK // OVERVIEW'
     kicker = 'EXIT CASE FILE // WORKBENCH'
+  } else if (type === 'case-study-switch') {
+    label = `TARGET // ${meta?.name?.toUpperCase() || 'NEXT CASE'}`
+    kicker = 'TRANSIT // DIRECT SYSTEM LINK'
   }
 
   if (lenisInstance) {
@@ -206,6 +221,12 @@ export async function triggerBarbaTransition(target, { type = 'section', meta = 
       } else {
         workEl.scrollIntoView()
       }
+    }
+  } else if (type === 'case-study-switch') {
+    if (onSwitch) {
+      onSwitch()
+    } else if (caseStudyHandlers.switch) {
+      caseStudyHandlers.switch(meta)
     }
   }
 
