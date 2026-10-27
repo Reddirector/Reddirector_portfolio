@@ -736,6 +736,356 @@ function QuickInstallBar() {
   )
 }
 
+function InteractiveWorkflowSimulator() {
+  const [isRunning, setIsRunning] = useState(false)
+  const [status, setStatus] = useState('READY')
+  const [nodes, setNodes] = useState({
+    retrieve: 'pending',
+    summarize: 'pending',
+    extract: 'pending',
+    report: 'pending',
+  })
+  const [edges, setEdges] = useState({
+    '1a': false,
+    '1b': false,
+    '2a': false,
+    '2b': false,
+  })
+  const [logs, setLogs] = useState([
+    {
+      id: 0,
+      time: '0.0000',
+      task: 'system',
+      oldSt: 'INIT',
+      newSt: 'READY',
+      attempt: 0,
+      note: '// Engine initialized with SQLite WAL. Click "Run Workflow" to observe DAG concurrency and 429 backoff.',
+    },
+  ])
+  const timerRef = useRef([])
+  const logStreamRef = useRef(null)
+
+  const clearAllTimers = () => {
+    timerRef.current.forEach((t) => clearTimeout(t))
+    timerRef.current = []
+  }
+
+  useEffect(() => {
+    return () => clearAllTimers()
+  }, [])
+
+  useEffect(() => {
+    if (logStreamRef.current) {
+      logStreamRef.current.scrollTop = logStreamRef.current.scrollHeight
+    }
+  }, [logs])
+
+  const addLog = (task, oldSt, newSt, attempt, note = '') => {
+    const time = (performance.now() / 1000).toFixed(4)
+    setLogs((prev) => [
+      ...prev,
+      { id: prev.length, time, task, oldSt, newSt, attempt, note },
+    ])
+  }
+
+  const resetSimulation = () => {
+    clearAllTimers()
+    setIsRunning(false)
+    setStatus('READY')
+    setNodes({
+      retrieve: 'pending',
+      summarize: 'pending',
+      extract: 'pending',
+      report: 'pending',
+    })
+    setEdges({
+      '1a': false,
+      '1b': false,
+      '2a': false,
+      '2b': false,
+    })
+    setLogs([
+      {
+        id: 0,
+        time: '0.0000',
+        task: 'system',
+        oldSt: 'INIT',
+        newSt: 'READY',
+        attempt: 0,
+        note: '// Simulation reset. Click "Run Workflow" to execute.',
+      },
+    ])
+  }
+
+  const startSimulation = () => {
+    if (isRunning) return
+    resetSimulation()
+    setIsRunning(true)
+    setStatus('RUNNING')
+
+    const schedule = (fn, delay) => {
+      const t = setTimeout(fn, delay)
+      timerRef.current.push(t)
+    }
+
+    // Step 1: Retrieve starts
+    setNodes((n) => ({ ...n, retrieve: 'ready' }))
+    addLog('retrieve', 'PENDING', 'READY', 0)
+
+    schedule(() => {
+      setNodes((n) => ({ ...n, retrieve: 'running' }))
+      addLog('retrieve', 'READY', 'RUNNING', 1)
+
+      schedule(() => {
+        setNodes((n) => ({ ...n, retrieve: 'succeeded' }))
+        setEdges((e) => ({ ...e, '1a': true, '1b': true }))
+        addLog('retrieve', 'RUNNING', 'SUCCEEDED', 1, '✓ Output passed to downstream inputs')
+
+        // Step 2: Fan-out parallel (Summarize + Extract)
+        schedule(() => {
+          setNodes((n) => ({ ...n, summarize: 'running', extract: 'running' }))
+          addLog('summarize', 'READY', 'RUNNING', 1, 'Concurrency: Worker 1 (ThreadPool)')
+          addLog('extract', 'READY', 'RUNNING', 1, 'Concurrency: Worker 2 (ProcessExecutor)')
+
+          schedule(() => {
+            // Extract succeeds
+            setNodes((n) => ({ ...n, extract: 'succeeded' }))
+            setEdges((e) => ({ ...e, '2b': true }))
+            addLog('extract', 'RUNNING', 'SUCCEEDED', 1, '✓ Entities extracted (JSON Schema)')
+
+            // Summarize catches 429 rate limit
+            setNodes((n) => ({ ...n, summarize: 'retry' }))
+            addLog('summarize', 'RUNNING', 'RETRY_WAIT', 1, '⚠ HTTP 429 Rate Limit - Finish-time backoff 1.0s')
+
+            // Summarize cool-down finishes -> Retry attempt 2
+            schedule(() => {
+              setNodes((n) => ({ ...n, summarize: 'running' }))
+              addLog('summarize', 'RETRY_WAIT', 'RUNNING', 2, 'Retry attempt 2 dispatched')
+
+              schedule(() => {
+                setNodes((n) => ({ ...n, summarize: 'succeeded' }))
+                setEdges((e) => ({ ...e, '2a': true }))
+                addLog('summarize', 'RUNNING', 'SUCCEEDED', 2, '✓ Summary generated')
+
+                // Step 3: Fan-in report synthesis gate
+                schedule(() => {
+                  setNodes((n) => ({ ...n, report: 'running' }))
+                  addLog('report', 'READY', 'RUNNING', 1, 'Injecting upstream inputs [summary, entities]')
+
+                  schedule(() => {
+                    setNodes((n) => ({ ...n, report: 'succeeded' }))
+                    addLog('report', 'RUNNING', 'SUCCEEDED', 1, '✓ Executive Report synthesized')
+                    setStatus('SUCCEEDED')
+                    setIsRunning(false)
+                  }, 750)
+                }, 400)
+              }, 800)
+            }, 1200)
+          }, 700)
+        }, 400)
+      }, 700)
+    }, 300)
+  }
+
+  const getNodeColor = (state) => {
+    switch (state) {
+      case 'ready':
+        return { stroke: '#3b82f6', fill: 'rgba(59, 130, 246, 0.08)', text: 'State: READY', textColor: '#60a5fa' }
+      case 'running':
+        return { stroke: 'var(--color-interactive)', fill: 'rgba(229, 72, 77, 0.16)', text: 'State: RUNNING...', textColor: '#ff6b6b' }
+      case 'retry':
+        return { stroke: '#eab308', fill: 'rgba(234, 179, 8, 0.2)', text: '429: RETRY WAIT (1.0s)', textColor: '#fbbf24' }
+      case 'succeeded':
+        return { stroke: '#10b981', fill: 'rgba(16, 185, 129, 0.15)', text: 'State: SUCCEEDED ✓', textColor: '#34d399' }
+      default:
+        return { stroke: 'rgba(255, 255, 255, 0.16)', fill: 'rgba(15, 15, 18, 0.9)', text: 'State: PENDING', textColor: 'rgba(255, 255, 255, 0.45)' }
+    }
+  }
+
+  const retrieveStyle = getNodeColor(nodes.retrieve)
+  const summarizeStyle = getNodeColor(nodes.summarize)
+  const extractStyle = getNodeColor(nodes.extract)
+  const reportStyle = getNodeColor(nodes.report)
+
+  return (
+    <div className="oe-sim-panel">
+      <div className="oe-sim-head">
+        <div className="oe-sim-title-group">
+          <div className="oe-sim-title">
+            <span>⚡ Interactive Workflow Execution Simulator</span>
+            <span className={`oe-sim-status-badge oe-sim-status-badge--${status.toLowerCase()}`}>
+              {status}
+            </span>
+          </div>
+          <p className="oe-sim-desc">
+            Observe DAG dependencies, concurrent fan-out, finish-time 429 backoff retry, and write-ahead SQLite audit logs in real time.
+          </p>
+        </div>
+        <div className="oe-sim-controls">
+          <button
+            type="button"
+            className="oe-sim-btn oe-sim-btn--run"
+            onClick={startSimulation}
+            disabled={isRunning}
+          >
+            {isRunning ? 'Executing Run...' : '▶ Run Workflow'}
+          </button>
+          <button
+            type="button"
+            className="oe-sim-btn oe-sim-btn--reset"
+            onClick={resetSimulation}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div className="oe-sim-metrics-grid">
+        <div className="oe-sim-metric-card">
+          <div className="oe-sim-metric-label">Scheduling Overhead</div>
+          <div className="oe-sim-metric-val">627 µs <span>/ task</span></div>
+          <div className="oe-sim-metric-bar">
+            <div className="oe-sim-metric-fill" style={{ width: '96%', background: '#10b981' }} />
+          </div>
+          <div className="oe-sim-metric-sub">1,594 tasks / sec throughput</div>
+        </div>
+
+        <div className="oe-sim-metric-card">
+          <div className="oe-sim-metric-label">SQLite WAL Write</div>
+          <div className="oe-sim-metric-val">44,730 <span>writes/s</span></div>
+          <div className="oe-sim-metric-bar">
+            <div className="oe-sim-metric-fill" style={{ width: '98%', background: '#06b6d4' }} />
+          </div>
+          <div className="oe-sim-metric-sub">22.36 µs per audit event</div>
+        </div>
+
+        <div className="oe-sim-metric-card">
+          <div className="oe-sim-metric-label">8-Core Speedup</div>
+          <div className="oe-sim-metric-val">7.86x <span>(98.2%)</span></div>
+          <div className="oe-sim-metric-bar">
+            <div className="oe-sim-metric-fill" style={{ width: '98.2%', background: '#6366f1' }} />
+          </div>
+          <div className="oe-sim-metric-sub">Near-linear parallel scaling</div>
+        </div>
+
+        <div className="oe-sim-metric-card">
+          <div className="oe-sim-metric-label">Test Suite Health</div>
+          <div className="oe-sim-metric-val">162 / 162 <span>Pass</span></div>
+          <div className="oe-sim-metric-bar">
+            <div className="oe-sim-metric-fill" style={{ width: '91.5%', background: '#10b981' }} />
+          </div>
+          <div className="oe-sim-metric-sub">91.45% coverage · 0 flakes</div>
+        </div>
+      </div>
+
+      <div className="oe-sim-canvas-box">
+        <svg viewBox="0 0 680 180" className="oe-sim-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="oe-sim-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="rgba(255, 255, 255, 0.4)" />
+            </marker>
+            <marker id="oe-sim-arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+            </marker>
+          </defs>
+
+          <path
+            d="M 140 90 C 190 90, 190 45, 240 45"
+            stroke={edges['1a'] ? '#10b981' : 'rgba(255, 255, 255, 0.2)'}
+            strokeWidth={edges['1a'] ? 2.2 : 1.5}
+            fill="none"
+            markerEnd={edges['1a'] ? 'url(#oe-sim-arrow-active)' : 'url(#oe-sim-arrow)'}
+            className={`oe-sim-edge ${edges['1a'] ? 'oe-sim-edge--flow' : ''}`}
+          />
+          <path
+            d="M 140 90 C 190 90, 190 135, 240 135"
+            stroke={edges['1b'] ? '#10b981' : 'rgba(255, 255, 255, 0.2)'}
+            strokeWidth={edges['1b'] ? 2.2 : 1.5}
+            fill="none"
+            markerEnd={edges['1b'] ? 'url(#oe-sim-arrow-active)' : 'url(#oe-sim-arrow)'}
+            className={`oe-sim-edge ${edges['1b'] ? 'oe-sim-edge--flow' : ''}`}
+          />
+          <path
+            d="M 400 45 C 450 45, 450 90, 500 90"
+            stroke={edges['2a'] ? '#10b981' : 'rgba(255, 255, 255, 0.2)'}
+            strokeWidth={edges['2a'] ? 2.2 : 1.5}
+            fill="none"
+            markerEnd={edges['2a'] ? 'url(#oe-sim-arrow-active)' : 'url(#oe-sim-arrow)'}
+            className={`oe-sim-edge ${edges['2a'] ? 'oe-sim-edge--flow' : ''}`}
+          />
+          <path
+            d="M 400 135 C 450 135, 450 90, 500 90"
+            stroke={edges['2b'] ? '#10b981' : 'rgba(255, 255, 255, 0.2)'}
+            strokeWidth={edges['2b'] ? 2.2 : 1.5}
+            fill="none"
+            markerEnd={edges['2b'] ? 'url(#oe-sim-arrow-active)' : 'url(#oe-sim-arrow)'}
+            className={`oe-sim-edge ${edges['2b'] ? 'oe-sim-edge--flow' : ''}`}
+          />
+
+          <g transform="translate(40, 65)">
+            <rect width="100" height="50" rx="3" fill={retrieveStyle.fill} stroke={retrieveStyle.stroke} strokeWidth="1.8" />
+            <text x="50" y="22" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f5f5f5" fontFamily="var(--font-mono)">1. Retrieve</text>
+            <text x="50" y="37" textAnchor="middle" fontSize="8.5" fill={retrieveStyle.textColor} fontFamily="var(--font-mono)">{retrieveStyle.text}</text>
+          </g>
+
+          <g transform="translate(240, 20)">
+            <rect width="160" height="50" rx="3" fill={summarizeStyle.fill} stroke={summarizeStyle.stroke} strokeWidth="1.8" />
+            <text x="80" y="22" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f5f5f5" fontFamily="var(--font-mono)">2A. Summarize LLM</text>
+            <text x="80" y="37" textAnchor="middle" fontSize="8.5" fill={summarizeStyle.textColor} fontFamily="var(--font-mono)">{summarizeStyle.text}</text>
+          </g>
+
+          <g transform="translate(240, 110)">
+            <rect width="160" height="50" rx="3" fill={extractStyle.fill} stroke={extractStyle.stroke} strokeWidth="1.8" />
+            <text x="80" y="22" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f5f5f5" fontFamily="var(--font-mono)">2B. Extract Entities</text>
+            <text x="80" y="37" textAnchor="middle" fontSize="8.5" fill={extractStyle.textColor} fontFamily="var(--font-mono)">{extractStyle.text}</text>
+          </g>
+
+          <g transform="translate(500, 65)">
+            <rect width="140" height="50" rx="3" fill={reportStyle.fill} stroke={reportStyle.stroke} strokeWidth="1.8" />
+            <text x="70" y="22" textAnchor="middle" fontSize="11" fontWeight="700" fill="#f5f5f5" fontFamily="var(--font-mono)">3. Report Gate</text>
+            <text x="70" y="37" textAnchor="middle" fontSize="8.5" fill={reportStyle.textColor} fontFamily="var(--font-mono)">{reportStyle.text}</text>
+          </g>
+        </svg>
+      </div>
+
+      <div className="oe-sim-log-panel">
+        <div className="oe-sim-log-head">
+          <span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            SQLite WAL Audit Trail (task_events table)
+          </span>
+          <span>{logs.length - 1} transitions recorded</span>
+        </div>
+        <div className="oe-sim-log-stream" ref={logStreamRef}>
+          {logs.map((log) => (
+            <div key={log.id} className="oe-sim-log-row">
+              <span className="text-zinc-500">[{log.time}s]</span>
+              <span className="text-amber-400 font-bold">{log.task.padEnd(9)}</span>
+              <span className="text-zinc-400">{log.oldSt}</span>
+              <span className="text-zinc-500">→</span>
+              <span
+                className={`font-bold ${
+                  log.newSt === 'SUCCEEDED'
+                    ? 'text-emerald-400'
+                    : log.newSt === 'RETRY_WAIT'
+                    ? 'text-yellow-400'
+                    : log.newSt === 'RUNNING'
+                    ? 'text-cyan-400'
+                    : 'text-zinc-300'
+                }`}
+              >
+                {log.newSt}
+              </span>
+              <span className="text-zinc-500">(attempt {log.attempt})</span>
+              {log.note && <span className="text-amber-300/90">{log.note}</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SingleWriterArchitectureDiagram() {
   return (
     <div className="oe-arch-card">
@@ -761,6 +1111,7 @@ function SingleWriterArchitectureDiagram() {
 
           {/* Line Client -> Coordinator */}
           <line x1="440" y1="68" x2="440" y2="104" stroke="var(--color-interactive)" strokeWidth="2" markerEnd="url(#oe-arrow-main)" />
+          <line x1="440" y1="68" x2="440" y2="104" className="oe-arch-flow-edge" strokeWidth="2" />
 
           {/* Coordinator */}
           <rect x="240" y="106" width="400" height="74" rx="4" className="oe-arch-box oe-arch-box--coord" />
@@ -770,11 +1121,13 @@ function SingleWriterArchitectureDiagram() {
 
           {/* Down-Left Arrow: Coordinator -> Workers */}
           <path d="M 320 180 L 320 216 L 190 216 L 190 236" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" markerEnd="url(#oe-arrow-dim)" />
-          <text x="215" y="208" className="oe-arch-edge-label" textAnchor="middle">Dispatch Task</text>
+          <path d="M 320 180 L 320 216 L 190 216 L 190 236" fill="none" className="oe-arch-flow-edge" stroke="rgba(255,255,255,0.8)" strokeWidth="1.8" />
+          <text x="215" y="208" className="oe-arch-edge-label" textAnchor="middle">1. Non-blocking Task Dispatch</text>
 
           {/* Down-Right Arrow: Coordinator -> SQLite */}
           <path d="M 560 180 L 560 216 L 690 216 L 690 236" fill="none" stroke="var(--color-interactive)" strokeWidth="2" markerEnd="url(#oe-arrow-main)" />
-          <text x="670" y="208" className="oe-arch-edge-label oe-arch-edge-label--highlight" textAnchor="middle">WAL Event Write (22.36 µs)</text>
+          <path d="M 560 180 L 560 216 L 690 216 L 690 236" fill="none" className="oe-arch-flow-edge" strokeWidth="2" />
+          <text x="670" y="208" className="oe-arch-edge-label oe-arch-edge-label--highlight" textAnchor="middle">Write-Ahead Log (Exclusive DB Access · 22.36 µs)</text>
 
           {/* Worker Pool */}
           <rect x="40" y="238" width="300" height="82" rx="3" className="oe-arch-box oe-arch-box--workers" />
@@ -784,7 +1137,8 @@ function SingleWriterArchitectureDiagram() {
 
           {/* TaskResult Future Pipe */}
           <path d="M 230 238 L 230 200 L 360 200 L 360 182" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="4 3" markerEnd="url(#oe-arrow-dim)" />
-          <text x="295" y="194" className="oe-arch-edge-label" textAnchor="middle">TaskResult Future</text>
+          <path d="M 230 238 L 230 200 L 360 200 L 360 182" fill="none" className="oe-arch-flow-edge" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" />
+          <text x="295" y="194" className="oe-arch-edge-label" textAnchor="middle">Return TaskResult via Future / Pipe</text>
 
           {/* SQLite DB */}
           <rect x="540" y="238" width="300" height="82" rx="3" className="oe-arch-box oe-arch-box--db" />
@@ -805,6 +1159,106 @@ function SingleWriterArchitectureDiagram() {
         <div className="oe-arch-point">
           <strong>3. Hardened WAL Pragma Rules</strong>
           <p>Engineered with PRAGMA journal_mode = WAL, PRAGMA synchronous = NORMAL, and PRAGMA busy_timeout = 5000 for 44,730 writes/sec durability.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OeSequenceDiagram() {
+  const [activeStep, setActiveStep] = useState(0)
+  const steps = [
+    {
+      num: '01',
+      title: 'Workflow Registration & State Initialization',
+      from: 'Client Interface / CLI',
+      to: 'Coordinator Thread',
+      storage: 'SQLite WAL (runs table)',
+      desc: 'Client initiates run_workflow(workflow, task_runner, max_concurrency=4). Coordinator writes an atomic INSERT INTO runs (status="running", started_at=now) before dispatching any tasks.',
+      invariant: 'Deterministic Run ID · Atomically persisted before dispatch loop commences.',
+    },
+    {
+      num: '02',
+      title: 'Topological Fixpoint Evaluation & State Commit',
+      from: 'Coordinator Loop',
+      to: 'SQLite WAL (task_events)',
+      storage: 'task_events table (22.36 µs write latency)',
+      desc: 'schedule_once() traverses DAG dependencies. Eligible tasks without unresolved upstream dependencies advance PENDING → READY → RUNNING. All transitions commit to task_events before in-memory state mutation.',
+      invariant: 'Single-Writer Persistence · Memory state never leads disk state.',
+    },
+    {
+      num: '03',
+      title: 'Non-Blocking Async Worker Dispatch',
+      from: 'Coordinator Thread',
+      to: 'Worker Pool (Thread / Process)',
+      storage: 'Zero Worker DB Access',
+      desc: 'Coordinator dispatches tasks asynchronously to ThreadPoolExecutor (I/O, LLM API calls) or spawned ProcessExecutor (CPU, untrusted code with true SIGKILL timeouts). Workers never receive database handles.',
+      invariant: 'Zero DB Contention · Eliminates "database is locked" errors at architectural root.',
+    },
+    {
+      num: '04',
+      title: 'Task Result Serialization & Data Propagation',
+      from: 'Worker Pool',
+      to: 'Coordinator Thread',
+      storage: 'task_outputs table',
+      desc: 'Worker returns frozen TaskResult(ok=True, output={...}) via Future pipe. Coordinator serializes output into task_outputs table, marks task SUCCEEDED, and injects payload into downstream task.inputs.',
+      invariant: 'Typed Payload Propagation · Immutable TaskResult passed directly to child inputs.',
+    },
+    {
+      num: '05',
+      title: 'Transient 429 Recovery & Finish-Time Backoff',
+      from: 'Worker Error (HTTP 429)',
+      to: 'Coordinator Scheduler',
+      storage: 'task_events (RETRY_WAIT)',
+      desc: 'On transient failure or timeout (attempts < max), Coordinator logs RETRY_WAIT and computes next_retry_at = finished_at + (delay × 2^(attempt-1)). Coordinator sleeps until earliest next_retry_at without blocking finished branches.',
+      invariant: 'Anti-Drift Backoff · Prevents thundering herd stampedes by anchoring to finish timestamp.',
+    },
+    {
+      num: '06',
+      title: 'Cascade Cancellation or Terminal Run Sync',
+      from: 'Coordinator Thread',
+      to: 'Client / CLI Exit',
+      storage: 'runs table (UPDATE status="succeeded")',
+      desc: 'If a task fails permanently, single-pass fixpoint cancellation cascades CANCELLED to all downstream nodes while parallel branches finish. Upon full completion, Coordinator updates runs table with finished_at and returns run_id.',
+      invariant: 'Crash Resilient · resume_run() bypasses completed tasks without duplicate executions.',
+    },
+  ]
+
+  return (
+    <div className="oe-seq-panel">
+      <div className="oe-seq-head">
+        <div>
+          <span>End-to-End Processing Workflow Sequence</span>
+          <small>Section 6 · Complete Execution Lifecycle Across Coordinator, SQLite WAL, and Workers</small>
+        </div>
+      </div>
+
+      <div className="oe-seq-steps-nav">
+        {steps.map((s, idx) => (
+          <button
+            key={s.num}
+            type="button"
+            className={`oe-seq-step-btn ${activeStep === idx ? 'is-active' : ''}`}
+            onClick={() => setActiveStep(idx)}
+          >
+            {s.num} {s.title.split(' ')[0]}
+          </button>
+        ))}
+      </div>
+
+      <div className="oe-seq-visual-card">
+        <div className="oe-seq-item-box">
+          <div className="oe-seq-num-badge">{steps[activeStep].num}</div>
+          <div className="oe-seq-item-content">
+            <h4>{steps[activeStep].title}</h4>
+            <p>{steps[activeStep].desc}</p>
+            <div className="oe-seq-channels">
+              <span className="oe-seq-pill">Source: <strong>{steps[activeStep].from}</strong></span>
+              <span className="oe-seq-pill">Target: <strong>{steps[activeStep].to}</strong></span>
+              <span className="oe-seq-pill oe-seq-pill--highlight">Storage: <strong>{steps[activeStep].storage}</strong></span>
+              <span className="oe-seq-pill oe-seq-pill--highlight">Guarantee: <strong>{steps[activeStep].invariant}</strong></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -881,6 +1335,11 @@ function LifecycleExplorer() {
       <div className="oe-state-outcomes"><small>Possible outcomes</small><div>{branchStates.map((state) => chip(state, 'oe-state-chip--branch', state))}</div></div>
     </div>
     <p className="oe-lifecycle-readout" role="status">{active ? LIFECYCLE_NOTES[active] : 'Select a state to see what the engine guarantees at that point.'}</p>
+    <div className="oe-verification-strip mt-3">
+      <p><b>01 / Fixpoint Transitive Cancel</b><span>When an upstream task fails permanently, all downstream dependents (direct and indirect) are cancelled in a single scheduling pass. Independent branches proceed to completion.</span></p>
+      <p><b>02 / Finish-Time Exponential Backoff</b><span>next_retry_at = finished_at + (delay_seconds × 2^(attempt - 1)). Anchored strictly to finished_at to prevent stampeding herd retries after long execution timeouts.</span></p>
+      <p><b>03 / Crash Recovery & Resume</b><span>Interrupted runs recover to READY via resume_run(); previously succeeded tasks are bypassed with zero duplicate side effects.</span></p>
+    </div>
   </div>
 }
 
@@ -993,24 +1452,24 @@ function OeBlueprintsPanel() {
           className={`oe-blueprint-tab${activeTab === 'agent' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('agent')}
         >
-          <span>Blueprint 01</span>
+          <span>Blueprint A</span>
           <strong>AI Agent Pipeline</strong>
-        </button>
-        <button
-          type="button"
-          className={`oe-blueprint-tab${activeTab === 'rag' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('rag')}
-        >
-          <span>Blueprint 02</span>
-          <strong>RAG Document Indexer</strong>
         </button>
         <button
           type="button"
           className={`oe-blueprint-tab${activeTab === 'sre' ? ' is-active' : ''}`}
           onClick={() => setActiveTab('sre')}
         >
-          <span>Blueprint 03</span>
+          <span>Blueprint B</span>
           <strong>SRE Incident Triage</strong>
+        </button>
+        <button
+          type="button"
+          className={`oe-blueprint-tab${activeTab === 'api' ? ' is-active' : ''}`}
+          onClick={() => setActiveTab('api')}
+        >
+          <span>Blueprint C</span>
+          <strong>Public API & Runner</strong>
         </button>
       </div>
 
@@ -1018,121 +1477,65 @@ function OeBlueprintsPanel() {
         {activeTab === 'agent' && (
           <div>
             <div className="oe-blueprint-header">
-              <h4>Multi-Step AI Agent Pipeline with HTTP 429 Exponential Backoff & Evaluation</h4>
-              <p>Deterministic execution of retrieval, query expansion, parallel LLM inference, and evaluation with state persistence, structured inputs, and SIGKILL isolation.</p>
+              <h4>Multi-Step AI Agent Pipeline with HTTP 429 Exponential Backoff & Synthesis</h4>
+              <p>Deterministic execution of knowledge retrieval, parallel LLM summarization and entity extraction, and executive briefing synthesis gate with structured input injection.</p>
             </div>
             <div className="oe-blueprint-dag">
               <div className="oe-blueprint-node">
-                fetch_context
-                <small>Vector DB / Search (timeout: 5s, retries: 3)</small>
+                1. Knowledge Retrieval
+                <small>Vector DB / Search (timeout: 10s · TaskResult output)</small>
               </div>
               <div className="oe-blueprint-branch">
                 <div className="oe-blueprint-node">
-                  generate_rag_answer
-                  <small>LLM inference · exponential backoff on HTTP 429</small>
+                  2A. Summarize Findings
+                  <small>LLM inference · Auto-retry on HTTP 429 (backoff 1.0s, max 3 attempts)</small>
                 </div>
                 <div className="oe-blueprint-node">
-                  extract_citations
-                  <small>Structured JSON parsing & metadata link validation</small>
+                  2B. Extract Entities
+                  <small>LLM inference · JSON Schema structured validation</small>
                 </div>
               </div>
               <div className="oe-blueprint-node oe-blueprint-node--target">
-                evaluate_and_log
-                <small>Depends on [generate_rag_answer, extract_citations] · TaskResult persistence</small>
+                3. Executive Briefing Synthesis
+                <small>Depends on [summarize, extract] · task.inputs aggregation gate</small>
               </div>
             </div>
+            <div className="oe-verification-strip mb-4">
+              <p><b>01 / Transient 429 Recovery</b><span>Configurable exponential backoff (delay_seconds=1.0, max_attempts=3) anchored to finish timestamp.</span></p>
+              <p><b>02 / Concurrent Fan-Out</b><span>Executes entity extraction and summarization concurrently across thread worker pool (max_concurrency=2).</span></p>
+              <p><b>03 / Data Flow Propagation</b><span>Upstream outputs pass directly to child task prompts via typed task.inputs["summarize"].</span></p>
+            </div>
             <pre className="oe-blueprint-code">
-{`# Blueprint 1: examples/agent_pipeline.py
-builder = WorkflowBuilder(workflow_id="rag_agent_v1")
-builder.add_step(
-    "fetch_context",
-    fn=query_vector_store,
-    retry_policy=RetryPolicy(max_retries=3, backoff_base=1.5),
-    timeout_seconds=5.0
+{`# Blueprint A: examples/agent_pipeline.py
+from orchestration_engine import (
+    WorkflowBuilder,
+    RetryPolicy,
+    TaskResult,
+    get_connection,
+    run_workflow,
 )
-builder.add_step(
-    "generate_rag_answer",
-    fn=call_llm_inference,
-    dependencies=["fetch_context"],
-    retry_policy=RetryPolicy(max_retries=3, backoff_base=2.0, retryable_exceptions=[RateLimitError]),
-    timeout_seconds=30.0
-)
-builder.add_step("extract_citations", fn=parse_metadata, dependencies=["fetch_context"])
-builder.add_step(
-    "evaluate_and_log",
-    fn=score_and_audit,
-    dependencies=["generate_rag_answer", "extract_citations"],
-    executor="process"  # Isolated process executor with true SIGKILL
-)
-engine.run(builder.build())`}
-            </pre>
-          </div>
-        )}
 
-        {activeTab === 'rag' && (
-          <div>
-            <div className="oe-blueprint-header">
-              <h4>RAG Document Ingestion & Batch Embedding Indexer</h4>
-              <p>Robust multi-stage document processing pipeline with chunking, token estimation, parallel vector embedding generation via ProcessExecutor, and transactional index commits.</p>
-            </div>
-            <div className="oe-blueprint-dag">
-              <div className="oe-blueprint-node">
-                extract_pdf_pages
-                <small>Source stream ingestion · timeout: 15s</small>
-              </div>
-              <div className="oe-blueprint-branch">
-                <div className="oe-blueprint-node">
-                  clean_and_chunk_text
-                  <small>CPU-bound token chunking with overlap</small>
-                </div>
-                <div className="oe-blueprint-node">
-                  extract_metadata
-                  <small>Author, date & header extraction</small>
-                </div>
-              </div>
-              <div className="oe-blueprint-node">
-                generate_embeddings
-                <small>Parallel vectorization with ProcessExecutor · timeout: 60s</small>
-              </div>
-              <div className="oe-blueprint-node oe-blueprint-node--target">
-                upsert_to_vector_index
-                <small>Depends on [generate_embeddings, extract_metadata] · atomic commit</small>
-              </div>
-            </div>
-            <pre className="oe-blueprint-code">
-{`# Blueprint 2: examples/rag_document_indexer.py
-builder = WorkflowBuilder(workflow_id="rag_indexer_v1")
-builder.add_step(
-    "extract_pdf_pages",
-    fn=extract_pdf_stream,
-    inputs={"source_path": "/data/docs/architecture_spec.pdf"},
-    timeout_seconds=15.0,
-    retry_policy=RetryPolicy(max_retries=2, backoff_base=1.5)
+# 1. Construct DAG with fluent builder
+workflow = (
+    WorkflowBuilder("agent-pipeline", default_timeout_seconds=30.0)
+    .task("retrieve", name="Retrieve Docs", timeout_seconds=10.0)
+    .task("summarize", name="Summarize", dependencies=["retrieve"], 
+          retry_policy=RetryPolicy(max_attempts=3, delay_seconds=1.0))
+    .task("extract", name="Extract Entities", dependencies=["retrieve"])
+    .task("report", name="Executive Report", dependencies=["summarize", "extract"])
+    .build()
 )
-builder.add_step(
-    "clean_and_chunk_text",
-    fn=semantic_chunker,
-    dependencies=["extract_pdf_pages"],
-    inputs={"chunk_size": 512, "overlap": 64}
-)
-builder.add_step(
-    "extract_metadata",
-    fn=parse_doc_metadata,
-    dependencies=["extract_pdf_pages"]
-)
-builder.add_step(
-    "generate_embeddings",
-    fn=batch_embed_vectors,
-    dependencies=["clean_and_chunk_text"],
-    executor="process",  # True POSIX SIGKILL process isolation for heavy native tokenizer
-    timeout_seconds=60.0
-)
-builder.add_step(
-    "upsert_to_vector_index",
-    fn=commit_vector_records,
-    dependencies=["generate_embeddings", "extract_metadata"]
-)
-engine.run(builder.build())`}
+
+# 2. Define business logic with typed outputs
+def agent_runner(task):
+    if task.task_id == "retrieve":
+        return TaskResult(ok=True, output={"docs": ["Doc A", "Doc B"]})
+    elif task.task_id == "report":
+        # Access outputs from upstream tasks cleanly:
+        summary = task.inputs["summarize"]["summary"]
+        entities = task.inputs["extract"]["entities"]
+        return TaskResult(ok=True, output={"report": f"{summary} | {entities}"})
+    return TaskResult(ok=True)`}
             </pre>
           </div>
         )}
@@ -1140,43 +1543,106 @@ engine.run(builder.build())`}
         {activeTab === 'sre' && (
           <div>
             <div className="oe-blueprint-header">
-              <h4>Automated SRE Remediation & Crash Resumption</h4>
-              <p>Resilient infrastructure triage workflow designed to survive coordinator SIGKILL, resume in-process without re-running verified health-checks, and cancel downstream restart tasks upon diagnostic failure.</p>
+              <h4>Autonomous SRE Incident Triage, Mitigation & Crash Resumption</h4>
+              <p>Multi-source diagnostic fan-out with root cause synthesis and fail-safe transitive cancellation, designed to survive coordinator SIGKILL and resume with zero duplicates.</p>
             </div>
             <div className="oe-blueprint-dag">
               <div className="oe-blueprint-node">
-                inspect_pod_health
-                <small>Cluster metrics probe (timeout: 10s)</small>
+                1. Ingest Alert
+                <small>Critical probe: Error Rate &gt; 2%</small>
               </div>
               <div className="oe-blueprint-branch--three">
                 <div className="oe-blueprint-node">
-                  capture_heap_dump
-                  <small>OOM diagnostics collection</small>
+                  2A. Check Logs
+                  <small>Scan exception patterns</small>
                 </div>
                 <div className="oe-blueprint-node">
-                  drain_traffic
-                  <small>Canary routing update</small>
+                  2B. Inspect DB Pool
+                  <small>Check saturation metrics</small>
                 </div>
                 <div className="oe-blueprint-node">
-                  isolate_node
-                  <small>Taint node & quarantine</small>
+                  2C. Ping Dependencies
+                  <small>Check upstream services</small>
                 </div>
+              </div>
+              <div className="oe-blueprint-node">
+                3. Synthesize RCA
+                <small>Root cause correlation from all 3 diagnostic streams</small>
+              </div>
+              <div className="oe-blueprint-node">
+                4. Apply Mitigation
+                <small>Scale pool / Reset connections</small>
               </div>
               <div className="oe-blueprint-node oe-blueprint-node--target">
-                rolling_restart_and_verify
-                <small>Depends on all 3 · atomic rollback on failure</small>
+                5. Verify Resolution
+                <small>Confirm error rate &lt; 1% · Cancelled if mitigation fails</small>
               </div>
             </div>
+            <div className="oe-verification-strip mb-4">
+              <p><b>01 / Diagnostic Fan-Out</b><span>Queries logs, database metrics, and service health simultaneously (max_concurrency=3).</span></p>
+              <p><b>02 / Root Cause Synthesis</b><span>Fan-in task correlates diagnostic streams to isolate connection pool exhaustion.</span></p>
+              <p><b>03 / Fixpoint Cancellation</b><span>If automated mitigation fails, verification steps are cancelled, preventing premature incident closure.</span></p>
+            </div>
             <pre className="oe-blueprint-code">
-{`# Blueprint 3: examples/incident_triage.py
+{`# Blueprint B: examples/incident_triage.py
+from orchestration_engine import WorkflowBuilder, RetryPolicy, TaskResult, resume_run, run_workflow
+
+workflow = (
+    WorkflowBuilder("incident-triage")
+    .task("alert", name="Ingest Alert")
+    .task("logs", name="Check Logs", dependencies=["alert"])
+    .task("metrics", name="Inspect DB Pool", dependencies=["alert"])
+    .task("deps", name="Ping Dependencies", dependencies=["alert"])
+    .task("rca", name="Synthesize RCA", dependencies=["logs", "metrics", "deps"])
+    .task("remediate", name="Apply Mitigation", dependencies=["rca"])
+    .task("verify", name="Verify Resolution", dependencies=["remediate"])
+    .build()
+)
+
 # Coordinator crash recovery:
 # If host process dies during isolate_node, state is safe in SQLite WAL.
-recovered_run = resume_run(
-    workflow_id="sre_incident_842",
-    db_path="production_events.db"
+recovered_run = resume_run(conn=conn, run_id=run_id)
+# Successfully completed steps (alert, logs, metrics, deps, rca) are loaded
+# from SQLite task_outputs and bypassed; only interrupted steps resume.`}
+            </pre>
+          </div>
+        )}
+
+        {activeTab === 'api' && (
+          <div>
+            <div className="oe-blueprint-header">
+              <h4>Public API & Code Construction (Zero Runtime Dependencies)</h4>
+              <p>Strictly typed surface with 25 frozen public symbols, SQLite WAL persistence, thread/process execution, and full compliance with strict mypy across 36 source files.</p>
+            </div>
+            <div className="oe-verification-strip mb-4">
+              <p><b>01 / Standard Library Only</b><span>Zero third-party runtime dependencies; pure Python 3.12+ (sqlite3, concurrent.futures, dataclasses).</span></p>
+              <p><b>02 / Single-Writer Coordinator</b><span>44,730 writes/sec in SQLite WAL mode; zero database locking issues under high multi-worker concurrency.</span></p>
+              <p><b>03 / In-Process Resume</b><span>resume_run(conn, run_id) restores workflow directly from disk without duplicate executions.</span></p>
+            </div>
+            <pre className="oe-blueprint-code">
+{`# Blueprint C: Pure Python 3.12+ Stdlib Execution
+from orchestration_engine import (
+    WorkflowBuilder,
+    RetryPolicy,
+    TaskResult,
+    Hooks,
+    get_connection,
+    run_workflow,
+    resume_run,
 )
-# Successfully completed steps (inspect_pod_health, capture_heap_dump, drain_traffic)
-# are loaded from SQLite task_outputs and bypassed; only interrupted steps resume.`}
+import time
+
+conn = get_connection("prod.db")
+run_id = run_workflow(
+    workflow=workflow,
+    task_states={},
+    time_source=time.time,
+    task_runner=agent_runner,
+    conn=conn,
+    max_concurrency=4,
+    executor="thread",  # or "process" with true SIGKILL isolation
+)
+print(f"Workflow finished: run_id={run_id}")`}
             </pre>
           </div>
         )}
@@ -1570,6 +2036,27 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 
         <QuickInstallBar />
 
+        <div className="oe-hero-badges" aria-label="Official Release Badges">
+          <a href={ORCHESTRATION_PYPI} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/pypi/v/orchestration-engine.svg?style=flat-square&color=e5484d" alt="PyPI version" />
+          </a>
+          <a href={ORCHESTRATION_PYPI} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/pypi/pyversions/orchestration-engine.svg?style=flat-square&color=141417" alt="Python versions" />
+          </a>
+          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-e5484d.svg?style=flat-square" alt="License" />
+          </a>
+          <a href={`${ORCHESTRATION_REPO}/actions`} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/badge/tests-162%20passed-10b981.svg?style=flat-square" alt="Tests Passing" />
+          </a>
+          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/badge/coverage-91.45%25-10b981.svg?style=flat-square" alt="Coverage" />
+          </a>
+          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noopener noreferrer">
+            <img src="https://img.shields.io/badge/docs-gh--pages-e5484d.svg?style=flat-square" alt="Documentation" />
+          </a>
+        </div>
+
         <div className="oe-report-btn-group">
           <HoldButton
             size="sm"
@@ -1665,6 +2152,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       </section>
       <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.12+ stdlib, robust CLI, and in-process crash recovery.</p>
 
+      <InteractiveWorkflowSimulator />
+
       <section className="oe-report-section" id="oe-s01">
         <div className="oe-report-section-label"><span>01</span><p>Why build this? (Engine vs. Alternatives)</p></div>
         <div className="oe-report-section-body">
@@ -1686,6 +2175,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
           <p>The coordinator runs an event-driven dispatch loop with an average scheduling latency of 627.23 µs per task (~1,594 tasks/sec). Concurrency scales linearly: executing 16 parallel tasks achieves a 7.86x speedup across 8 workers (98.2% scaling efficiency) with near-zero coordinator lock contention.</p>
           <SingleWriterArchitectureDiagram />
           <OeConcurrencyBenchmarks />
+          <OeSequenceDiagram />
           <OrchestrationDependencyGraph />
           <FailureDrillPanel />
           <LifecycleExplorer />
