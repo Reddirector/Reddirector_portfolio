@@ -940,44 +940,6 @@ function InteractiveWorkflowSimulator() {
         </div>
       </div>
 
-      <div className="oe-sim-metrics-grid">
-        <div className="oe-sim-metric-card">
-          <div className="oe-sim-metric-label">Scheduling Overhead</div>
-          <div className="oe-sim-metric-val">627 µs <span>/ task</span></div>
-          <div className="oe-sim-metric-bar">
-            <div className="oe-sim-metric-fill" style={{ width: '96%', background: '#10b981' }} />
-          </div>
-          <div className="oe-sim-metric-sub">1,594 tasks / sec throughput</div>
-        </div>
-
-        <div className="oe-sim-metric-card">
-          <div className="oe-sim-metric-label">SQLite WAL Write</div>
-          <div className="oe-sim-metric-val">44,730 <span>writes/s</span></div>
-          <div className="oe-sim-metric-bar">
-            <div className="oe-sim-metric-fill" style={{ width: '98%', background: '#06b6d4' }} />
-          </div>
-          <div className="oe-sim-metric-sub">22.36 µs per audit event</div>
-        </div>
-
-        <div className="oe-sim-metric-card">
-          <div className="oe-sim-metric-label">8-Core Speedup</div>
-          <div className="oe-sim-metric-val">7.86x <span>(98.2%)</span></div>
-          <div className="oe-sim-metric-bar">
-            <div className="oe-sim-metric-fill" style={{ width: '98.2%', background: '#6366f1' }} />
-          </div>
-          <div className="oe-sim-metric-sub">Near-linear parallel scaling</div>
-        </div>
-
-        <div className="oe-sim-metric-card">
-          <div className="oe-sim-metric-label">Test Suite Health</div>
-          <div className="oe-sim-metric-val">162 / 162 <span>Pass</span></div>
-          <div className="oe-sim-metric-bar">
-            <div className="oe-sim-metric-fill" style={{ width: '91.5%', background: '#10b981' }} />
-          </div>
-          <div className="oe-sim-metric-sub">91.45% coverage · 0 flakes</div>
-        </div>
-      </div>
-
       <div className="oe-sim-canvas-box">
         <svg viewBox="0 0 680 180" className="oe-sim-svg" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -2035,27 +1997,6 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         <p id="project-detail" className="oe-report-intro">A fault-tolerant, dependency-aware workflow orchestration engine for Python with zero external runtime dependencies. Built specifically for mission-critical automation pipelines—autonomous AI agent loops, RAG document indexing, data ingestion, and cloud incident triage—featuring single-writer SQLite WAL write-ahead durability, 627 µs scheduling latency, SIGKILL child process isolation, and in-process crash resumption.</p>
 
         <QuickInstallBar />
-
-        <div className="oe-hero-badges" aria-label="Official Release Badges">
-          <a href={ORCHESTRATION_PYPI} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/pypi/v/orchestration-engine.svg?style=flat-square&color=e5484d" alt="PyPI version" />
-          </a>
-          <a href={ORCHESTRATION_PYPI} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/pypi/pyversions/orchestration-engine.svg?style=flat-square&color=141417" alt="Python versions" />
-          </a>
-          <a href={`${ORCHESTRATION_REPO}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-e5484d.svg?style=flat-square" alt="License" />
-          </a>
-          <a href={`${ORCHESTRATION_REPO}/actions`} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/badge/tests-162%20passed-10b981.svg?style=flat-square" alt="Tests Passing" />
-          </a>
-          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/badge/coverage-91.45%25-10b981.svg?style=flat-square" alt="Coverage" />
-          </a>
-          <a href={ORCHESTRATION_DOCS} target="_blank" rel="noopener noreferrer">
-            <img src="https://img.shields.io/badge/docs-gh--pages-e5484d.svg?style=flat-square" alt="Documentation" />
-          </a>
-        </div>
 
         <div className="oe-report-btn-group">
           <HoldButton
