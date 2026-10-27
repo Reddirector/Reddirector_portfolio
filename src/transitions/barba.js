@@ -207,7 +207,6 @@ export async function triggerBarbaTransition(target, { type = 'section', meta = 
         workEl.scrollIntoView()
       }
     }
-    window.history.pushState(null, '', '#work')
   }
 
   // Update Barba container namespace

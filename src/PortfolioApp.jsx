@@ -47,13 +47,35 @@ const PROJECT_NAME_TO_SLUG = {
   'Pentagon': 'pentagon',
 }
 
+export function getAppBasePath() {
+  if (typeof window === 'undefined') return '/'
+  const envBase = import.meta.env.BASE_URL || '/'
+  const cleanEnvBase = envBase.endsWith('/') ? envBase : `${envBase}/`
+
+  // If running under GitHub Pages or a subdirectory that matches envBase
+  if (cleanEnvBase !== '/' && window.location.pathname.startsWith(cleanEnvBase.replace(/\/$/, ''))) {
+    return cleanEnvBase
+  }
+
+  // Dynamically detect base if inside /projects/
+  const match = window.location.pathname.match(/^(.*\/)projects\//)
+  if (match) {
+    return match[1] || '/'
+  }
+
+  if (cleanEnvBase !== '/') {
+    return cleanEnvBase
+  }
+  return '/'
+}
+
 function parseCurrentRoute() {
   if (typeof window === 'undefined') return { page: 'home', project: null }
   const path = window.location.pathname.toLowerCase()
   const hash = window.location.hash.toLowerCase()
 
   // 1. Check pathname: /projects/<slug> or /<slug>
-  const pathMatch = path.match(/\/(?:projects\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)/)
+  const pathMatch = path.match(/(?:^|\/)(?:projects\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)(?:\/|$)/)
   if (pathMatch) {
     const slug = pathMatch[1]
     const projName = SLUG_TO_PROJECT_NAME[slug]
@@ -62,7 +84,7 @@ function parseCurrentRoute() {
   }
 
   // 2. Check hash: #/projects/<slug> or #<slug>
-  const hashMatch = hash.match(/#(?:(?:\/projects\/)?|\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)/)
+  const hashMatch = hash.match(/#(?:(?:\/projects\/)?|\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)(?:\/|$)/)
   if (hashMatch) {
     const slug = hashMatch[1]
     const projName = SLUG_TO_PROJECT_NAME[slug]
@@ -2070,16 +2092,6 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
             License ↗
           </HoldButton>
         </div>
-        <div className="oe-hero-chips" aria-hidden="true">
-          <span>v0.9.0 Beta</span>
-          <span>pure python stdlib</span>
-          <span>sqlite3 WAL (44.7k writes/s)</span>
-          <span>627 µs latency</span>
-          <span>0 dependencies</span>
-          <span>162 / 162 tests (91.5% cov)</span>
-          <span>7.86x concurrency</span>
-          <span>100% strict mypy</span>
-        </div>
         <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" /><i className="oe-hero-bracket oe-hero-bracket--br" aria-hidden="true" />
       </header>
 
@@ -2281,6 +2293,7 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
   const entranceDelay = 0.15
   useLayoutEffect(() => {
     if (!project || !panel.current) return undefined
+    if (overlay.current) overlay.current.scrollTop = 0
     setReportReady(true)
     setTransitionDone(true)
     if (reduceMotion()) return undefined
@@ -2869,16 +2882,17 @@ function Work() {
   }
 
   const updateUrlForProject = useCallback((project) => {
+    const basePath = getAppBasePath()
     if (!project) {
+      const targetHomeUrl = `${basePath}#work`
       if (window.location.pathname.includes('/projects/') || window.location.hash.includes('project')) {
-        const base = window.location.pathname.replace(/\/projects\/.*$/, '') || '/'
-        window.history.pushState(null, '', base)
+        window.history.pushState(null, '', targetHomeUrl)
       }
       document.title = 'Reddirector · Engineering Portfolio'
       return
     }
     const slug = PROJECT_NAME_TO_SLUG[project.name] || project.id
-    const targetUrl = `/projects/${slug}`
+    const targetUrl = `${basePath}projects/${slug}`
     if (window.location.pathname !== targetUrl && !window.location.hash.includes(slug)) {
       window.history.pushState({ project: slug }, '', targetUrl)
     }
@@ -2908,6 +2922,10 @@ function Work() {
       } else {
         setActive(null)
         document.title = 'Reddirector · Engineering Portfolio'
+        const workEl = document.getElementById('work')
+        if (workEl) {
+          workEl.scrollIntoView({ behavior: 'smooth' })
+        }
       }
     }
     window.addEventListener('popstate', handlePopState)
