@@ -765,6 +765,607 @@ button.oe-api-item { cursor:pointer; }
   animation:oe-dash-flow 1.2s linear infinite;
 }
 
+/* ---- Orchestration Engine — Task Failure, Fault Recovery & Cascade Cancellation Studio ---- */
+.oe-fault-studio {
+  margin: 2rem 0 1.5rem;
+  border: 1px solid rgb(229 72 77 / .28);
+  background: rgb(6 4 5 / .92);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  position: relative;
+}
+
+.oe-fault-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgb(255 255 255 / .1);
+  flex-wrap: wrap;
+}
+
+.oe-fault-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 48rem;
+}
+
+.oe-fault-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f5f5f5;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.oe-fault-icon {
+  color: var(--color-interactive);
+  font-size: 0.95rem;
+}
+
+.oe-fault-badge {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  background: rgb(229 72 77 / .14);
+  color: var(--color-interactive);
+  border: 1px solid rgb(229 72 77 / .35);
+}
+
+.oe-fault-desc {
+  margin: 0;
+  color: rgb(255 255 255 / .65);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.oe-fault-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.oe-fault-btn {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.9rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.oe-fault-btn--run {
+  background: var(--color-interactive);
+  color: #fff;
+  border: 1px solid var(--color-interactive);
+  font-weight: 700;
+  box-shadow: 0 0 16px -2px rgb(229 72 77 / .45);
+}
+
+.oe-fault-btn--run:hover:not(:disabled) {
+  background: #ff5459;
+  border-color: #ff5459;
+  transform: translateY(-1px);
+}
+
+.oe-fault-btn--run:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.oe-fault-btn--reset {
+  background: rgb(255 255 255 / .06);
+  border: 1px solid rgb(255 255 255 / .15);
+  color: rgb(255 255 255 / .7);
+}
+
+.oe-fault-btn--reset:hover:not(:disabled) {
+  background: rgb(255 255 255 / .12);
+  color: #fff;
+}
+
+/* Scenario Mode Tabs */
+.oe-fault-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 1.15rem 0 0.85rem;
+}
+
+.oe-fault-mode-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+  background: rgb(255 255 255 / .02);
+  border: 1px solid rgb(255 255 255 / .12);
+  padding: 0.75rem 0.85rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.oe-fault-mode-btn:hover {
+  background: rgb(255 255 255 / .05);
+  border-color: rgb(229 72 77 / .4);
+}
+
+.oe-fault-mode-btn.is-active {
+  background: rgb(229 72 77 / .09);
+  border-color: var(--color-interactive);
+  box-shadow: inset 0 0 12px rgb(229 72 77 / .12);
+}
+
+.oe-fault-mode-num {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--color-interactive);
+  padding: 0.15rem 0.35rem;
+  background: rgb(229 72 77 / .12);
+  border: 1px solid rgb(229 72 77 / .25);
+  border-radius: 2px;
+}
+
+.oe-fault-mode-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.oe-fault-mode-info strong {
+  font-size: 0.76rem;
+  color: #f5f5f5;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.oe-fault-mode-info small {
+  font-size: 0.64rem;
+  color: rgb(255 255 255 / .5);
+  line-height: 1.35;
+}
+
+.oe-fault-mode-btn.is-active .oe-fault-mode-info small {
+  color: rgb(255 255 255 / .7);
+}
+
+/* Canvas DAG visual */
+.oe-fault-canvas-box {
+  position: relative;
+  width: 100%;
+  border: 1px solid rgb(255 255 255 / .14);
+  background: rgb(0 0 0 / .6);
+  padding: 0.75rem 0.5rem;
+  margin: 0.85rem 0 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.oe-fault-canvas-scroll-cue {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / .45);
+  padding: 0.2rem 0.5rem 0.45rem;
+  text-align: right;
+}
+
+.oe-fault-svg {
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+  display: block;
+}
+
+/* SVG nodes & state styling */
+.oe-fault-node-box {
+  fill: rgb(15 15 18 / .95);
+  stroke: rgb(255 255 255 / .18);
+  stroke-width: 1.2;
+  transition: all 0.35s ease;
+}
+
+.oe-fault-node-box.running {
+  stroke: var(--color-interactive);
+  fill: rgb(229 72 77 / .08);
+}
+
+.oe-fault-node-box.retry_wait {
+  stroke: #f59e0b;
+  fill: rgb(245 158 11 / .08);
+}
+
+.oe-fault-node-box.succeeded {
+  stroke: #10b981;
+  fill: rgb(16 185 129 / .08);
+}
+
+.oe-fault-node-box.failed {
+  stroke: #ef4444;
+  fill: rgb(239 68 68 / .12);
+}
+
+.oe-fault-node-box.cancelled {
+  stroke: #6b7280;
+  fill: rgb(107 114 128 / .1);
+  stroke-dasharray: 4 3;
+}
+
+.oe-fault-node-tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  fill: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+
+.oe-fault-node-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: #f5f5f5;
+  letter-spacing: -0.01em;
+}
+
+.oe-fault-node-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.oe-fault-annotation {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+}
+
+/* Status pills inside SVG */
+.oe-fault-status-pill {
+  fill: rgb(255 255 255 / .06);
+  stroke: rgb(255 255 255 / .15);
+  stroke-width: 1;
+}
+
+.oe-fault-status-pill--running {
+  fill: rgb(229 72 77 / .2);
+  stroke: var(--color-interactive);
+}
+
+.oe-fault-status-pill--retry_wait {
+  fill: rgb(245 158 11 / .2);
+  stroke: #f59e0b;
+}
+
+.oe-fault-status-pill--succeeded {
+  fill: rgb(16 185 129 / .2);
+  stroke: #10b981;
+}
+
+.oe-fault-status-pill--failed {
+  fill: rgb(239 68 68 / .2);
+  stroke: #ef4444;
+}
+
+.oe-fault-status-pill--cancelled {
+  fill: rgb(107 114 128 / .2);
+  stroke: #6b7280;
+}
+
+.oe-fault-status-pill-text {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  fill: #f5f5f5;
+}
+
+/* Edge flow animation */
+.oe-fault-edge {
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.oe-fault-edge--flow {
+  stroke-dasharray: 6 5;
+  animation: oe-dash-flow 1.1s linear infinite;
+}
+
+.oe-fault-edge--fail {
+  animation: oe-dash-flow 2s linear infinite reverse;
+}
+
+.oe-fault-edge--retry {
+  animation: oe-dash-flow 1.5s linear infinite;
+}
+
+/* Narrative status bar */
+.oe-fault-narrative {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgb(229 72 77 / .06);
+  border-left: 2px solid var(--color-interactive);
+  border-top: 1px solid rgb(255 255 255 / .08);
+  border-right: 1px solid rgb(255 255 255 / .08);
+  border-bottom: 1px solid rgb(255 255 255 / .08);
+  margin-bottom: 1rem;
+}
+
+.oe-fault-narrative-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--color-interactive);
+  white-space: nowrap;
+}
+
+.oe-fault-narrative p {
+  margin: 0;
+  color: rgb(255 255 255 / .85);
+  font-size: 0.76rem;
+  line-height: 1.55;
+  font-family: var(--font-mono);
+}
+
+/* Details Grid: WAL Log & Python Code */
+.oe-fault-details-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.oe-fault-log-panel,
+.oe-fault-code-panel {
+  border: 1px solid rgb(255 255 255 / .12);
+  background: rgb(0 0 0 / .75);
+  display: flex;
+  flex-direction: column;
+}
+
+.oe-fault-log-head,
+.oe-fault-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgb(255 255 255 / .1);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / .65);
+}
+
+.oe-fault-log-head span:first-child {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.oe-fault-log-head small {
+  color: rgb(255 255 255 / .4);
+}
+
+.oe-fault-log-stream {
+  padding: 0.75rem 0.85rem;
+  height: 12.5rem;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.oe-fault-log-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.oe-fault-log-ts {
+  color: rgb(255 255 255 / .35);
+  flex-shrink: 0;
+}
+
+.oe-fault-log-msg {
+  color: rgb(255 255 255 / .8);
+  word-break: break-word;
+}
+
+.oe-fault-log-row--info .oe-fault-log-msg {
+  color: #60a5fa;
+}
+
+.oe-fault-log-row--warn .oe-fault-log-msg {
+  color: #f59e0b;
+}
+
+.oe-fault-log-row--error .oe-fault-log-msg {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.oe-fault-log-row--success .oe-fault-log-msg {
+  color: #10b981;
+}
+
+.oe-fault-log-row--accent .oe-fault-log-msg {
+  color: var(--color-interactive);
+}
+
+.oe-fault-code-copy {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgb(255 255 255 / .06);
+  border: 1px solid rgb(255 255 255 / .15);
+  color: rgb(255 255 255 / .7);
+  padding: 0.18rem 0.45rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.oe-fault-code-copy:hover {
+  background: var(--color-interactive);
+  color: #fff;
+  border-color: var(--color-interactive);
+}
+
+.oe-fault-code-block {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  height: 12.5rem;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / .85);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Invariant reference cards */
+.oe-fault-invariants {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.oe-fault-invariant-card {
+  border: 1px solid rgb(255 255 255 / .12);
+  background: rgb(255 255 255 / .02);
+  padding: 0.85rem;
+}
+
+.oe-fault-invariant-title {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-interactive);
+  margin-bottom: 0.4rem;
+  font-weight: 700;
+}
+
+.oe-fault-invariant-card p {
+  margin: 0;
+  color: rgb(255 255 255 / .65);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.oe-fault-invariant-card code {
+  color: var(--color-interactive);
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+
+/* Responsive architecture & fault studio rules */
+@media (max-width: 900px) {
+  .oe-fault-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .oe-fault-log-stream,
+  .oe-fault-code-block {
+    height: 10.5rem;
+  }
+  .oe-exit-codes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .oe-fault-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .oe-fault-controls {
+    width: 100%;
+  }
+  .oe-fault-btn {
+    flex: 1;
+    text-align: center;
+  }
+  .oe-fault-modes {
+    grid-template-columns: 1fr;
+  }
+  .oe-fault-invariants {
+    grid-template-columns: 1fr;
+  }
+  .oe-fault-canvas-scroll-cue {
+    display: block;
+  }
+  .oe-arch-points {
+    grid-template-columns: 1fr;
+  }
+  .oe-install-bar {
+    max-width: 100%;
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .oe-fault-studio {
+    padding: 0.75rem;
+  }
+  .oe-fault-title {
+    font-size: 0.64rem;
+  }
+  .oe-fault-desc {
+    font-size: 0.72rem;
+  }
+  .oe-fault-narrative {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .oe-fault-log-stream {
+    font-size: 0.58rem;
+    height: 9rem;
+  }
+  .oe-fault-code-block {
+    font-size: 0.58rem;
+    height: 9.5rem;
+  }
+  .oe-exit-codes-grid {
+    grid-template-columns: 1fr;
+  }
+  .oe-formula-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .oe-install-bar {
+    font-size: 0.62rem;
+    padding: 0.45rem 0.65rem;
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width:760px) {
   .oe-sim-head { flex-direction:column; align-items:flex-start; }
 }

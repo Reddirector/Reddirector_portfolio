@@ -1270,28 +1270,7 @@ function FinishTimeBackoffFormula() {
   )
 }
 
-function OrchestrationDependencyGraph() {
-  return <figure className="oe-dependency-graph">
-    <svg viewBox="0 0 920 280" role="img" aria-labelledby="oe-graph-title">
-      <title id="oe-graph-title">Two independent tasks run in the same scheduling pass; a third waits for both to succeed.</title>
-      <rect className="oe-graph-card" x="24" y="42" width="276" height="74" rx="2" />
-      <rect className="oe-graph-card" x="24" y="164" width="276" height="74" rx="2" />
-      <rect className="oe-graph-card oe-graph-card--target" x="610" y="103" width="286" height="74" rx="2" />
-      <path className="oe-graph-edge oe-graph-edge--a" d="M300 79 C430 79 470 123 610 140" />
-      <path className="oe-graph-edge oe-graph-edge--b" d="M300 201 C430 201 470 157 610 140" />
-      <circle className="oe-graph-node" cx="300" cy="79" r="6" />
-      <circle className="oe-graph-node oe-graph-node--delayed" cx="300" cy="201" r="6" />
-      <circle className="oe-graph-node oe-graph-node--target" cx="610" cy="140" r="7" />
-      <text className="oe-graph-index" x="42" y="68">TASK 01</text>
-      <text className="oe-graph-label" x="42" y="96">Independent A</text>
-      <text className="oe-graph-index" x="42" y="190">TASK 02</text>
-      <text className="oe-graph-label" x="42" y="218">Independent B</text>
-      <text className="oe-graph-index" x="632" y="129">TASK 03 · DEPENDS ON BOTH</text>
-      <text className="oe-graph-label" x="632" y="157">Runs after success</text>
-    </svg>
-    <figcaption>Two ready branches can run in one scheduling pass. The dependent task becomes eligible only after both report <code>SUCCEEDED</code>.</figcaption>
-  </figure>
-}
+
 
 const LIFECYCLE_NOTES = {
   PENDING: 'Created, but its dependencies have not succeeded yet — the scheduler will not pick it up.',
@@ -1712,94 +1691,662 @@ function OeTransformationGrid() {
   )
 }
 
-function FailureDrillPanel() {
-  const groupA = useRef(null), groupB = useRef(null), groupT = useRef(null)
-  const edgeA = useRef(null), edgeB = useRef(null)
-  const statusA = useRef(null), statusB = useRef(null), statusT = useRef(null)
-  const narrative = useRef(null)
-  const timeline = useRef(null)
-  const [phase, setPhase] = useState('idle')
-  useEffect(() => () => timeline.current?.kill(), [])
-  const applyStates = (states) => {
-    const groups = { a: groupA.current, b: groupB.current, t: groupT.current }
-    const statuses = { a: statusA.current, b: statusB.current, t: statusT.current }
-    Object.entries(states).forEach(([key, value]) => {
-      if (groups[key]) groups[key].setAttribute('class', `oe-drill-group ${value.cls || ''}`)
-      if (value.text && statuses[key]) statuses[key].textContent = value.text
-    })
+function TaskFaultDrillExplorer() {
+  const [drillMode, setDrillMode] = useState('transient') // 'transient' | 'cascade' | 'sigkill'
+  const [phase, setPhase] = useState('idle') // 'idle' | 'running' | 'done'
+  const [activeCodeTab, setActiveCodeTab] = useState('python')
+  const [copiedCode, setCopiedCode] = useState(false)
+  const [nodes, setNodes] = useState({
+    task1: { state: 'idle', label: 'idle', attempt: 1 },
+    task2: { state: 'idle', label: 'idle', attempt: 1, error: null },
+    task3: { state: 'waiting', label: 'waiting', attempt: 0 },
+    task4: { state: 'idle', label: 'idle', attempt: 1 },
+  })
+  const [logs, setLogs] = useState([
+    { ts: '0.000s', text: 'Drill initialized. Select a failure mode and click "Run Drill".', type: 'info' }
+  ])
+  const [narrativeText, setNarrativeText] = useState(
+    'Task 03 depends on Task 01 and Task 02. Task 04 runs in an independent parallel branch. Select a failure drill to observe engine fault invariants in real time.'
+  )
+  const timeoutsRef = useRef([])
+  const logStreamRef = useRef(null)
+
+  const clearAllTimeouts = () => {
+    timeoutsRef.current.forEach(clearTimeout)
+    timeoutsRef.current = []
   }
-  const writeNarrative = (text) => { if (narrative.current) narrative.current.textContent = text }
-  const resetVisual = () => {
-    timeline.current?.kill()
-    applyStates({ a: { text: 'idle' }, b: { text: 'idle' }, t: { text: 'waiting' } })
-    ;[edgeA.current, edgeB.current].forEach((edge) => {
-      if (!edge) return
-      const length = edge.getTotalLength()
-      edge.setAttribute('stroke-dasharray', String(length))
-      edge.setAttribute('stroke-dashoffset', String(length))
-    })
-    writeNarrative('Task 03 becomes eligible only after both dependencies report SUCCEEDED. Run the drill to watch one transient failure move through that contract.')
+
+  useEffect(() => () => clearAllTimeouts(), [])
+
+  useEffect(() => {
+    if (logStreamRef.current) {
+      logStreamRef.current.scrollTop = logStreamRef.current.scrollHeight
+    }
+  }, [logs])
+
+  const addLog = (ts, text, type = 'normal') => {
+    setLogs((prev) => [...prev, { ts, text, type }])
   }
+
+  const scheduleStep = (fn, delayMs) => {
+    const id = setTimeout(fn, delayMs)
+    timeoutsRef.current.push(id)
+    return id
+  }
+
+  const resetDrill = (newMode = drillMode) => {
+    clearAllTimeouts()
+    setPhase('idle')
+    setNodes({
+      task1: { state: 'idle', label: 'idle', attempt: 1 },
+      task2: { state: 'idle', label: 'idle', attempt: 1, error: null },
+      task3: { state: 'waiting', label: 'waiting', attempt: 0 },
+      task4: { state: 'idle', label: 'idle', attempt: 1 },
+    })
+    setLogs([
+      { ts: '0.000s', text: `Switched to drill: ${newMode.toUpperCase()}. Ready to execute.`, type: 'info' }
+    ])
+    if (newMode === 'transient') {
+      setNarrativeText('Transient Failure: Task 02 throws HTTP 429. The coordinator anchors exponential backoff strictly to finished_at (1.0s delay), recovering safely within budget.')
+    } else if (newMode === 'cascade') {
+      setNarrativeText('Permanent Failure: Task 02 exhausts its 3/3 retry budget. Single-Pass Fixpoint immediately marks downstream Task 03 CANCELLED while parallel Task 04 completes SUCCEEDED.')
+    } else if (newMode === 'sigkill') {
+      setNarrativeText('Process Isolation: Task 02 exceeds hard 15.0s timeout. ProcessExecutor issues POSIX SIGKILL to child PID, terminating the worker without zombie leaks.')
+    }
+  }
+
+  const handleSelectMode = (mode) => {
+    if (phase === 'running') return
+    setDrillMode(mode)
+    resetDrill(mode)
+  }
+
   const runDrill = () => {
     if (phase === 'running') return
-    if (phase === 'done') { setPhase('idle'); resetVisual(); return }
+    if (phase === 'done') {
+      resetDrill()
+      return
+    }
+
+    clearAllTimeouts()
+    setPhase('running')
+    setLogs([])
+
     if (reduceMotion()) {
-      applyStates({ a: { cls: 'is-done', text: 'succeeded' }, b: { cls: 'is-done', text: 'succeeded · 2/3' }, t: { cls: 'is-done', text: 'succeeded' } })
-      ;[edgeA.current, edgeB.current].forEach((edge) => edge?.setAttribute('stroke-dashoffset', '0'))
-      writeNarrative('Drill result (reduced motion): task B failed once, spent one retry, succeeded — so the dependent task ran without being cancelled.')
+      if (drillMode === 'transient') {
+        setNodes({
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task2: { state: 'succeeded', label: 'succeeded · attempt 2/3', attempt: 2, error: null },
+          task3: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+        })
+        setNarrativeText('Drill complete: Task 02 recovered via exponential backoff; all dependent tasks completed.')
+      } else if (drillMode === 'cascade') {
+        setNodes({
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task2: { state: 'failed', label: 'failed · 3/3 exhausted', attempt: 3, error: 'DatabaseError' },
+          task3: { state: 'cancelled', label: 'cancelled · cascade', attempt: 0 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+        })
+        setNarrativeText('Drill complete: Task 02 failed permanently. Downstream Task 03 was cancelled; parallel Task 04 succeeded.')
+      } else {
+        setNodes({
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task2: { state: 'failed', label: 'timed out · SIGKILL', attempt: 1, error: 'TimeoutError' },
+          task3: { state: 'cancelled', label: 'cancelled · cascade', attempt: 0 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+        })
+        setNarrativeText('Drill complete: Child worker killed via SIGKILL. Downstream cancelled; zero zombie processes.')
+      }
       setPhase('done')
       return
     }
-    setPhase('running')
-    resetVisual()
-    const flash = (group, className) => {
-      if (!group) return
-      group.classList.add(className)
-      gsap.fromTo(group, { opacity: .4 }, { opacity: 1, duration: .32, ease: 'power1.out', clearProps: 'opacity' })
+
+    if (drillMode === 'transient') {
+      // SCENARIO 1: Transient 429 & Exponential Backoff Recovery
+      scheduleStep(() => {
+        addLog('0.000s', 'Pass 01: Three independent ready tasks enter dispatch loop.', 'accent')
+        setNodes({
+          task1: { state: 'running', label: 'running', attempt: 1 },
+          task2: { state: 'running', label: 'running (attempt 1/3)', attempt: 1, error: null },
+          task3: { state: 'waiting', label: 'waiting (deps: 0/2)', attempt: 0 },
+          task4: { state: 'running', label: 'running', attempt: 1 },
+        })
+        setNarrativeText('Pass 01: Task 01, Task 02, and Task 04 are dispatched to the worker pool concurrently.')
+      }, 0)
+
+      scheduleStep(() => {
+        addLog('0.340s', 'task_01: RUNNING → SUCCEEDED ({chunks: 14})', 'success')
+        addLog('0.380s', 'task_04: RUNNING → SUCCEEDED (telemetry recorded)', 'success')
+        setNodes((n) => ({
+          ...n,
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task3: { state: 'waiting', label: 'waiting (deps: 1/2)', attempt: 0 },
+        }))
+        setNarrativeText('Task 01 and parallel Task 04 complete successfully. Task 03 waits for Task 02.')
+      }, 750)
+
+      scheduleStep(() => {
+        addLog('0.520s', 'task_02: RUNNING → RETRY_WAIT (err: RateLimitError 429)', 'warn')
+        addLog('0.521s', 'coordinator: finish-time backoff: next_retry_at = 1.521s (1.0s cooling)', 'info')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'retry_wait', label: 'retry_wait · cooling 1.0s', attempt: 1, error: 'HTTP 429' },
+        }))
+        setNarrativeText('Task 02 throws HTTP 429. Coordinator logs RETRY_WAIT to SQLite WAL and anchors cooling-off to finished_at.')
+      }, 1500)
+
+      scheduleStep(() => {
+        addLog('1.520s', 'task_02: RETRY_WAIT → RUNNING (Attempt 2/3 dispatched)', 'accent')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'running', label: 'running (attempt 2/3)', attempt: 2, error: null },
+        }))
+        setNarrativeText('Cooling-off window expired. Coordinator re-enqueues Task 02 for Attempt 2 of 3.')
+      }, 2500)
+
+      scheduleStep(() => {
+        addLog('1.950s', 'task_02: RUNNING → SUCCEEDED (status=200 OK)', 'success')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'succeeded', label: 'succeeded (attempt 2/3)', attempt: 2, error: null },
+          task3: { state: 'running', label: 'running (deps ready: 2/2)', attempt: 1 },
+        }))
+        setNarrativeText('Task 02 recovers and succeeds! Both dependencies are terminal: Task 03 transitions to RUNNING.')
+      }, 3300)
+
+      scheduleStep(() => {
+        addLog('2.380s', 'task_03: RUNNING → SUCCEEDED (report synthesized)', 'success')
+        addLog('2.381s', 'run_workflow: Workflow complete (4/4 SUCCEEDED, 0 CANCELLED)', 'success')
+        setNodes((n) => ({
+          ...n,
+          task3: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+        }))
+        setNarrativeText('Drill complete: transient HTTP 429 recovered within retry budget. Zero orphaned dependents.')
+        setPhase('done')
+      }, 4100)
+
+    } else if (drillMode === 'cascade') {
+      // SCENARIO 2: Permanent Failure & Fixpoint Cascade Cancellation
+      scheduleStep(() => {
+        addLog('0.000s', 'Pass 01: Three ready tasks enter dispatch loop.', 'accent')
+        setNodes({
+          task1: { state: 'running', label: 'running', attempt: 1 },
+          task2: { state: 'running', label: 'running (attempt 1/3)', attempt: 1, error: null },
+          task3: { state: 'waiting', label: 'waiting (deps: 0/2)', attempt: 0 },
+          task4: { state: 'running', label: 'running', attempt: 1 },
+        })
+        setNarrativeText('Pass 01: Tasks dispatch concurrently. Task 02 simulates a critical upstream service dependency.')
+      }, 0)
+
+      scheduleStep(() => {
+        addLog('0.340s', 'task_01: RUNNING → SUCCEEDED', 'success')
+        addLog('0.390s', 'task_04: RUNNING → SUCCEEDED', 'success')
+        setNodes((n) => ({
+          ...n,
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task3: { state: 'waiting', label: 'waiting (deps: 1/2)', attempt: 0 },
+        }))
+      }, 750)
+
+      scheduleStep(() => {
+        addLog('0.620s', 'task_02: RUNNING → RETRY_WAIT (attempt 1/3 failed: FatalDBError)', 'warn')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'retry_wait', label: 'retrying (1/3)', attempt: 1, error: 'DB Connection Refused' },
+        }))
+        setNarrativeText('Task 02 fails Attempt 1. Enters backoff retry...')
+      }, 1500)
+
+      scheduleStep(() => {
+        addLog('1.100s', 'task_02: RUNNING → RETRY_WAIT (attempt 2/3 failed: FatalDBError)', 'warn')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'retry_wait', label: 'retrying (2/3)', attempt: 2, error: 'DB Connection Refused' },
+        }))
+        setNarrativeText('Task 02 fails Attempt 2. Retry budget depleting...')
+      }, 2300)
+
+      scheduleStep(() => {
+        addLog('1.650s', 'task_02: RUNNING → FAILED (max_attempts=3 exhausted)', 'error')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'failed', label: 'FAILED · 3/3 EXHAUSTED', attempt: 3, error: 'FatalDBError' },
+        }))
+        setNarrativeText('Task 02 exhausts its maximum 3 attempts. State commits as terminal FAILED in SQLite WAL.')
+      }, 3100)
+
+      scheduleStep(() => {
+        addLog('1.800s', 'coordinator: Single-pass fixpoint cancellation evaluating DAG...', 'warn')
+        addLog('1.801s', 'task_03: WAITING → CANCELLED (upstream task_02 failed)', 'error')
+        addLog('1.802s', 'run_workflow: Workflow terminal: FAILED (0 orphan stalls, parallel branch intact)', 'error')
+        setNodes((n) => ({
+          ...n,
+          task3: { state: 'cancelled', label: 'CANCELLED · UPSTREAM FAILED', attempt: 0 },
+        }))
+        setNarrativeText('Single-Pass Fixpoint: Coordinator recursively flags Task 03 as CANCELLED. Parallel Task 04 completed safely with zero leak.')
+        setPhase('done')
+      }, 3900)
+
+    } else {
+      // SCENARIO 3: Hard Timeout & POSIX SIGKILL Isolation
+      scheduleStep(() => {
+        addLog('0.000s', 'ProcessExecutor: Spawning untrusted task in isolated child process (PID 4192)...', 'accent')
+        setNodes({
+          task1: { state: 'running', label: 'running', attempt: 1 },
+          task2: { state: 'running', label: 'running (pid=4192)', attempt: 1, error: null },
+          task3: { state: 'waiting', label: 'waiting (deps: 0/2)', attempt: 0 },
+          task4: { state: 'running', label: 'running', attempt: 1 },
+        })
+        setNarrativeText('ProcessExecutor isolates Task 02 in a dedicated subprocess with hard timeout_seconds=15.0s.')
+      }, 0)
+
+      scheduleStep(() => {
+        addLog('0.350s', 'task_01: RUNNING → SUCCEEDED', 'success')
+        addLog('0.400s', 'task_04: RUNNING → SUCCEEDED', 'success')
+        setNodes((n) => ({
+          ...n,
+          task1: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+          task4: { state: 'succeeded', label: 'succeeded', attempt: 1 },
+        }))
+      }, 750)
+
+      scheduleStep(() => {
+        addLog('0.850s', 'task_02: Subprocess enters unkillable blocking loop (ignoring GIL)...', 'warn')
+        setNarrativeText('Task 02 enters an infinite C-extension loop that ignores standard Python thread interrupts.')
+      }, 1600)
+
+      scheduleStep(() => {
+        addLog('1.550s', 'coordinator: Hard timeout exceeded (15.0s limit reached)', 'error')
+        addLog('1.551s', 'process_executor: Issuing POSIX SIGKILL to PID 4192...', 'error')
+        addLog('1.553s', 'os.kill(4192, signal.SIGKILL) returned 0 (process terminated)', 'success')
+        setNodes((n) => ({
+          ...n,
+          task2: { state: 'failed', label: 'KILLED VIA SIGKILL (PID 4192)', attempt: 1, error: 'HardTimeout' },
+          task3: { state: 'cancelled', label: 'CANCELLED · TIMEOUT CASCADE', attempt: 0 },
+        }))
+        setNarrativeText('POSIX SIGKILL terminates child process PID 4192 immediately. Memory reclaimed, zero zombie leaks, coordinator remains responsive.')
+        setPhase('done')
+      }, 2600)
     }
-    const drill = gsap.timeline({ onComplete: () => setPhase('done') })
-    timeline.current = drill
-    drill
-      .call(() => { applyStates({ a: { cls: 'is-run', text: 'running' }, b: { cls: 'is-run', text: 'running' } }); writeNarrative('Both independent tasks are ready, so they enter the same scheduling pass.') })
-      .call(() => applyStates({ a: { cls: 'is-done', text: 'succeeded' } }), null, '+=.7')
-      .to(edgeA.current, { strokeDashoffset: 0, duration: .5, ease: 'power1.inOut' }, '<')
-      .call(() => { applyStates({ b: { cls: 'is-failed', text: 'failed · 1/3' } }); flash(groupB.current, 'is-failed'); writeNarrative('Task B times out. The timeout is treated as an ordinary execution failure and spends the task retry budget.') }, null, '+=.55')
-      .call(() => applyStates({ b: { cls: 'is-retry', text: 'retry_wait · 2/3' } }), null, '+=.8')
-      .call(() => applyStates({ b: { cls: 'is-run', text: 'running · 2/3' } }), null, '+=.65')
-      .call(() => applyStates({ b: { cls: 'is-done', text: 'succeeded · 2/3' } }), null, '+=.7')
-      .to(edgeB.current, { strokeDashoffset: 0, duration: .5, ease: 'power1.inOut' }, '<')
-      .call(() => { applyStates({ t: { cls: 'is-run', text: 'running' } }); writeNarrative('Both dependencies are terminal and successful — the dependent task becomes eligible in the next pass.') }, null, '<')
-      .call(() => { applyStates({ t: { cls: 'is-done', text: 'succeeded' } }); writeNarrative('Drill complete: one transient failure, one retry, zero cancelled dependents — because the failure was recovered inside its budget.') }, null, '+=.85')
   }
-  return <div className="oe-dependency-graph oe-drill">
-    <div className="oe-drill-head"><span>Failure drill · interactive</span><button type="button" className="oe-drill-button" onClick={runDrill} disabled={phase === 'running'}>{phase === 'running' ? 'drill running…' : phase === 'done' ? 'Reset drill' : 'Run failure drill'}</button></div>
-    <svg viewBox="0 0 920 280" role="img" aria-label="Failure drill: task B fails once, retries, succeeds; the dependent task then runs after both dependencies succeed.">
-      <g ref={groupA} className="oe-drill-group">
-        <rect className="oe-graph-card" x="24" y="42" width="276" height="74" rx="2" />
-        <text className="oe-graph-index" x="42" y="68">TASK 01</text>
-        <text className="oe-graph-label" x="42" y="96">Independent A</text>
-        <text ref={statusA} className="oe-drill-status" x="282" y="68" textAnchor="end">idle</text>
-      </g>
-      <g ref={groupB} className="oe-drill-group">
-        <rect className="oe-graph-card" x="24" y="164" width="276" height="74" rx="2" />
-        <text className="oe-graph-index" x="42" y="190">TASK 02</text>
-        <text className="oe-graph-label" x="42" y="218">Independent B</text>
-        <text ref={statusB} className="oe-drill-status" x="282" y="190" textAnchor="end">idle</text>
-      </g>
-      <g ref={groupT} className="oe-drill-group">
-        <rect className="oe-graph-card oe-graph-card--target" x="610" y="103" width="286" height="74" rx="2" />
-        <text className="oe-graph-index" x="632" y="129">TASK 03 · DEPENDS ON BOTH</text>
-        <text className="oe-graph-label" x="632" y="157">Runs after success</text>
-        <text ref={statusT} className="oe-drill-status" x="878" y="129" textAnchor="end">waiting</text>
-      </g>
-      <path ref={edgeA} className="oe-graph-edge oe-graph-edge--a" d="M300 79 C430 79 470 123 610 140" />
-      <path ref={edgeB} className="oe-graph-edge oe-graph-edge--b" d="M300 201 C430 201 470 157 610 140" />
-      <circle className="oe-graph-node" cx="300" cy="79" r="6" />
-      <circle className="oe-graph-node oe-graph-node--delayed" cx="300" cy="201" r="6" />
-      <circle className="oe-graph-node oe-graph-node--target" cx="610" cy="140" r="7" />
-    </svg>
-    <p ref={narrative} className="oe-drill-narrative" role="status">Task 03 becomes eligible only after both dependencies report SUCCEEDED. Run the drill to watch one transient failure move through that contract.</p>
-  </div>
+
+  const copyCode = () => {
+    const code = `from orchestration_engine import WorkflowBuilder, RetryPolicy, TaskResult, run_workflow
+
+builder = WorkflowBuilder(workflow_id="fault_tolerant_pipeline")
+
+# Step 1: Upstream Ingestion
+@builder.task(name="ingest_data")
+def ingest_data(context):
+    return {"doc_id": "doc_9481", "chunks": 14}
+
+# Step 2: Task with Finish-Time Retry Policy & Timeout
+@builder.task(
+    name="query_llm",
+    retry_policy=RetryPolicy(
+        max_attempts=3,
+        delay_seconds=1.0,      # 1.0s -> 2.0s -> 4.0s exponential backoff
+        backoff_factor=2.0,
+        retry_on=(ConnectionError, TimeoutError)
+    ),
+    timeout_seconds=15.0        # Enforced via POSIX SIGKILL in ProcessExecutor
+)
+def query_llm(context):
+    doc = context.inputs["ingest_data"]
+    # If transient error: coordinator sleeps finished_at + backoff, then retries
+    # If 3 attempts exhausted: coordinator marks FAILED and triggers fixpoint cancel
+    return call_api_service(doc)
+
+# Step 3: Dependent Task (Cascade-cancelled if Step 2 fails)
+@builder.task(name="synthesize_report", dependencies=["ingest_data", "query_llm"])
+def synthesize_report(context):
+    return compile_summary(context.inputs)
+
+# Step 4: Independent Parallel Task (Unaffected by Step 2 failure)
+@builder.task(name="telemetry_log")
+def telemetry_log(context):
+    return {"status": "healthy"}
+
+result = run_workflow(builder.build(), db_path="orchestration.db")
+print("Status:", result.status)   # 'SUCCEEDED' or 'FAILED'`
+
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedCode(true)
+      setTimeout(() => setCopiedCode(false), 2000)
+    })
+  }
+
+  return (
+    <div className="oe-fault-studio" id="oe-fault-drill">
+      <div className="oe-fault-head">
+        <div className="oe-fault-title-group">
+          <div className="oe-fault-title">
+            <span className="oe-fault-icon">⚡</span>
+            <span>Task Failure, Fault Recovery & Cascade Cancellation Studio</span>
+            <span className="oe-fault-badge">Interactive Invariants</span>
+          </div>
+          <p className="oe-fault-desc">
+            Explore deterministic fault handling: transient 429 exponential backoff, single-pass fixpoint cascade cancellation, and POSIX SIGKILL process isolation.
+          </p>
+        </div>
+        <div className="oe-fault-controls">
+          <button
+            type="button"
+            className="oe-fault-btn oe-fault-btn--run"
+            onClick={runDrill}
+            disabled={phase === 'running'}
+          >
+            {phase === 'running' ? 'Simulating Fault...' : phase === 'done' ? '↺ Reset & Re-run' : '▶ Run Failure Drill'}
+          </button>
+          <button
+            type="button"
+            className="oe-fault-btn oe-fault-btn--reset"
+            onClick={() => resetDrill()}
+            disabled={phase === 'running'}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Scenario Mode Tabs */}
+      <div className="oe-fault-modes" role="tablist" aria-label="Failure Scenarios">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={drillMode === 'transient'}
+          className={`oe-fault-mode-btn ${drillMode === 'transient' ? 'is-active' : ''}`}
+          onClick={() => handleSelectMode('transient')}
+        >
+          <span className="oe-fault-mode-num">01</span>
+          <div className="oe-fault-mode-info">
+            <strong>Transient 429 & Backoff Recovery</strong>
+            <small>HTTP 429 · finished_at backoff (1.0s) · attempt 2 succeeds</small>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={drillMode === 'cascade'}
+          className={`oe-fault-mode-btn ${drillMode === 'cascade' ? 'is-active' : ''}`}
+          onClick={() => handleSelectMode('cascade')}
+        >
+          <span className="oe-fault-mode-num">02</span>
+          <div className="oe-fault-mode-info">
+            <strong>Permanent Failure & Fixpoint Cancel</strong>
+            <small>3/3 exhausted · FAILED · downstream CANCELLED</small>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={drillMode === 'sigkill'}
+          className={`oe-fault-mode-btn ${drillMode === 'sigkill' ? 'is-active' : ''}`}
+          onClick={() => handleSelectMode('sigkill')}
+        >
+          <span className="oe-fault-mode-num">03</span>
+          <div className="oe-fault-mode-info">
+            <strong>Hard Timeout & SIGKILL Isolation</strong>
+            <small>Child PID terminated · 0 thread leaks · coordinator healthy</small>
+          </div>
+        </button>
+      </div>
+
+      {/* Visual Animated SVG DAG */}
+      <div className="oe-fault-canvas-box">
+        <div className="oe-fault-canvas-scroll-cue">⇄ Scroll to pan workflow DAG</div>
+        <svg viewBox="0 0 940 340" className="oe-fault-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="edgeGradSuccess" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#10b981" />
+              <stop offset="100%" stopColor="#059669" />
+            </linearGradient>
+            <linearGradient id="edgeGradFail" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ef4444" />
+              <stop offset="100%" stopColor="#991b1b" />
+            </linearGradient>
+            <linearGradient id="edgeGradWait" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#d97706" />
+            </linearGradient>
+            <pattern id="diagonalHatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1.5" />
+            </pattern>
+          </defs>
+
+          {/* Connectors */}
+          {/* Edge A: Node 1 -> Node 3 */}
+          <path
+            d="M300 72 C440 72 470 125 590 135"
+            className={`oe-fault-edge ${nodes.task1.state === 'succeeded' ? 'oe-fault-edge--flow' : ''}`}
+            stroke={nodes.task1.state === 'succeeded' ? '#10b981' : 'rgba(255,255,255,0.18)'}
+            strokeWidth={nodes.task1.state === 'succeeded' ? '2.5' : '1.5'}
+            fill="none"
+          />
+
+          {/* Edge B: Node 2 -> Node 3 */}
+          <path
+            d="M300 178 C440 178 470 145 590 135"
+            className={`oe-fault-edge ${nodes.task2.state === 'succeeded' ? 'oe-fault-edge--flow' : nodes.task2.state === 'failed' ? 'oe-fault-edge--fail' : nodes.task2.state === 'retry_wait' ? 'oe-fault-edge--retry' : ''}`}
+            stroke={
+              nodes.task2.state === 'succeeded'
+                ? '#10b981'
+                : nodes.task2.state === 'failed'
+                ? '#ef4444'
+                : nodes.task2.state === 'retry_wait'
+                ? '#f59e0b'
+                : 'rgba(255,255,255,0.18)'
+            }
+            strokeWidth={nodes.task2.state !== 'idle' ? '2.5' : '1.5'}
+            strokeDasharray={nodes.task2.state === 'failed' ? '6 4' : nodes.task2.state === 'retry_wait' ? '4 4' : 'none'}
+            fill="none"
+          />
+
+          {/* Junction Circles */}
+          <circle cx="300" cy="72" r="5" fill={nodes.task1.state === 'succeeded' ? '#10b981' : '#666'} />
+          <circle cx="300" cy="178" r="5" fill={nodes.task2.state === 'succeeded' ? '#10b981' : nodes.task2.state === 'failed' ? '#ef4444' : '#666'} />
+          <circle cx="590" cy="135" r="5" fill={nodes.task3.state === 'succeeded' ? '#10b981' : nodes.task3.state === 'cancelled' ? '#6b7280' : '#888'} />
+
+          {/* NODE 01: Ingest Data (Independent A) */}
+          <g className={`oe-fault-node-group ${nodes.task1.state}`}>
+            <rect
+              x="20" y="30" width="280" height="84" rx="3"
+              className={`oe-fault-node-box ${nodes.task1.state}`}
+            />
+            <text x="36" y="52" className="oe-fault-node-tag">TASK 01 · INDEPENDENT A</text>
+            <text x="36" y="74" className="oe-fault-node-name">1. Ingest Documents</text>
+            <rect
+              x="36" y="84" width="105" height="20" rx="2"
+              className={`oe-fault-status-pill oe-fault-status-pill--${nodes.task1.state}`}
+            />
+            <text x="88" y="98" textAnchor="middle" className="oe-fault-status-pill-text">
+              {nodes.task1.label}
+            </text>
+          </g>
+
+          {/* NODE 02: Target Worker (Query LLM / Failing Step) */}
+          <g className={`oe-fault-node-group ${nodes.task2.state}`}>
+            <rect
+              x="20" y="132" width="280" height="92" rx="3"
+              className={`oe-fault-node-box ${nodes.task2.state}`}
+            />
+            <text x="36" y="152" className="oe-fault-node-tag">TASK 02 · DRILL TARGET</text>
+            <text x="36" y="174" className="oe-fault-node-name">2. Query LLM Service</text>
+            <rect
+              x="36" y="186" width={drillMode === 'sigkill' && nodes.task2.state === 'failed' ? 220 : drillMode === 'cascade' && nodes.task2.state === 'failed' ? 185 : 145} height="22" rx="2"
+              className={`oe-fault-status-pill oe-fault-status-pill--${nodes.task2.state}`}
+            />
+            <text
+              x={36 + (drillMode === 'sigkill' && nodes.task2.state === 'failed' ? 110 : drillMode === 'cascade' && nodes.task2.state === 'failed' ? 92 : 72)}
+              y="201"
+              textAnchor="middle"
+              className="oe-fault-status-pill-text"
+            >
+              {nodes.task2.state === 'retry_wait' ? 'RETRY_WAIT (1.0s)' : nodes.task2.label}
+            </text>
+          </g>
+
+          {/* NODE 04: Independent Parallel Branch */}
+          <g className={`oe-fault-node-group ${nodes.task4.state}`}>
+            <rect
+              x="20" y="242" width="280" height="82" rx="3"
+              className={`oe-fault-node-box ${nodes.task4.state}`}
+            />
+            <text x="36" y="262" className="oe-fault-node-tag">TASK 04 · PARALLEL BRANCH</text>
+            <text x="36" y="284" className="oe-fault-node-name">4. Record Audit Telemetry</text>
+            <rect
+              x="36" y="294" width="105" height="20" rx="2"
+              className={`oe-fault-status-pill oe-fault-status-pill--${nodes.task4.state}`}
+            />
+            <text x="88" y="308" textAnchor="middle" className="oe-fault-status-pill-text">
+              {nodes.task4.label}
+            </text>
+          </g>
+
+          {/* NODE 03: Downstream Dependent Gate */}
+          <g className={`oe-fault-node-group ${nodes.task3.state}`}>
+            <rect
+              x="590" y="75" width="310" height="120" rx="3"
+              className={`oe-fault-node-box ${nodes.task3.state}`}
+            />
+            {nodes.task3.state === 'cancelled' && (
+              <rect
+                x="590" y="75" width="310" height="120" rx="3"
+                fill="url(#diagonalHatch)" pointerEvents="none"
+              />
+            )}
+            <text x="608" y="100" className="oe-fault-node-tag">TASK 03 · DEPENDENT GATE</text>
+            <text x="608" y="125" className="oe-fault-node-name">3. Synthesize Summary Report</text>
+            <text x="608" y="145" className="oe-fault-node-sub">Depends on: [Task 01, Task 02]</text>
+            <rect
+              x="608" y="157" width={nodes.task3.state === 'cancelled' ? 220 : 130} height="24" rx="2"
+              className={`oe-fault-status-pill oe-fault-status-pill--${nodes.task3.state}`}
+            />
+            <text
+              x={608 + (nodes.task3.state === 'cancelled' ? 110 : 65)}
+              y="173"
+              textAnchor="middle"
+              className="oe-fault-status-pill-text"
+            >
+              {nodes.task3.label}
+            </text>
+          </g>
+
+          {/* Branch Isolation Annotation */}
+          <path d="M300 283 L550 283" stroke="rgba(255,255,255,0.15)" strokeDasharray="3 3" fill="none" />
+          <text x="560" y="287" className="oe-fault-annotation">
+            Parallel branch: unaffected by upstream failures
+          </text>
+        </svg>
+      </div>
+
+      {/* Live Narrative Status Bar */}
+      <div className="oe-fault-narrative" role="status">
+        <span className="oe-fault-narrative-tag">COORDINATOR INVARIANT:</span>
+        <p>{narrativeText}</p>
+      </div>
+
+      {/* Telemetry Log and Python Code Example Grid */}
+      <div className="oe-fault-details-grid">
+        {/* Real-time SQLite WAL Audit Log */}
+        <div className="oe-fault-log-panel">
+          <div className="oe-fault-log-head">
+            <span>● SQLITE WAL AUDIT TRAIL (TASK_EVENTS TABLE)</span>
+            <small>{logs.length} events logged</small>
+          </div>
+          <div className="oe-fault-log-stream" ref={logStreamRef}>
+            {logs.map((log, i) => (
+              <div key={i} className={`oe-fault-log-row oe-fault-log-row--${log.type}`}>
+                <span className="oe-fault-log-ts">[{log.ts}]</span>
+                <span className="oe-fault-log-msg">{log.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Executable Code Pattern */}
+        <div className="oe-fault-code-panel">
+          <div className="oe-fault-code-head">
+            <span>PYTHON 3.12+ STDLIB CODE PATTERN</span>
+            <button type="button" className="oe-fault-code-copy" onClick={copyCode}>
+              {copiedCode ? 'copied ✓' : 'copy code'}
+            </button>
+          </div>
+          <pre className="oe-fault-code-block">
+            <code>{drillMode === 'transient' ? `# 1. Transient Retry Policy Configuration
+from orchestration_engine import WorkflowBuilder, RetryPolicy
+
+builder = WorkflowBuilder(workflow_id="document_indexing")
+
+# Step with Finish-Time Exponential Backoff
+builder.add_step(
+    name="query_llm",
+    fn=call_llm_embeddings,
+    retry_policy=RetryPolicy(
+        max_attempts=3,
+        delay_seconds=1.0,     # 1.0s -> 2.0s -> 4.0s
+        backoff_factor=2.0,
+        retry_on=(RateLimitError, TimeoutError)
+    )
+)
+# Coordinator commits RETRY_WAIT to SQLite WAL
+# next_retry_at = finished_at + (1.0s * 2^(attempt-1))` : drillMode === 'cascade' ? `# 2. Single-Pass Fixpoint Cascade Cancellation
+builder.add_step(
+    name="query_llm",
+    fn=failing_database_query,
+    retry_policy=RetryPolicy(max_attempts=3)
+)
+
+# Dependent Step: Automatically CANCELLED if query_llm fails
+builder.add_step(
+    name="synthesize_report",
+    fn=generate_executive_summary,
+    dependencies=["query_llm"]  # Fixpoint cancellation prevents orphan stalls
+)
+
+# Parallel Step: Runs and completes SUCCEEDED independently
+builder.add_step(name="record_telemetry", fn=audit_logger)` : `# 3. ProcessExecutor POSIX SIGKILL Isolation
+builder.add_step(
+    name="untrusted_compute",
+    fn=run_sandboxed_c_extension,
+    timeout_seconds=15.0,        # Hard POSIX timeout limit
+    executor="process"          # Child process isolation
+)
+# On 15.0s timeout: ProcessExecutor triggers:
+# os.kill(child_pid, signal.SIGKILL)
+# Memory and descriptors reclaimed; zero zombie thread leaks`}</code>
+          </pre>
+        </div>
+      </div>
+
+      {/* Engine Invariant Cards */}
+      <div className="oe-fault-invariants">
+        <article className="oe-fault-invariant-card">
+          <span className="oe-fault-invariant-title">01 / Finish-Time Exponential Backoff</span>
+          <p>
+            <code>next_retry_at = finished_at + (delay × 2^(attempt-1))</code>. Anchoring strictly to finished_at prevents stampeding herd retries after long task execution.
+          </p>
+        </article>
+        <article className="oe-fault-invariant-card">
+          <span className="oe-fault-invariant-title">02 / Single-Pass Fixpoint Cancellation</span>
+          <p>
+            When an upstream task exhausts its retries, all transitive downstream dependents are marked <code>CANCELLED</code> in a single scheduling pass, while unaffected parallel branches complete.
+          </p>
+        </article>
+        <article className="oe-fault-invariant-card">
+          <span className="oe-fault-invariant-title">03 / POSIX SIGKILL Child Process Isolation</span>
+          <p>
+            Child workers spawned via <code>ProcessExecutor</code> are terminated with true POSIX <code>SIGKILL</code> upon timeout, preventing thread-stall leaks and GIL hangs.
+          </p>
+        </article>
+      </div>
+    </div>
+  )
 }
 
 const API_ITEMS = [
@@ -2133,8 +2680,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
           <SingleWriterArchitectureDiagram />
           <OeConcurrencyBenchmarks />
           <OeSequenceDiagram />
-          <OrchestrationDependencyGraph />
-          <FailureDrillPanel />
+          <TaskFaultDrillExplorer />
           <LifecycleExplorer />
         </div>
       </section>
