@@ -1497,10 +1497,12 @@ agent.start() # Pure Python stdlib HTTP worker cluster`
     <div className="oe-bento-pillars-wrapper">
       <div className="oe-bento-grid">
         {pillars.map((p, idx) => {
-          const isHero = idx === 0 || idx === 3
+          // Only the first card (Agentic AI Core) spans left column both rows as hero
+          const isHero = idx === 0
           return (
             <article
               key={p.num}
+              data-num={p.num}
               className={`oe-bento-card ${isHero ? 'oe-bento-card--hero' : ''} ${selectedPillar === idx ? 'is-selected' : ''}`}
               onClick={() => setSelectedPillar(idx)}
             >
@@ -3514,9 +3516,22 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
           FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span className="oe-hero-subtitle">PRODUCTION-READY BETA (v0.9.0)</span>
         </CipherReveal>
+        {/* Asymmetric side panel — vertical stats column in right grid cell */}
+        <aside className="oe-hero-side-panel" aria-label="Key project stats">
+          <div className="oe-hero-side-stat"><strong>233/233</strong><span>Automated tests · 100% pass</span></div>
+          <div className="oe-hero-side-divider" />
+          <div className="oe-hero-side-stat"><strong>627 µs</strong><span>Task scheduling overhead</span></div>
+          <div className="oe-hero-side-divider" />
+          <div className="oe-hero-side-stat"><strong>79</strong><span>Frozen public symbols</span></div>
+          <div className="oe-hero-side-divider" />
+          <div className="oe-hero-side-stat"><strong>0 Deps</strong><span>Zero runtime dependencies</span></div>
+          <div className="oe-hero-side-divider" />
+          <span className="oe-hero-side-badge">Live on PyPI v0.9.0</span>
+        </aside>
+
         <p id="project-detail" className="oe-report-intro">A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in the Python standard library. Engineered for AI agent loops, fintech transaction Sagas, high-volume streaming, and cloud infrastructure pipelines—featuring cyclic reflection graphs with state checkpointing, distributed backward compensating rollbacks, O(1) constant-RAM streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery.</p>
 
-        <QuickInstallBar />
+        <div className="oe-hero-quick-install-row"><QuickInstallBar /></div>
 
         <div className="oe-report-btn-group">
           <HoldButton
@@ -3603,7 +3618,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       </section>
       <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
 
-      <section className="oe-report-section" id="oe-pillars">
+      <section className="oe-report-section" id="oe-pillars" data-num="00">
         <div className="oe-report-section-label"><span>00</span><p>Architectural pillars</p></div>
         <div className="oe-report-section-body">
           <div className="oe-section-intro-block">
@@ -3614,7 +3629,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-runtime-lab">
+      <section className="oe-report-section oe-report-section--flip" id="oe-runtime-lab" data-num="01">
         <div className="oe-report-section-label"><span>01</span><p>Interactive Runtime Lab</p></div>
         <div className="oe-report-section-body">
           <div className="oe-section-intro-block">
@@ -3627,7 +3642,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 
       <InteractiveWorkflowSimulator />
 
-      <section className="oe-report-section" id="oe-s01">
+      <section className="oe-report-section" id="oe-s01" data-num="02">
         <div className="oe-report-section-label"><span>01</span><p>Why build this? (Engine vs. Alternatives)</p></div>
         <div className="oe-report-section-body">
           <h3>Zero-overhead orchestration without infrastructure sprawl.</h3>
@@ -3641,7 +3656,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s02">
+      <section className="oe-report-section oe-report-section--flip" id="oe-s02" data-num="03">
         <div className="oe-report-section-label"><span>02</span><p>Concurrency & scheduling model</p></div>
         <div className="oe-report-section-body">
           <h3>Decoupled single-writer coordination with linear multi-worker scaling.</h3>
@@ -3654,7 +3669,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s03">
+      <section className="oe-report-section" id="oe-s03" data-num="04">
         <div className="oe-report-section-label"><span>03</span><p>Durability, Sagas & crash recovery</p></div>
         <div className="oe-report-section-body">
           <h3>Write-ahead SQLite WAL event persistence, distributed Sagas & reverse rollback.</h3>
@@ -3671,7 +3686,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s04">
+      <section className="oe-report-section oe-report-section--flip" id="oe-s04" data-num="05">
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
           <h3>233 automated tests, 79 public exports, and quantitative performance profiling.</h3>
@@ -3685,7 +3700,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s05">
+      <section className="oe-report-section" id="oe-s05" data-num="06">
         <div className="oe-report-section-label"><span>05</span><p>API surface & zero-dependency CLI</p></div>
         <div className="oe-report-section-body">
           <h3>79 frozen public symbols, typed TaskResult passing, and robust zero-dependency CLI.</h3>
@@ -3696,7 +3711,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s06">
+      <section className="oe-report-section oe-report-section--flip" id="oe-s06" data-num="07">
         <div className="oe-report-section-label"><span>06</span><p>Production blueprints</p></div>
         <div className="oe-report-section-body">
           <h3>Real-world battle-tested patterns: AI agent graphs, document indexers & automated SRE triage.</h3>
@@ -3705,7 +3720,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         </div>
       </section>
 
-      <section className="oe-report-section" id="oe-s07">
+      <section className="oe-report-section" id="oe-s07" data-num="08">
         <div className="oe-report-section-label"><span>07</span><p>Engineering transformation (G1–G13)</p></div>
         <div className="oe-report-section-body">
           <h3>Systematic elimination of all 13 architectural gaps from prototype to release.</h3>
