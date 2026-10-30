@@ -3512,7 +3512,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <header className="oe-report-hero">
         <p className="oe-report-kicker">Technical Master Specification & Production Case Study · Python 3.10+ Orchestration & Agentic Graphs</p>
         <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
-          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span>PRODUCTION-READY BETA (v0.9.0)</span>
+          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span className="oe-hero-subtitle">PRODUCTION-READY BETA (v0.9.0)</span>
         </CipherReveal>
         <p id="project-detail" className="oe-report-intro">A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in the Python standard library. Engineered for AI agent loops, fintech transaction Sagas, high-volume streaming, and cloud infrastructure pipelines—featuring cyclic reflection graphs with state checkpointing, distributed backward compensating rollbacks, O(1) constant-RAM streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery.</p>
 
