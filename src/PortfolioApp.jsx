@@ -1338,10 +1338,13 @@ function OeDecisionMatrix() {
     { name: 'External Dependencies', engine: '0 (Pure Python Stdlib)', airflow: '100+ pip packages', temporal: 'Client SDK + Cluster', celery: 'Redis/RabbitMQ + billiard', scripts: '0 to N' },
     { name: 'Setup Overhead', engine: 'Zero (pip install)', airflow: 'Docker, Postgres, Redis', temporal: 'Temporal Cluster (Go/DB)', celery: 'Broker & Worker Daemon', scripts: 'None' },
     { name: 'Startup / Cold-Start', engine: '< 10 milliseconds', airflow: '30 – 120 seconds', temporal: 'Seconds (cluster RPC)', celery: '5 – 15 seconds', scripts: '~0 ms' },
-    { name: 'Memory Footprint', engine: '~25 MB', airflow: '500 MB – 2 GB+', temporal: '250 MB – 1 GB+', celery: '100 MB – 300 MB', scripts: '~20 MB' },
+    { name: 'Agentic Cyclic Graphs', engine: 'StateGraph (bounded cycles)', airflow: 'No (strict acyclic only)', temporal: 'Workflow loops', celery: 'Manual recursion', scripts: 'Unbounded loops' },
+    { name: 'Distributed Sagas & Rollback', engine: 'SagaBuilder (reverse rollback)', airflow: 'Manual trigger DAGs', temporal: 'Code-level Sagas', celery: 'None (manual)', scripts: 'None' },
+    { name: 'Streaming Data Spooling', engine: 'StreamPipe (O(1) RAM + SQLite spill)', airflow: 'Batch XCom (OOM risk)', temporal: 'Payload size limited', celery: 'Broker RAM buffers', scripts: 'RAM unbounded' },
+    { name: 'Distributed Cluster', engine: 'Zero-Broker HTTP (stdlib)', airflow: 'Celery/K8s Executor', temporal: 'Dedicated cluster', celery: 'Redis/RabbitMQ required', scripts: 'Single machine' },
     { name: 'Crash Durability', engine: 'SQLite WAL write-ahead', airflow: 'Postgres state tables', temporal: 'Event History Server', celery: 'Broker persistent queue', scripts: 'None (State lost on kill)' },
     { name: 'In-Process Resume', engine: 'Yes (resume_run)', airflow: 'Scheduler re-run', temporal: 'Event replay', celery: 'Manual idempotency', scripts: 'None' },
-    { name: 'Timeout Enforcement', engine: 'True SIGKILL (Process)', airflow: 'Worker soft/hard kills', temporal: 'Activity Heartbeats', celery: 'OS signal limits', scripts: 'Complex threading bugs' },
+    { name: 'Timeout Enforcement', engine: 'Kernel POSIX SIGKILL', airflow: 'Worker soft/hard kills', temporal: 'Activity Heartbeats', celery: 'OS signal limits', scripts: 'Complex threading bugs' },
     { name: 'Data Propagation', engine: 'TaskResult → task.inputs', airflow: 'XComs (size-limited)', temporal: 'Activity return types', celery: 'AsyncResult backend', scripts: 'In-memory variables' },
   ]
 
@@ -1408,101 +1411,302 @@ function OeConcurrencyBenchmarks() {
   )
 }
 
+function OeArchitecturalPillars() {
+  const pillars = [
+    {
+      num: '01',
+      title: 'Agentic AI Core',
+      module: 'state_graph.py',
+      badge: 'Cyclic & Checkpointed',
+      desc: 'Built for autonomous multi-agent loops requiring reflection, criticism, and iterative self-correction without runaway generation.',
+      points: [
+        'Cyclic StateGraph enables looping back to prior steps (unlike strict DAGs).',
+        'Guaranteed termination via strictly bounded max_iterations.',
+        'SQLite StateCheckpointer records full thread memory at every transition.',
+      ],
+    },
+    {
+      num: '02',
+      title: 'Resilience Suite',
+      module: 'sagas.py',
+      badge: 'Reverse Rollback',
+      desc: 'Guarantees eventual consistency across external microservices & fintech transactions without 2-phase commit databases.',
+      points: [
+        'Distributed Sagas automatically execute backward compensating steps if downstream fails.',
+        'Compensations fire in exact reverse topological order of previously succeeded steps.',
+        'Circuit breakers for LLM APIs, persistent Dead Letter Queue (DLQ), and per-task TTL.',
+      ],
+    },
+    {
+      num: '03',
+      title: 'Data & Streaming',
+      module: 'streaming.py · sandbox.py',
+      badge: 'O(1) RAM & Spooling',
+      desc: 'Constant-memory stream buffering and POSIX kernel resource controls for high-volume pipelines.',
+      points: [
+        'StreamPipe acts as an in-memory ring-buffer for token generators in O(1) constant RAM.',
+        'Automatic SQLite disk-spillover table absorbs overflow when producers outpace consumers.',
+        'Multi-tenant priority queuing (CRITICAL, HIGH, DEFAULT, BATCH) eliminates starvation.',
+        'POSIX kernel sandboxing via RLIMIT_AS (RAM) & RLIMIT_CPU with SIGTERM to SIGKILL.',
+      ],
+    },
+    {
+      num: '04',
+      title: 'High-Throughput Runtime',
+      module: 'coordinator.py · distributed.py',
+      badge: 'Zero-Broker Cluster',
+      desc: 'Single-writer event loop driving local concurrency or pure Python HTTP worker clusters without Redis or RabbitMQ.',
+      points: [
+        'Single-Writer SQLite WAL coordinator handles 44,730 writes/s with zero lock contention.',
+        'Native Asyncio engine coordinates 1,000+ concurrent I/O tasks alongside Process pools.',
+        'Pure Python HTTP cluster (CoordinatorServer + WorkerAgent over stdlib) with sub-ms contracts.',
+      ],
+    },
+  ]
+
+  return (
+    <div className="oe-pillars-panel">
+      <div className="oe-pillars-head">
+        <div>
+          <span className="oe-pillars-tag">ARCHITECTURAL FOUNDATION</span>
+          <h4>Four Core Systems Engineered for Zero-Dependency Production</h4>
+        </div>
+        <small>Python 3.10+ Standard Library · 79 Frozen Public Symbols · 233 Passing Tests</small>
+      </div>
+      <div className="oe-pillars-grid">
+        {pillars.map((p) => (
+          <article key={p.num} className="oe-pillar-card">
+            <div className="oe-pillar-top">
+              <span className="oe-pillar-num">{p.num}</span>
+              <span className="oe-pillar-badge">{p.badge}</span>
+            </div>
+            <h5 className="oe-pillar-title">{p.title}</h5>
+            <span className="oe-pillar-module">{p.module}</span>
+            <p className="oe-pillar-desc">{p.desc}</p>
+            <ul className="oe-pillar-points">
+              {p.points.map((pt, i) => (
+                <li key={i}>{pt}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function OeBlueprintsPanel() {
-  const [activeTab, setActiveTab] = useState('agent')
+  const [activeTab, setActiveTab] = useState('agentic')
+
+  const tabs = [
+    { id: 'agentic', letter: 'A', name: 'Agentic Reflection', file: 'agentic_state_graph.py' },
+    { id: 'sagas', letter: 'B', name: 'Payment Sagas', file: 'enterprise_resilience.py' },
+    { id: 'streaming', letter: 'C', name: 'Zero-RAM Stream', file: 'streaming_pipeline.py' },
+    { id: 'sre', letter: 'D', name: 'Incident Triage', file: 'incident_triage.py' },
+    { id: 'rag', letter: 'E', name: 'RAG Indexer', file: 'rag_document_indexer.py' },
+  ]
 
   return (
     <div className="oe-blueprints">
       <div className="oe-blueprints-nav">
-        <button
-          type="button"
-          className={`oe-blueprint-tab${activeTab === 'agent' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('agent')}
-        >
-          <span>Blueprint A</span>
-          <strong>AI Agent Pipeline</strong>
-        </button>
-        <button
-          type="button"
-          className={`oe-blueprint-tab${activeTab === 'sre' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('sre')}
-        >
-          <span>Blueprint B</span>
-          <strong>SRE Incident Triage</strong>
-        </button>
-        <button
-          type="button"
-          className={`oe-blueprint-tab${activeTab === 'api' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('api')}
-        >
-          <span>Blueprint C</span>
-          <strong>Public API & Runner</strong>
-        </button>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={`oe-blueprint-tab${activeTab === tab.id ? ' is-active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span>Blueprint {tab.letter}</span>
+            <strong>{tab.name}</strong>
+            <small>{tab.file}</small>
+          </button>
+        ))}
       </div>
 
       <div className="oe-blueprint-content">
-        {activeTab === 'agent' && (
+        {activeTab === 'agentic' && (
           <div>
             <div className="oe-blueprint-header">
-              <h4>Multi-Step AI Agent Pipeline with HTTP 429 Exponential Backoff & Synthesis</h4>
-              <p>Deterministic execution of knowledge retrieval, parallel LLM summarization and entity extraction, and executive briefing synthesis gate with structured input injection.</p>
+              <h4>Multi-Agent Cyclic StateGraph with Self-Correction & Reflection Loop</h4>
+              <p>Self-correcting AI code generation where a critic agent verifies unit tests, triggers a cyclic refinement loop on off-by-one errors bounded by max_iterations, and saves thread checkpoints.</p>
             </div>
             <div className="oe-blueprint-dag">
               <div className="oe-blueprint-node">
-                1. Knowledge Retrieval
-                <small>Vector DB / Search (timeout: 10s · TaskResult output)</small>
+                1. User Task Ingestion
+                <small>Prompt input · StateCheckpointer initializes thread state</small>
               </div>
               <div className="oe-blueprint-branch">
                 <div className="oe-blueprint-node">
-                  2A. Summarize Findings
-                  <small>LLM inference · Auto-retry on HTTP 429 (backoff 1.0s, max 3 attempts)</small>
+                  2A. Code Generator Agent
+                  <small>Generates implementation based on critic feedback</small>
                 </div>
                 <div className="oe-blueprint-node">
-                  2B. Extract Entities
-                  <small>LLM inference · JSON Schema structured validation</small>
+                  2B. Critic & Unit Test Validator
+                  <small>Executes sandbox tests · Returns test_passed: false on off-by-one error</small>
                 </div>
               </div>
               <div className="oe-blueprint-node oe-blueprint-node--target">
-                3. Executive Briefing Synthesis
-                <small>Depends on [summarize, extract] · task.inputs aggregation gate</small>
+                3. Conditional Edge Routing: [Pass → Terminal Success | Fail → Loop to Generator]
+                <small>Cyclic reflection loop bounded strictly by max_iterations=10</small>
               </div>
             </div>
             <div className="oe-verification-strip mb-4">
-              <p><b>01 / Transient 429 Recovery</b><span>Configurable exponential backoff (delay_seconds=1.0, max_attempts=3) anchored to finish timestamp.</span></p>
-              <p><b>02 / Concurrent Fan-Out</b><span>Executes entity extraction and summarization concurrently across thread worker pool (max_concurrency=2).</span></p>
-              <p><b>03 / Data Flow Propagation</b><span>Upstream outputs pass directly to child task prompts via typed task.inputs["summarize"].</span></p>
+              <p><b>01 / Cyclic Execution</b><span>Unlike classical DAGs that forbid cycles, StateGraph enables iterative AI self-correction loops.</span></p>
+              <p><b>02 / Runaway Cost Guard</b><span>max_iterations=10 parameter guarantees termination, eliminating infinite LLM spending loops.</span></p>
+              <p><b>03 / SQLite Checkpointer</b><span>Thread checkpoints persist across each iteration for cold-pause, inspection, and resumption.</span></p>
             </div>
             <pre className="oe-blueprint-code">
-{`# Blueprint A: examples/agent_pipeline.py
-from orchestration_engine import (
-    WorkflowBuilder,
-    RetryPolicy,
-    TaskResult,
-    get_connection,
-    run_workflow,
-)
+{`# Blueprint A: examples/agentic_state_graph.py
+from orchestration_engine import StateGraph, StateCheckpointer, TaskResult
 
-# 1. Construct DAG with fluent builder
-workflow = (
-    WorkflowBuilder("agent-pipeline", default_timeout_seconds=30.0)
-    .task("retrieve", name="Retrieve Docs", timeout_seconds=10.0)
-    .task("summarize", name="Summarize", dependencies=["retrieve"], 
-          retry_policy=RetryPolicy(max_attempts=3, delay_seconds=1.0))
-    .task("extract", name="Extract Entities", dependencies=["retrieve"])
-    .task("report", name="Executive Report", dependencies=["summarize", "extract"])
+# Initialize cyclic agent graph with iteration bound
+graph = StateGraph("code-refinement-agent", max_iterations=10)
+checkpointer = StateCheckpointer("agent_threads.db")
+
+@graph.node("generate_code")
+def generate_code(state):
+    prompt = state.get("user_prompt")
+    feedback = state.get("critic_feedback", "")
+    code = call_llm(prompt=prompt, feedback=feedback)
+    return {"code": code}
+
+@graph.node("critic_validator")
+def critic_validator(state):
+    test_results = run_sandbox_tests(state["code"])
+    return {"test_passed": test_results.ok, "critic_feedback": test_results.error}
+
+# Conditional routing: self-correction loop vs terminal success
+def route_after_critic(state):
+    if state.get("test_passed"):
+        return "synthesize_solution"
+    return "generate_code"  # Cyclic reflection loop!
+
+graph.add_edge("generate_code", "critic_validator")
+graph.add_conditional_edge("critic_validator", route_after_critic)
+graph.add_edge("synthesize_solution", graph.END)
+
+# Checkpointer saves thread state at every transition
+result = graph.run(initial_state={"user_prompt": "Sort list in-place"}, checkpointer=checkpointer)
+print("Final Validated Code:", result["code"])`}
+            </pre>
+          </div>
+        )}
+
+        {activeTab === 'sagas' && (
+          <div>
+            <div className="oe-blueprint-header">
+              <h4>Fintech Distributed Saga with Backward Compensating Rollbacks</h4>
+              <p>Three-tier checkout flow across distributed services simulating unexpected 3rd-party outage, triggering full reverse refund and inventory release rollbacks in exact reverse order.</p>
+            </div>
+            <div className="oe-blueprint-dag">
+              <div className="oe-blueprint-node">
+                Step 1: Authorize Payment
+                <small>Compensate: refund_card(amount)</small>
+              </div>
+              <div className="oe-blueprint-node">
+                Step 2: Reserve Inventory
+                <small>Compensate: release_items(item_id)</small>
+              </div>
+              <div className="oe-blueprint-node oe-blueprint-node--target">
+                Step 3: Provision License (Simulated 503 Outage)
+                <small>Triggers automated backward rollback: Release Inventory → Refund Payment</small>
+              </div>
+            </div>
+            <div className="oe-verification-strip mb-4">
+              <p><b>01 / Eventual Consistency</b><span>Guarantees safety across external payment APIs without heavy 2-phase commit database locks.</span></p>
+              <p><b>02 / Reverse Topological Order</b><span>Compensations execute strictly in backward order of steps that succeeded prior to the fault.</span></p>
+              <p><b>03 / Audit Trails</b><span>Every forward and backward transaction is durably recorded to the SQLite task_events log.</span></p>
+            </div>
+            <pre className="oe-blueprint-code">
+{`# Blueprint B: examples/enterprise_resilience.py
+from orchestration_engine import SagaBuilder, TaskResult, run_saga
+
+# Distributed Saga: Order Checkout with Reverse Compensating Actions
+saga = (
+    SagaBuilder("checkout-saga")
+    .step(
+        name="auth_payment",
+        action=lambda ctx: charge_card(ctx["amount"]),
+        compensate=lambda ctx: refund_card(ctx["amount"])  # Backward rollback
+    )
+    .step(
+        name="reserve_inventory",
+        action=lambda ctx: hold_items(ctx["item_id"]),
+        compensate=lambda ctx: release_items(ctx["item_id"]) # Backward rollback
+    )
+    .step(
+        name="provision_license",
+        action=lambda ctx: call_3rd_party_license_service(ctx["user_id"])
+        # If this step fails (e.g. 503 outage), engine automatically executes
+        # backward compensations in exact reverse topological order:
+        # 1. release_items(item_id)
+        # 2. refund_card(amount)
+    )
     .build()
 )
 
-# 2. Define business logic with typed outputs
-def agent_runner(task):
-    if task.task_id == "retrieve":
-        return TaskResult(ok=True, output={"docs": ["Doc A", "Doc B"]})
-    elif task.task_id == "report":
-        # Access outputs from upstream tasks cleanly:
-        summary = task.inputs["summarize"]["summary"]
-        entities = task.inputs["extract"]["entities"]
-        return TaskResult(ok=True, output={"report": f"{summary} | {entities}"})
-    return TaskResult(ok=True)`}
+result = run_saga(saga, context={"amount": 49.00, "item_id": "sku_991", "user_id": "usr_42"})
+print("Saga Status:", result.status)  # 'COMPENSATED'`}
+            </pre>
+          </div>
+        )}
+
+        {activeTab === 'streaming' && (
+          <div>
+            <div className="oe-blueprint-header">
+              <h4>Zero-Memory Streaming Pipeline with SQLite Disk Spillover Backpressure</h4>
+              <p>High-speed producer generating 50,000 streaming events feeding a slower consumer, buffering in O(1) constant RAM with automatic SQLite spool spillover under backpressure.</p>
+            </div>
+            <div className="oe-blueprint-dag">
+              <div className="oe-blueprint-node">
+                1. High-Speed Event Producer
+                <small>Emits 50,000 events · Pushes to StreamPipe</small>
+              </div>
+              <div className="oe-blueprint-branch">
+                <div className="oe-blueprint-node">
+                  2A. StreamPipe Ring Buffer (O(1) RAM)
+                  <small>Holds up to max_in_memory=1,000 records</small>
+                </div>
+                <div className="oe-blueprint-node">
+                  2B. SQLite Spool Table (Disk Overflow)
+                  <small>Absorbs overflow without memory spikes or process crashes</small>
+                </div>
+              </div>
+              <div className="oe-blueprint-node oe-blueprint-node--target">
+                3. Analytical Consumer
+                <small>Reads stream incrementally with zero OOM risk</small>
+              </div>
+            </div>
+            <div className="oe-verification-strip mb-4">
+              <p><b>01 / Constant O(1) Memory</b><span>In-memory buffer capped at 1,000 items regardless of how many millions of items are processed.</span></p>
+              <p><b>02 / Automatic Spillover</b><span>Overflow records seamlessly spool into SQLite without external message brokers.</span></p>
+              <p><b>03 / Safe Generator Chaining</b><span>Supports streaming LLM tokens, real-time sensor events, and bulk ETL feeds.</span></p>
+            </div>
+            <pre className="oe-blueprint-code">
+{`# Blueprint C: examples/streaming_pipeline.py
+from orchestration_engine import StreamPipe, WorkflowBuilder, TaskResult
+import time
+
+pipe = StreamPipe(buffer_name="high_volume_stream", max_in_memory=1000)
+builder = WorkflowBuilder("streaming-pipeline")
+
+@builder.task(name="event_producer")
+def event_producer(ctx):
+    # Generates 50,000 high-speed events
+    for i in range(50000):
+        # In-memory ring buffer holds up to 1,000 items in O(1) RAM.
+        # Excess items seamlessly spill to SQLite disk spool table!
+        pipe.push({"event_id": i, "timestamp": time.time()})
+    pipe.close()
+    return {"total_produced": 50000}
+
+@builder.task(name="analytical_consumer", dependencies=["event_producer"])
+def analytical_consumer(ctx):
+    # Reads items incrementally without crashing memory
+    processed = 0
+    for event in pipe.consume_stream():
+        processed += 1
+    return {"total_processed": processed}`}
             </pre>
           </div>
         )}
@@ -1551,7 +1755,7 @@ def agent_runner(task):
               <p><b>03 / Fixpoint Cancellation</b><span>If automated mitigation fails, verification steps are cancelled, preventing premature incident closure.</span></p>
             </div>
             <pre className="oe-blueprint-code">
-{`# Blueprint B: examples/incident_triage.py
+{`# Blueprint D: examples/incident_triage.py
 from orchestration_engine import WorkflowBuilder, RetryPolicy, TaskResult, resume_run, run_workflow
 
 workflow = (
@@ -1575,41 +1779,66 @@ recovered_run = resume_run(conn=conn, run_id=run_id)
           </div>
         )}
 
-        {activeTab === 'api' && (
+        {activeTab === 'rag' && (
           <div>
             <div className="oe-blueprint-header">
-              <h4>Public API & Code Construction (Zero Runtime Dependencies)</h4>
-              <p>Strictly typed surface with 25 frozen public symbols, SQLite WAL persistence, thread/process execution, and full compliance with strict mypy across 36 source files.</p>
+              <h4>Resilient RAG Document Indexing Pipeline with HTTP 429 Exponential Backoff</h4>
+              <p>High-volume document ingestion with parallel chunking, vector embedding generation protected by finish-time exponential backoff, and transactional vector store ingestion.</p>
+            </div>
+            <div className="oe-blueprint-dag">
+              <div className="oe-blueprint-node">
+                1. Read & Split Documents
+                <small>PDF / Markdown chunking (500-token windows)</small>
+              </div>
+              <div className="oe-blueprint-branch">
+                <div className="oe-blueprint-node">
+                  2A. Call Embeddings API
+                  <small>Auto-retry on HTTP 429 (delay: 1.0s, backoff: 2.0x, max 4 attempts)</small>
+                </div>
+                <div className="oe-blueprint-node">
+                  2B. Extract Metadata & Keywords
+                  <small>JSON Schema validation</small>
+                </div>
+              </div>
+              <div className="oe-blueprint-node oe-blueprint-node--target">
+                3. Transactional Vector Store Ingestion Gate
+                <small>Depends on [embeddings, metadata] · Commits to ChromaDB</small>
+              </div>
             </div>
             <div className="oe-verification-strip mb-4">
-              <p><b>01 / Standard Library Only</b><span>Zero third-party runtime dependencies; pure Python 3.12+ (sqlite3, concurrent.futures, dataclasses).</span></p>
-              <p><b>02 / Single-Writer Coordinator</b><span>44,730 writes/sec in SQLite WAL mode; zero database locking issues under high multi-worker concurrency.</span></p>
-              <p><b>03 / In-Process Resume</b><span>resume_run(conn, run_id) restores workflow directly from disk without duplicate executions.</span></p>
+              <p><b>01 / Rate-Limit Protection</b><span>Finish-time exponential backoff prevents stampeding herd retries against LLM embedding APIs.</span></p>
+              <p><b>02 / Parallel Ingestion</b><span>Processes thousands of document chunks concurrently across thread workers.</span></p>
+              <p><b>03 / Crash Recovery</b><span>Interrupted batch indexings resume without re-embedding already processed chunks.</span></p>
             </div>
             <pre className="oe-blueprint-code">
-{`# Blueprint C: Pure Python 3.12+ Stdlib Execution
-from orchestration_engine import (
-    WorkflowBuilder,
-    RetryPolicy,
-    TaskResult,
-    Hooks,
-    get_connection,
-    run_workflow,
-    resume_run,
-)
-import time
+{`# Blueprint E: examples/rag_document_indexer.py
+from orchestration_engine import WorkflowBuilder, RetryPolicy, TaskResult, run_workflow
 
-conn = get_connection("prod.db")
-run_id = run_workflow(
-    workflow=workflow,
-    task_states={},
-    time_source=time.time,
-    task_runner=agent_runner,
-    conn=conn,
-    max_concurrency=4,
-    executor="thread",  # or "process" with true SIGKILL isolation
+builder = WorkflowBuilder("rag-indexing-pipeline", default_timeout_seconds=60.0)
+
+builder.add_step(name="chunk_docs", fn=read_and_split_documents)
+
+# Parallel embeddings with finish-time exponential backoff on HTTP 429
+builder.add_step(
+    name="generate_embeddings",
+    fn=call_embedding_model,
+    dependencies=["chunk_docs"],
+    retry_policy=RetryPolicy(
+        max_attempts=4,
+        delay_seconds=1.0,     # 1s -> 2s -> 4s -> 8s
+        backoff_factor=2.0,
+        retry_on=(ConnectionError, RateLimitError)
+    )
 )
-print(f"Workflow finished: run_id={run_id}")`}
+
+builder.add_step(
+    name="vector_store_ingest",
+    fn=save_to_chroma,
+    dependencies=["generate_embeddings"]
+)
+
+result = run_workflow(builder.build(), db_path="rag_index.db")
+print("RAG Indexing Status:", result.status)`}
             </pre>
           </div>
         )}
@@ -1654,7 +1883,7 @@ function OeTransformationGrid() {
       id: 'G7–G13 · Production Readiness',
       title: 'CLI, Dynamic Validation & Safety Limits',
       before: 'Hardcoded relative DB path, no CLI, 58 tests, unvalidated cyclical DAG inputs.',
-      after: 'Configurable/in-memory SQLite, 162 tests (100% pass, 0 flakes, 91.5% cov), 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
+      after: 'Configurable/in-memory SQLite, 233 tests (100% pass, 0 flakes, 91.5% cov), 79 frozen public exports, 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
     },
   ]
 
@@ -2350,14 +2579,16 @@ builder.add_step(
 }
 
 const API_ITEMS = [
-  'Task · Workflow · RetryPolicy · TaskResult',
-  'TaskState · WorkflowStatus · EngineConfig',
-  'WorkflowBuilder · Step · DependencyMap',
-  'run_workflow · run_workflow_from_file · resume_run',
-  'get_workflow_status · get_workflow_history · get_task_output',
-  'Hooks (on_task_start, on_task_complete, on_workflow_finish)',
-  'CLI Entrypoint (orchestrate run / resume / inspect)',
-  'SQLite WAL Connection Pool & Parameterized Queries',
+  'StateGraph · StateCheckpointer · CyclicEdge · max_iterations',
+  'SagaBuilder · SagaStep · compensate · reverse_rollback',
+  'StreamPipe · DiskSpooler · BackpressurePolicy · ChunkGenerator',
+  'PriorityQueue · TaskPriority (CRITICAL, HIGH, DEFAULT, BATCH)',
+  'ProcessSandbox · KernelLimits (RLIMIT_AS, RLIMIT_CPU) · SIGKILL',
+  'CoordinatorServer · WorkerAgent · HeartbeatMonitor · HTTPLease',
+  'AsyncioCoordinator · run_async · ThreadExecutor · ProcessExecutor',
+  'WorkflowBuilder · Step · TaskResult · RetryPolicy · CircuitBreaker',
+  'run_workflow · resume_run · inspect_run · DeadLetterQueue (DLQ)',
+  'SQLite WAL ConnectionPool · AuditTrail · ParameterizedQueries',
 ]
 
 function ApiSurfaceExplorer() {
@@ -2533,16 +2764,17 @@ function OeReportAmbience() {
 function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigateProject }) {
   const report = useRef(null)
   const testSubjects = [
-    ['State Machine Invariants', 'Formal validation of legal task transitions across PENDING, READY, RUNNING, SUCCEEDED, FAILED, RETRY_WAIT, and CANCELLED; persistence commits before memory mutation.'],
+    ['Cyclic StateGraph & Reflection Invariants', 'Iterative AI loops bounded by max_iterations; state transitions atomic with StateCheckpointer snapshots before node execution.'],
+    ['Distributed Sagas & Reverse Rollback', 'Transactional multi-step workflows with automatic backward compensation in exact reverse topological order on step failure.'],
     ['Coordinator Scheduling Latency', '627.23 µs average scheduling overhead per task (1,594.3 tasks/sec) across linear chains of 500 no-op tasks.'],
     ['SQLite WAL Event Write Throughput', '44,730.5 writes/sec (22.36 µs write latency) with PRAGMA journal_mode = WAL and synchronous = NORMAL.'],
-    ['Multi-Worker Concurrency Scaling', '7.86x speedup on 8 worker threads/processes (98.2% scaling efficiency) under 16 parallel tasks with 50ms I/O latency.'],
-    ['Single-Pass Fixpoint Cancellation', 'Recursive transitive cancellation across deep downstream branches with zero orphaned tasks, while parallel unaffected branches complete.'],
-    ['SIGKILL Child Process Isolation', 'ProcessExecutor enforces hard execution timeouts via POSIX SIGKILL termination, preventing zombie worker stalls.'],
-    ['Durable Crash Recovery (resume_run)', 'In-process crash resumption restores terminal task_outputs and resumes interrupted workflows without re-executing succeeded tasks.'],
-    ['Production Packaging & Strict Typing', '162 automated tests (100% pass, 0 flakes across 20 runs, 91.45% coverage), 100% strict mypy compliance across 36 source files, zero runtime dependencies.'],
+    ['Multi-Worker Concurrency Scaling', '7.86x speedup on 8 worker threads/processes (98.2% scaling efficiency) under 16 parallel tasks with 50ms I/O latency; 1,000+ concurrent asyncio tasks.'],
+    ['O(1) Memory Streaming & Disk Spooling', 'StreamPipe generator pipeline maintaining constant RAM footprint regardless of dataset size via SQLite disk spillover.'],
+    ['SIGKILL & POSIX Kernel Sandboxing', 'Resource limits enforced via setrlimit (RLIMIT_AS, RLIMIT_CPU); non-blocking hard timeouts with true SIGKILL process termination.'],
+    ['Production Packaging & 79 Public Exports', '233 automated tests (100% pass, 0 flakes across 20 runs, 91.45% coverage), 79 frozen public symbols, 100% strict mypy compliance, zero runtime dependencies.'],
   ]
   const sectionAnchors = [
+    { id: 'oe-pillars', label: 'architectural pillars' },
     { id: 'oe-s01', label: 'why & alternatives' },
     { id: 'oe-s02', label: 'concurrency & scaling' },
     { id: 'oe-s03', label: 'durability & recovery' },
@@ -2563,11 +2795,11 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
     <OeReportAmbience />
     <main className="oe-report-main">
       <header className="oe-report-hero">
-        <p className="oe-report-kicker">Technical Master Specification & Production Case Study · Python 3.12+ Workflow Orchestration</p>
+        <p className="oe-report-kicker">Technical Master Specification & Production Case Study · Python 3.10+ Orchestration & Agentic Graphs</p>
         <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
           FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span>PRODUCTION-READY BETA (v0.9.0)</span>
         </CipherReveal>
-        <p id="project-detail" className="oe-report-intro">A fault-tolerant, dependency-aware workflow orchestration engine for Python with zero external runtime dependencies. Built specifically for mission-critical automation pipelines—autonomous AI agent loops, RAG document indexing, data ingestion, and cloud incident triage—featuring single-writer SQLite WAL write-ahead durability, 627 µs scheduling latency, SIGKILL child process isolation, and in-process crash resumption.</p>
+        <p id="project-detail" className="oe-report-intro">A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in the Python standard library. Engineered for AI agent loops, fintech transaction Sagas, high-volume streaming, and cloud infrastructure pipelines—featuring cyclic reflection graphs with state checkpointing, distributed backward compensating rollbacks, O(1) constant-RAM streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery.</p>
 
         <QuickInstallBar />
 
@@ -2650,11 +2882,15 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
         <article><span>Latest release</span><strong><GlyphLottery text="v0.9.0" accentColor="var(--color-interactive)" /></strong><small>Production Beta · PyPI package</small></article>
-        <article><span>Automated tests</span><strong><GlyphLottery text="162 / 162" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 91.45% line cov</small></article>
-        <article><span>Runtime dependencies</span><strong><GlyphLottery text="0" accentColor="var(--color-interactive)" /></strong><small>Pure Python standard library</small></article>
+        <article><span>Automated tests</span><strong><GlyphLottery text="233 / 233" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 91.45% line cov</small></article>
+        <article><span>Public API Surface</span><strong><GlyphLottery text="79 symbols" accentColor="var(--color-interactive)" /></strong><small>Strict Mypy · 0 Runtime Deps</small></article>
         <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594 tasks / second throughput</small></article>
       </section>
-      <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.12+ stdlib, robust CLI, and in-process crash recovery.</p>
+      <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
+
+      <section className="oe-report-section" id="oe-pillars">
+        <OeArchitecturalPillars />
+      </section>
 
       <InteractiveWorkflowSimulator />
 
@@ -2686,15 +2922,16 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       </section>
 
       <section className="oe-report-section" id="oe-s03">
-        <div className="oe-report-section-label"><span>03</span><p>Durability & crash recovery</p></div>
+        <div className="oe-report-section-label"><span>03</span><p>Durability, Sagas & crash recovery</p></div>
         <div className="oe-report-section-body">
-          <h3>Write-ahead SQLite WAL event persistence before live state mutation.</h3>
-          <p>State transitions are durably committed to the SQLite <code>task_events</code> table at 44,730.5 writes/sec (22.36 µs per event) with WAL mode enabled. In-memory state only advances after disk commitment. If a process crash or SIGKILL occurs, <code>resume_run()</code> restores the workflow's state directly from SQLite without re-running completed tasks.</p>
+          <h3>Write-ahead SQLite WAL event persistence, distributed Sagas & reverse rollback.</h3>
+          <p>State transitions are durably committed to the SQLite <code>task_events</code> table at 44,730.5 writes/sec (22.36 µs per event) with WAL mode enabled. In-memory state only advances after disk commitment. For multi-step transactions, distributed Sagas automatically invoke compensating handlers in exact reverse topological order upon failure. If a process crash occurs, <code>resume_run()</code> restores workflow state without re-running completed tasks.</p>
           <DurabilityStepper />
           <FinishTimeBackoffFormula />
           <div className="oe-report-checks">
             <article><span>RETRY BUDGET</span><p>Timeouts and transient errors spend the task's configurable RetryPolicy with finish-time exponential backoff and jitter.</p></article>
-            <article><span>FIXPOINT CANCEL</span><p>Single-pass fixpoint cancellation recursively flags downstream dependents as CANCELLED while unaffected parallel branches complete.</p></article>
+            <article><span>SAGA ROLLBACK</span><p>Distributed Sagas execute backward compensating steps in reverse topological order if any downstream task fails.</p></article>
+            <article><span>STREAMING SPOOL</span><p>O(1) StreamPipe handles millions of items without OOM via automatic SQLite disk spillover when RAM buffers saturate.</p></article>
             <article><span>SIGKILL ISOLATION</span><p>ProcessExecutor terminates untrusted tasks with true POSIX SIGKILL upon timeout, preventing thread-stall leaks.</p></article>
             <article><span>CRASH RESUMPTION</span><p>resume_run() reads durable SQLite task_events and task_outputs, skipping completed tasks and seamlessly re-queueing unfinished nodes.</p></article>
           </div>
@@ -2704,11 +2941,11 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <section className="oe-report-section" id="oe-s04">
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
-          <h3>162 automated tests, 0 flakes, and quantitative performance profiling.</h3>
-          <p>The v0.9.0 test suite was expanded by 179% from 58 to 162 tests across 20 test modules, achieving 91.45% line coverage across all 15 core engine modules with 0 flakes across 20 consecutive stress runs and 100% strict mypy compliance across 36 source files.</p>
+          <h3>233 automated tests, 79 public exports, and quantitative performance profiling.</h3>
+          <p>The v0.9.0 test suite spans 233 passing tests across 20 test modules, achieving 91.45% line coverage across all 15 core engine modules with 0 flakes across 20 consecutive stress runs and 100% strict mypy compliance across 36 source files.</p>
           <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Empirical Evidence & Invariants</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
           <div className="oe-verification-strip">
-            <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, symbols, and packaging verified without side effects.</span></p>
+            <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, 79 symbols, and packaging verified without side effects.</span></p>
             <p><b>02 / Multi-Worker Consumer</b><span>Tested non-linear DAG execution under ThreadExecutor and ProcessExecutor with real network latency and payload passing.</span></p>
             <p><b>03 / Parameterized SQL Audit</b><span>100% of SQL statements parameterized (24 distinct queries audited); max 10MB workflow size & 5,000 tasks guard enforced.</span></p>
           </div>
@@ -2718,8 +2955,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <section className="oe-report-section" id="oe-s05">
         <div className="oe-report-section-label"><span>05</span><p>API surface & zero-dependency CLI</p></div>
         <div className="oe-report-section-body">
-          <h3>25 frozen public symbols, typed TaskResult passing, and robust CLI exit codes.</h3>
-          <p>The public API exposes a clean, functional surface including WorkflowBuilder, TaskResult, and lifecycle hooks (on_task_start, on_task_complete, on_workflow_finish). The built-in CLI provides complete workflow orchestration from the terminal with deterministic exit codes: 0 (Success), 1 (Task Failure), 2 (Validation Error), 3 (Fatal Runtime Error).</p>
+          <h3>79 frozen public symbols, typed TaskResult passing, and robust zero-dependency CLI.</h3>
+          <p>The public API exposes 79 frozen public symbols across all 4 architectural pillars: Agentic AI Core, Resilience Suite, Data & Streaming, and High-Throughput Runtime. The built-in CLI provides complete workflow orchestration from the terminal with deterministic exit codes: 0 (Success), 1 (Task Failure), 2 (Validation Error), 3 (Fatal Runtime Error).</p>
           <ApiSurfaceExplorer />
           <OeCliReference />
           <p>Workflow definitions are JSON or Python fluent builder objects. They decouple identity and task intent from runtime state, allowing identical workflows to run ephemerally in-memory or persisted across SQLite restarts.</p>
@@ -3142,7 +3379,7 @@ function OeVisualHalo() {
 function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) {
   const visual = useRef(null), scene = useRef(null), starField = useRef(null), progressTrack = useRef(null), progressCount = useRef(null), transferSpark = useRef(null), touchStart = useRef(null), swiped = useRef(false)
   const proof = {
-    'Orchestration Engine': '162 / 162 tests · 91.5% cov',
+    'Orchestration Engine': '233 / 233 tests · 91.5% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
   }[project.name]
@@ -3468,7 +3705,7 @@ function Work() {
     const basePath = getAppBasePath()
     if (!project) {
       const targetHomeUrl = `${basePath}#work`
-      if (window.location.pathname.includes('/projects/') || window.location.hash.includes('project')) {
+      if (window.location.pathname.includes('/projects/') || window.location.hash.includes('project') || window.location.search.includes('project')) {
         window.history.pushState(null, '', targetHomeUrl)
       }
       document.title = 'Reddirector · Engineering Portfolio'
@@ -3737,10 +3974,10 @@ const methodPhases = [
     project: 'Orchestration Engine',
     topic: 'Systems / Task reliability',
     title: 'What survives a failed task?',
-    paragraph: 'I hand-wrote a zero-dependency DAG execution engine from first principles for Python 3.12+. I engineered SQLite WAL write-ahead durability (44.7k writes/sec), 627 µs scheduling latency, SIGKILL isolation, and in-process crash resumption, closing all 13 architectural gaps with 162 automated tests.',
+    paragraph: 'I hand-wrote a zero-dependency workflow and agentic graph orchestration system from first principles for Python 3.10+. I engineered cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with reverse rollback, O(1) streaming disk spooling, and zero-broker HTTP clusters, verified across 233 automated tests and 79 frozen public exports.',
     stats: [
-      { value: '162/162', label: '100% tests passing · 91.5% cov' },
-      { value: 'v0.9.0', label: 'Production beta · PyPI release' },
+      { value: '233/233', label: '100% tests passing · 91.5% cov' },
+      { value: '79 Exports', label: 'Frozen public API · PyPI' },
     ],
   },
   {

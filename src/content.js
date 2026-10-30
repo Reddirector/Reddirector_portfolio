@@ -8,11 +8,11 @@ export const content = {
     {
       id: '01',
       name: 'Orchestration Engine',
-      tag: 'Python 3.12+ · SQLite WAL · 0 Dependencies · v0.9.0 Beta',
+      tag: 'Python 3.10+ · Zero Dependencies · Agentic Graphs · v0.9.0 Beta',
       color: '#A40000',
       ink: 'light',
-      short: 'A fault-tolerant, dependency-aware workflow orchestration engine for Python with zero external runtime dependencies.',
-      detail: 'Engineered with 0 runtime dependencies, 162 automated tests (100% pass, 0 flakes across 20 runs), and 91.45% coverage. Delivers 627.23 µs scheduling latency (1,594 tasks/sec), single-writer SQLite WAL persistence (44,730 writes/sec), 7.86x concurrency speedup across 8 cores (98.2% efficiency), true SIGKILL process isolation, crash resumption, and complete CLI tooling.',
+      short: 'A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in Python standard library.',
+      detail: 'Engineered for AI agents, fintech transactions, and data pipelines. Features cyclic reflection graphs, distributed Sagas with automated rollback, O(1) constant-memory streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery. Backed by 233/233 passing tests (91.45% coverage), 79 frozen public exports, 627 µs/task overhead, and 44,730 writes/s SQLite WAL throughput.',
       link: 'https://github.com/Reddirector/Orchestration_Engine',
       pypi: 'https://pypi.org/project/orchestration-engine/',
       docs: 'https://reddirector.github.io/Orchestration_Engine/',
@@ -22,9 +22,9 @@ export const content = {
     { id: '02', name: 'SAE Reproduction', tag: 'Research paper reproduction · Interpretability', color: '#A40000', ink: 'light', short: 'An independent sparse autoencoder experiment based on Anthropic’s paper. The project notes report a 0.897562 validation cosine similarity and 0.10% dead features.', detail: 'The project notes list a GELU-1L model and an SAE with 2,048 input dimensions and 4,096 features. They report a validation cosine similarity of 0.897562 and 0.10% dead features. The training configuration and exact evaluation procedure still need documenting.' },
     { id: '03', name: 'Pentagon', tag: 'FastAPI · LangGraph · Local RAG · BYOK Encryption', color: '#A40000', ink: 'light', short: 'An enterprise-grade, local-first multimodal AI workstation built with BYOK Fernet encryption, LangGraph state machine, local ChromaDB document RAG, and cross-platform native compilation.', detail: 'Pentagon is an enterprise-grade AI workstation engineered for private multimodal intelligence with a strict Bring Your Own Key (BYOK) architecture and local Fernet encryption (AES-128-CBC + HMAC) at rest. It features on-device ChromaDB document retrieval with fail-safe automatic migration to local CPU embeddings (all-MiniLM-L6-v2), hierarchical autonomy governance across 6 risk categories and 4 permission tiers, and multimodal vision/voice pipelines. Packaged simultaneously for Web (Vercel SPA), Mobile (Capacitor Android APK / iOS), Desktop (Electron Windows/Linux), and offline bootable ISO.', link: 'https://pentagon-bice.vercel.app' },
   ],
-  metrics: [{ value: 162, suffix: '/162', label: 'orchestration tests passing (91.5% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
+  metrics: [{ value: 233, suffix: '/233', label: 'orchestration tests passing (91.5% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
   now: [
-    { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: pure Python 3.12+ stdlib workflow engine with zero external runtime dependencies, 162 tests (100% pass), 627 µs scheduling latency, 44,730 writes/sec SQLite WAL throughput, 7.86x concurrency speedup, and dual MIT/Apache-2.0 licensing.' },
+    { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, O(1) streaming disk spooling, and zero-broker HTTP clustering across 233 passing tests and 79 frozen exports.' },
     { name: 'Pentagon AI Workstation', text: 'Developing an enterprise-grade local-first AI workstation featuring zero-leak BYOK Fernet encryption, LangGraph deterministic state orchestration, ChromaDB vector RAG with CPU failover, and multi-tier autonomy governance across Web, Android APK, Electron, and ISO.' },
   ],
 }

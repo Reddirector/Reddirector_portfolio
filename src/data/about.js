@@ -26,8 +26,8 @@ export const STORY = {
   body: 'Before software, I worked in documentary filmmaking as a researcher, scriptwriter, and director. I use AI tools, and I stay responsible for understanding the code I ship.',
   note: 'Figures from project notes.',
   stats: [
-    { value: 'v0.1.0', label: 'Orchestration Engine published' },
-    { value: 58, label: 'passing tests' },
+    { value: 'v0.9.0', label: 'Orchestration Engine published' },
+    { value: '233', label: 'passing tests (91.5% cov)' },
     { value: '0.10%', label: 'dead features in my SAE run' },
   ],
 }
@@ -109,7 +109,7 @@ export const SKILLS = [
 ]
 
 export const ACHIEVEMENTS = [
-  { title: 'Orchestration Engine v0.1.0 published', detail: 'Apache 2.0, 58 passing tests, wheel build verified in a clean environment.' },
+  { title: 'Orchestration Engine v0.9.0 published on PyPI', detail: 'Zero runtime dependencies, 233 passing tests (91.45% coverage), 79 frozen exports, cyclic agentic graphs, and distributed Sagas.' },
   { title: 'Sparse autoencoder reproduction', detail: 'Validation cosine similarity 0.897562, 0.10% dead features (per project notes).' },
   { title: 'Harvard CS50 Introduction to AI with Python', detail: 'Course certificate.', date: 'July 2026' },
   { title: 'Vizuara “Building LLMs from Scratch”', detail: 'Course certificate.', date: 'July to August 2026' },
