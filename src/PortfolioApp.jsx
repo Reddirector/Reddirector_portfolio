@@ -1412,84 +1412,798 @@ function OeConcurrencyBenchmarks() {
 }
 
 function OeArchitecturalPillars() {
+  const [selectedPillar, setSelectedPillar] = useState(0)
+
   const pillars = [
     {
       num: '01',
       title: 'Agentic AI Core',
-      module: 'state_graph.py',
+      module: 'state_graph.py · checkpointer.py',
       badge: 'Cyclic & Checkpointed',
+      highlight: 'Bounded by max_iterations (default: 10) · SQLite StateCheckpointer snapshots',
       desc: 'Built for autonomous multi-agent loops requiring reflection, criticism, and iterative self-correction without runaway generation.',
       points: [
         'Cyclic StateGraph enables looping back to prior steps (unlike strict DAGs).',
         'Guaranteed termination via strictly bounded max_iterations.',
-        'SQLite StateCheckpointer records full thread memory at every transition.',
+        'SQLite StateCheckpointer records full thread memory at every transition for cold pause/resume.',
       ],
+      metric: '3-Node Cyclic Loop',
+      metricSub: 'Bounded Reflection',
+      codeSnippet: `graph = StateGraph(state_schema=AgentState)
+graph.add_node("agent", call_llm)
+graph.add_node("critic", eval_code)
+graph.add_conditional_edges("critic", route_critique)
+graph.compile(checkpointer=SqliteCheckpointer("threads.db"))`
     },
     {
       num: '02',
       title: 'Resilience Suite',
-      module: 'sagas.py',
+      module: 'sagas.py · circuit_breaker.py',
       badge: 'Reverse Rollback',
+      highlight: 'Exact reverse topological rollback order · DLQ audit trail',
       desc: 'Guarantees eventual consistency across external microservices & fintech transactions without 2-phase commit databases.',
       points: [
         'Distributed Sagas automatically execute backward compensating steps if downstream fails.',
         'Compensations fire in exact reverse topological order of previously succeeded steps.',
         'Circuit breakers for LLM APIs, persistent Dead Letter Queue (DLQ), and per-task TTL.',
       ],
+      metric: 'Reverse Topological',
+      metricSub: 'Zero State Leaks',
+      codeSnippet: `saga = SagaBuilder("payment_fulfillment")
+saga.add_step("reserve", fn=reserve_funds, compensate=release_funds)
+saga.add_step("charge", fn=call_gateway, compensate=refund_charge)
+saga.add_step("license", fn=mint_license, compensate=revoke_license)
+result = run_saga(saga.build())`
     },
     {
       num: '03',
       title: 'Data & Streaming',
       module: 'streaming.py · sandbox.py',
       badge: 'O(1) RAM & Spooling',
+      highlight: '14.2 MB flat footprint · SQLite spillover table',
       desc: 'Constant-memory stream buffering and POSIX kernel resource controls for high-volume pipelines.',
       points: [
         'StreamPipe acts as an in-memory ring-buffer for token generators in O(1) constant RAM.',
         'Automatic SQLite disk-spillover table absorbs overflow when producers outpace consumers.',
-        'Multi-tenant priority queuing (CRITICAL, HIGH, DEFAULT, BATCH) eliminates starvation.',
         'POSIX kernel sandboxing via RLIMIT_AS (RAM) & RLIMIT_CPU with SIGTERM to SIGKILL.',
       ],
+      metric: 'O(1) Memory',
+      metricSub: '14.2 MB Flat RAM',
+      codeSnippet: `pipe = StreamPipe(buffer_size=1024, spillover_db="spool.db")
+for chunk in pipe.stream(token_generator):
+    process_chunk(chunk) # Consumes in constant RAM`
     },
     {
       num: '04',
       title: 'High-Throughput Runtime',
       module: 'coordinator.py · distributed.py',
       badge: 'Zero-Broker Cluster',
+      highlight: '44,730 writes/s WAL throughput · 627 µs coordinator latency',
       desc: 'Single-writer event loop driving local concurrency or pure Python HTTP worker clusters without Redis or RabbitMQ.',
       points: [
         'Single-Writer SQLite WAL coordinator handles 44,730 writes/s with zero lock contention.',
         'Native Asyncio engine coordinates 1,000+ concurrent I/O tasks alongside Process pools.',
         'Pure Python HTTP cluster (CoordinatorServer + WorkerAgent over stdlib) with sub-ms contracts.',
       ],
+      metric: '44,730 writes/s',
+      metricSub: '98.2% 8-Core Scaling',
+      codeSnippet: `server = CoordinatorServer(host="0.0.0.0", port=8000)
+agent = WorkerAgent(coordinator_url="http://10.0.0.1:8000")
+agent.start() # Pure Python stdlib HTTP worker cluster`
     },
   ]
 
   return (
-    <div className="oe-pillars-panel">
-      <div className="oe-pillars-head">
-        <div>
-          <span className="oe-pillars-tag">ARCHITECTURAL FOUNDATION</span>
-          <h4>Four Core Systems Engineered for Zero-Dependency Production</h4>
-        </div>
-        <small>Python 3.10+ Standard Library · 79 Frozen Public Symbols · 233 Passing Tests</small>
+    <div className="oe-bento-pillars-wrapper">
+      <div className="oe-bento-grid">
+        {pillars.map((p, idx) => {
+          const isHero = idx === 0 || idx === 3
+          return (
+            <article
+              key={p.num}
+              className={`oe-bento-card ${isHero ? 'oe-bento-card--hero' : ''} ${selectedPillar === idx ? 'is-selected' : ''}`}
+              onClick={() => setSelectedPillar(idx)}
+            >
+              <div className="oe-bento-card-header">
+                <div className="oe-bento-card-meta">
+                  <span className="oe-bento-card-num">{p.num}</span>
+                  <span className="oe-bento-card-badge">{p.badge}</span>
+                </div>
+                <div className="oe-bento-card-stat">
+                  <strong>{p.metric}</strong>
+                  <small>{p.metricSub}</small>
+                </div>
+              </div>
+
+              <div className="oe-bento-card-body">
+                <h4 className="oe-bento-card-title">{p.title}</h4>
+                <span className="oe-bento-card-module">{p.module}</span>
+                <p className="oe-bento-card-desc">{p.desc}</p>
+                <div className="oe-bento-card-highlight">
+                  <span className="oe-bento-card-hl-icon">⚡</span>
+                  <span>{p.highlight}</span>
+                </div>
+              </div>
+
+              <ul className="oe-bento-card-points">
+                {p.points.map((pt, i) => (
+                  <li key={i}>{pt}</li>
+                ))}
+              </ul>
+
+              <div className="oe-bento-card-code-preview">
+                <div className="oe-bento-code-head">
+                  <span>PYTHON 3.10+ STDLIB CONTRACT</span>
+                  <span className="oe-bento-code-tag">ACTIVE INVARIANT</span>
+                </div>
+                <pre>{p.codeSnippet}</pre>
+              </div>
+
+              <div className="oe-bento-corner oe-bento-corner--tl" aria-hidden="true" />
+              <div className="oe-bento-corner oe-bento-corner--br" aria-hidden="true" />
+            </article>
+          )
+        })}
       </div>
-      <div className="oe-pillars-grid">
-        {pillars.map((p) => (
-          <article key={p.num} className="oe-pillar-card">
-            <div className="oe-pillar-top">
-              <span className="oe-pillar-num">{p.num}</span>
-              <span className="oe-pillar-badge">{p.badge}</span>
+    </div>
+  )
+}
+
+function AgenticReflectionSim() {
+  const [phase, setPhase] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const timerRef = useRef(null)
+
+  const phases = [
+    {
+      id: 'ingest',
+      label: '01 · Goal Ingestion',
+      badge: 'PROMPT INPUT',
+      activeNode: 'prompt',
+      title: 'Synthesize thread-safe SQLite connection pool with retry',
+      desc: 'User prompt ingested into Agentic StateGraph. Initial thread state initialized with thread_id: "ag-9921".',
+      iteration: 1,
+      evalPassed: null,
+      code: '# Ingesting user prompt into StateGraph\ngraph = StateGraph(state_schema=AgentState)\ngraph.add_node("generator", call_llm_code_gen)\ngraph.add_node("critic", run_invariant_tests)',
+      log: '[00:00.012] Thread initialized. StateCheckpointer snapshot committed (v0).'
+    },
+    {
+      id: 'gen1',
+      label: '02 · LLM Draft 1',
+      badge: 'GENERATION',
+      activeNode: 'generator',
+      title: 'LLM outputs naive connection pool without write serialization',
+      desc: 'Generator node calls LLM. Generates naive code opening multiple write connections simultaneously.',
+      iteration: 1,
+      evalPassed: null,
+      code: 'class ConnectionPool:\n    def get_conn(self):\n        return sqlite3.connect("data.db")  # NAIVE: concurrent writes will lock!',
+      log: '[00:00.340] Generator generated 48 lines. Token count: 312. Passing to Critic node.'
+    },
+    {
+      id: 'critic1',
+      label: '03 · Critic Audit (Failure)',
+      badge: 'INVARIANT BREACH',
+      activeNode: 'critic',
+      title: 'Concurrency stress test triggers SQLite database lock failure',
+      desc: 'Critic executes 16 parallel tasks. SQLite throws OperationalError: database is locked. Critic returns pass=False with detailed traceback.',
+      iteration: 1,
+      evalPassed: false,
+      code: 'FAILED: sqlite3.OperationalError: database is locked\nTest Suite: 12/16 workers stalled on write lock contention.\nCritic Verdict: FAIL -> Requires single-writer coordinator pattern.',
+      log: '[00:00.785] Critic audit FAIL. Concurrency test crashed with lock contention.'
+    },
+    {
+      id: 'checkpoint',
+      label: '04 · Checkpoint & Loopback',
+      badge: 'STATE CHECKPOINT',
+      activeNode: 'router',
+      title: 'StateCheckpointer saves thread snapshot; router loops back to generator',
+      desc: 'Conditional router inspects state["eval_passed"] == False. Checks iteration count (1 < max_iterations: 3). Appends critique context to thread memory and routes back to Generator.',
+      iteration: 1,
+      evalPassed: false,
+      code: '# Router conditional edge\ndef route_eval(state: AgentState) -> str:\n    if state.eval_passed: return "end"\n    if state.iteration >= state.max_iterations: return "dlq"\n    return "generator"  # Loop back with critique context',
+      log: '[00:01.020] StateCheckpointer committed thread snapshot #1 (24.1 KB). Routing back to Generator.'
+    },
+    {
+      id: 'gen2',
+      label: '05 · Reflection Draft 2',
+      badge: 'SELF-CORRECTION',
+      activeNode: 'generator',
+      title: 'LLM refactors architecture with Single-Writer serialized write queue',
+      desc: 'Generator receives prior failure trace in message history. Rewrites connection pool using serialized single-writer worker thread + WAL journal mode.',
+      iteration: 2,
+      evalPassed: null,
+      code: 'class SerializedWritePool:\n    def __init__(self):\n        self.write_queue = Queue()\n        self._worker = Thread(target=self._writer_loop, daemon=True)\n        self._worker.start()\n    # All writes routed through single thread; zero lock contention',
+      log: '[00:01.450] Generator synthesized refactored architecture with write queue. Passing to Critic.'
+    },
+    {
+      id: 'critic2',
+      label: '06 · Critic Re-Audit (Passed)',
+      badge: '100% INVARIANTS PASS',
+      activeNode: 'critic',
+      title: 'All 16 concurrent workers complete in 627 µs with 0 lock errors',
+      desc: 'Critic re-runs stress tests against refactored implementation. 162/162 checks pass with 0 flakes. Concurrency scaling efficiency measured at 98.2%.',
+      iteration: 2,
+      evalPassed: true,
+      code: 'PASSED: 162/162 tests passed.\nMeasured Latency: 627.23 µs / task\nContention Errors: 0\nCritic Verdict: PASS -> Routing to END.',
+      log: '[00:01.890] Critic audit SUCCESS. Invariants verified across 16 worker threads.'
+    },
+    {
+      id: 'end',
+      label: '07 · Terminal END',
+      badge: 'COMPLETED',
+      activeNode: 'end',
+      title: 'Verified artifacts committed to persistent output store',
+      desc: 'StateGraph reaches terminal END node. Final code artifact and verification certificate returned to caller. Iterations spent: 2 / 3.',
+      iteration: 2,
+      evalPassed: true,
+      code: 'result = graph.invoke({"goal": "connection_pool"})\nassert result.status == "SUCCEEDED"\nassert result.iteration == 2\nprint("Agent workflow finished in 2 iterations.")',
+      log: '[00:02.110] StateGraph reached END. Final state committed to SQLite task_events. 0 errors.'
+    }
+  ]
+
+  const cur = phases[phase]
+
+  const togglePlay = () => setIsPlaying(!isPlaying)
+  const stepNext = () => setPhase(p => (p + 1) % phases.length)
+  const stepPrev = () => setPhase(p => (p - 1 + phases.length) % phases.length)
+  const reset = () => { setIsPlaying(false); setPhase(0); }
+
+  useEffect(() => {
+    if (!isPlaying) {
+      if (timerRef.current) clearInterval(timerRef.current)
+      return
+    }
+    timerRef.current = setInterval(() => {
+      setPhase(p => {
+        if (p >= phases.length - 1) {
+          setIsPlaying(false)
+          return p
+        }
+        return p + 1
+      })
+    }, 2800)
+    return () => clearInterval(timerRef.current)
+  }, [isPlaying, phases.length])
+
+  return (
+    <div className="oe-sim-container">
+      <div className="oe-sim-topbar">
+        <div className="oe-sim-phase-indicator">
+          <span className="oe-sim-phase-pill">{cur.label}</span>
+          <span className={`oe-sim-state-tag ${cur.evalPassed === false ? 'is-error' : cur.evalPassed === true ? 'is-success' : 'is-active'}`}>
+            {cur.badge}
+          </span>
+        </div>
+        <div className="oe-sim-controls">
+          <button type="button" onClick={stepPrev} className="oe-sim-btn oe-sim-btn--step" title="Previous phase">◂ Step</button>
+          <button type="button" onClick={togglePlay} className="oe-sim-btn oe-sim-btn--play">
+            {isPlaying ? '❚❚ Pause' : '▶ Play Simulation'}
+          </button>
+          <button type="button" onClick={stepNext} className="oe-sim-btn oe-sim-btn--step" title="Next phase">Step ▸</button>
+          <button type="button" onClick={reset} className="oe-sim-btn oe-sim-btn--reset" title="Reset simulation">↺</button>
+        </div>
+      </div>
+
+      <div className="oe-sim-visual-canvas">
+        <svg viewBox="0 0 880 180" className="oe-sim-svg-stage" aria-label="Agentic reflection state graph">
+          <defs>
+            <marker id="oe-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="rgba(255,255,255,0.4)" />
+            </marker>
+            <marker id="oe-arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="#e5484d" />
+            </marker>
+            <marker id="oe-arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="#4ade80" />
+            </marker>
+          </defs>
+
+          {/* Forward Connections */}
+          <line x1="120" y1="70" x2="200" y2="70" stroke="rgba(255,255,255,0.2)" strokeWidth="2" markerEnd="url(#oe-arrow)" />
+          <line x1="330" y1="70" x2="410" y2="70" stroke="rgba(255,255,255,0.2)" strokeWidth="2" markerEnd="url(#oe-arrow)" />
+          <line x1="540" y1="70" x2="620" y2="70" stroke="rgba(255,255,255,0.2)" strokeWidth="2" markerEnd="url(#oe-arrow)" />
+          <line x1="730" y1="70" x2="800" y2="70" stroke={cur.evalPassed === true ? '#4ade80' : 'rgba(255,255,255,0.2)'} strokeWidth="2" markerEnd={cur.evalPassed === true ? 'url(#oe-arrow-green)' : 'url(#oe-arrow)'} />
+
+          {/* Reflection Backchannel (Arc from Router to Generator) */}
+          <path
+            d="M 675 95 C 675 155, 265 155, 265 95"
+            fill="none"
+            stroke={phase === 3 ? '#e5484d' : 'rgba(229,72,77,0.3)'}
+            strokeWidth={phase === 3 ? '3' : '1.5'}
+            strokeDasharray={phase === 3 ? '6 4' : 'none'}
+            className={phase === 3 ? 'oe-svg-pulse-path' : ''}
+          />
+          <text x="470" y="160" textAnchor="middle" fill={phase === 3 ? '#e5484d' : 'rgba(255,255,255,0.4)'} fontSize="10" fontFamily="var(--font-mono)">
+            ↺ REFLECTION LOOPBACK (Critique Context + StateCheckpointer snapshot)
+          </text>
+
+          {/* Node 1: Prompt */}
+          <g className={`oe-svg-node ${cur.activeNode === 'prompt' ? 'is-active' : ''}`}>
+            <rect x="20" y="45" width="100" height="50" rx="4" fill={cur.activeNode === 'prompt' ? 'rgba(229,72,77,0.2)' : 'rgba(255,255,255,0.04)'} stroke={cur.activeNode === 'prompt' ? '#e5484d' : 'rgba(255,255,255,0.2)'} />
+            <text x="70" y="68" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="600" fontFamily="var(--font-mono)">USER GOAL</text>
+            <text x="70" y="83" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="9" fontFamily="var(--font-mono)">ag-9921</text>
+          </g>
+
+          {/* Node 2: Generator */}
+          <g className={`oe-svg-node ${cur.activeNode === 'generator' ? 'is-active' : ''}`}>
+            <rect x="200" y="45" width="130" height="50" rx="4" fill={cur.activeNode === 'generator' ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)'} stroke={cur.activeNode === 'generator' ? '#60a5fa' : 'rgba(255,255,255,0.2)'} />
+            <text x="265" y="68" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="600" fontFamily="var(--font-mono)">GENERATOR</text>
+            <text x="265" y="83" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="9" fontFamily="var(--font-mono)">call_llm_code</text>
+          </g>
+
+          {/* Node 3: Critic */}
+          <g className={`oe-svg-node ${cur.activeNode === 'critic' ? 'is-active' : ''}`}>
+            <rect
+              x="410"
+              y="45"
+              width="130"
+              height="50"
+              rx="4"
+              fill={cur.evalPassed === false ? 'rgba(229,72,77,0.25)' : cur.evalPassed === true ? 'rgba(16,185,129,0.2)' : cur.activeNode === 'critic' ? 'rgba(234,179,8,0.2)' : 'rgba(255,255,255,0.04)'}
+              stroke={cur.evalPassed === false ? '#e5484d' : cur.evalPassed === true ? '#4ade80' : cur.activeNode === 'critic' ? '#eab308' : 'rgba(255,255,255,0.2)'}
+            />
+            <text x="475" y="68" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="600" fontFamily="var(--font-mono)">CRITIC / AUDIT</text>
+            <text x="475" y="83" textAnchor="middle" fill={cur.evalPassed === false ? '#e5484d' : cur.evalPassed === true ? '#4ade80' : 'rgba(255,255,255,0.5)'} fontSize="9" fontFamily="var(--font-mono)">
+              {cur.evalPassed === false ? 'FAIL (Lock)' : cur.evalPassed === true ? 'PASS (162/162)' : 'eval_invariants'}
+            </text>
+          </g>
+
+          {/* Node 4: Router */}
+          <g className={`oe-svg-node ${cur.activeNode === 'router' ? 'is-active' : ''}`}>
+            <rect x="620" y="45" width="110" height="50" rx="4" fill={cur.activeNode === 'router' ? 'rgba(229,72,77,0.2)' : 'rgba(255,255,255,0.04)'} stroke={cur.activeNode === 'router' ? '#e5484d' : 'rgba(255,255,255,0.2)'} />
+            <text x="675" y="68" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="600" fontFamily="var(--font-mono)">ROUTER</text>
+            <text x="675" y="83" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="9" fontFamily="var(--font-mono)">iteration {cur.iteration}/3</text>
+          </g>
+
+          {/* Node 5: Terminal END */}
+          <g className={`oe-svg-node ${cur.activeNode === 'end' ? 'is-active' : ''}`}>
+            <rect x="800" y="45" width="70" height="50" rx="4" fill={cur.activeNode === 'end' ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.04)'} stroke={cur.activeNode === 'end' ? '#4ade80' : 'rgba(255,255,255,0.2)'} />
+            <text x="835" y="74" textAnchor="middle" fill={cur.activeNode === 'end' ? '#4ade80' : '#fff'} fontSize="11" fontWeight="700" fontFamily="var(--font-mono)">END</text>
+          </g>
+        </svg>
+      </div>
+
+      <div className="oe-sim-detail-grid">
+        <div className="oe-sim-detail-card">
+          <div className="oe-sim-card-head">
+            <span>ACTIVE PHASE DESCRIPTION</span>
+            <span className="oe-sim-iter-badge">ITERATION {cur.iteration} / 3</span>
+          </div>
+          <h4>{cur.title}</h4>
+          <p>{cur.desc}</p>
+          <div className="oe-sim-code-box">
+            <span className="oe-sim-code-label">LIVE PYTHON STATE TRANSITION</span>
+            <pre>{cur.code}</pre>
+          </div>
+        </div>
+
+        <div className="oe-sim-detail-card oe-sim-detail-card--log">
+          <div className="oe-sim-card-head">
+            <span>SQLITE WAL EVENT STREAM</span>
+            <span className="oe-sim-live-pulse" />
+          </div>
+          <div className="oe-sim-log-scroll">
+            <div className="oe-sim-log-line is-meta"># Thread ID: ag-9921 · Database: :memory: / WAL mode</div>
+            <div className="oe-sim-log-line">{cur.log}</div>
+            {phase >= 3 && <div className="oe-sim-log-line is-checkpoint">✓ StateCheckpointer commit: thread_id="ag-9921", step=1, state_size=24,680 bytes</div>}
+            {phase >= 5 && <div className="oe-sim-log-line is-pass">✓ Concurrency invariant verified: 16 threads, 0 deadlocks, latency 627.23 µs</div>}
+            {phase === 6 && <div className="oe-sim-log-line is-end">★ TERMINAL SUCCESS: Workflow finished cleanly in 2 reflection iterations.</div>}
+          </div>
+          <div className="oe-sim-invariants-strip">
+            <div><span>Max Iterations Guard:</span> <b>3 (Enforced)</b></div>
+            <div><span>State Durability:</span> <b>SQLite WAL (100%)</b></div>
+            <div><span>Infinite Loop Risk:</span> <b>0% (Proven Bounded)</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DistributedSagasSim() {
+  const [mode, setMode] = useState('fail') // 'fail' or 'clean'
+  const [stepIndex, setStepIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const timerRef = useRef(null)
+
+  const steps = [
+    { id: 'auth', name: 'Step 1: Auth & Reserve Hold', target: 'reserve_funds($450)', comp: 'release_funds($450)' },
+    { id: 'inv', name: 'Step 2: Lock Warehouse SKU', target: 'lock_inventory(SKU-8849)', comp: 'unlock_inventory(SKU-8849)' },
+    { id: 'pay', name: 'Step 3: Charge Payment Gateway', target: 'POST /v1/charges', comp: 'refund_charge()' },
+    { id: 'lic', name: 'Step 4: Issue Cryptographic Key', target: 'mint_license_key()', comp: 'revoke_license()' },
+  ]
+
+  // Sequence of phases
+  // fail mode: 0 (idle), 1 (step 1 ok), 2 (step 2 ok), 3 (step 3 fails!), 4 (compensate step 2), 5 (compensate step 1 -> rolled back)
+  // clean mode: 0 (idle), 1 (step 1 ok), 2 (step 2 ok), 3 (step 3 ok), 4 (step 4 ok -> completed)
+
+  const maxPhases = mode === 'fail' ? 5 : 4
+
+  const stepNext = () => setStepIndex(s => (s + 1) % (maxPhases + 1))
+  const stepPrev = () => setStepIndex(s => (s - 1 + (maxPhases + 1)) % (maxPhases + 1))
+  const reset = () => { setIsPlaying(false); setStepIndex(0); }
+
+  useEffect(() => {
+    if (!isPlaying) {
+      if (timerRef.current) clearInterval(timerRef.current)
+      return
+    }
+    timerRef.current = setInterval(() => {
+      setStepIndex(s => {
+        if (s >= maxPhases) {
+          setIsPlaying(false)
+          return s
+        }
+        return s + 1
+      })
+    }, 2400)
+    return () => clearInterval(timerRef.current)
+  }, [isPlaying, maxPhases])
+
+  return (
+    <div className="oe-sim-container">
+      <div className="oe-sim-topbar">
+        <div className="oe-sim-phase-indicator">
+          <span className="oe-sim-phase-pill">
+            {mode === 'fail'
+              ? stepIndex === 3 ? 'ALERT: STEP 3 FAILED (GATEWAY TIMEOUT)'
+              : stepIndex > 3 ? `REVERSE ROLLBACK CASCADE (Phase ${stepIndex - 3} of 2)`
+              : `FORWARD EXECUTION (Step ${stepIndex} of 4)`
+              : `FORWARD EXECUTION (Step ${stepIndex} of 4)`}
+          </span>
+          <span className={`oe-sim-state-tag ${mode === 'fail' && stepIndex >= 3 ? 'is-error' : 'is-success'}`}>
+            {mode === 'fail' && stepIndex >= 5 ? 'ROLLED_BACK' : mode === 'clean' && stepIndex === 4 ? 'COMPLETED' : 'RUNNING'}
+          </span>
+        </div>
+        <div className="oe-sim-controls">
+          <div className="oe-sim-mode-toggle">
+            <button
+              type="button"
+              className={`oe-sim-mode-btn ${mode === 'fail' ? 'is-active' : ''}`}
+              onClick={() => { setMode('fail'); reset(); }}
+            >
+              Simulate Failure & Reverse Rollback
+            </button>
+            <button
+              type="button"
+              className={`oe-sim-mode-btn ${mode === 'clean' ? 'is-active' : ''}`}
+              onClick={() => { setMode('clean'); reset(); }}
+            >
+              Simulate Clean Happy Path
+            </button>
+          </div>
+          <button type="button" onClick={stepPrev} className="oe-sim-btn oe-sim-btn--step">◂</button>
+          <button type="button" onClick={() => setIsPlaying(!isPlaying)} className="oe-sim-btn oe-sim-btn--play">
+            {isPlaying ? '❚❚' : '▶ Play'}
+          </button>
+          <button type="button" onClick={stepNext} className="oe-sim-btn oe-sim-btn--step">▸</button>
+          <button type="button" onClick={reset} className="oe-sim-btn oe-sim-btn--reset">↺</button>
+        </div>
+      </div>
+
+      <div className="oe-saga-pipeline">
+        {steps.map((st, i) => {
+          let stepStatus = 'PENDING'
+          let isCompensated = false
+
+          if (mode === 'clean') {
+            if (stepIndex > i) stepStatus = 'SUCCEEDED'
+            else if (stepIndex === i + 1) stepStatus = 'RUNNING'
+          } else {
+            // Failure mode
+            if (i === 0) {
+              if (stepIndex >= 5) { stepStatus = 'ROLLED_BACK'; isCompensated = true; }
+              else if (stepIndex >= 1) stepStatus = 'SUCCEEDED'
+            } else if (i === 1) {
+              if (stepIndex >= 4) { stepStatus = 'ROLLED_BACK'; isCompensated = true; }
+              else if (stepIndex >= 2) stepStatus = 'SUCCEEDED'
+            } else if (i === 2) {
+              if (stepIndex >= 3) stepStatus = 'FAILED'
+            } else if (i === 3) {
+              if (stepIndex >= 3) stepStatus = 'SKIPPED'
+            }
+          }
+
+          return (
+            <div key={st.id} className={`oe-saga-node-card status-${stepStatus.toLowerCase()}`}>
+              <div className="oe-saga-card-top">
+                <span className="oe-saga-step-num">0{i + 1}</span>
+                <span className={`oe-saga-badge is-${stepStatus.toLowerCase()}`}>{stepStatus}</span>
+              </div>
+              <h5 className="oe-saga-card-title">{st.name}</h5>
+              <div className="oe-saga-card-action">
+                <small>FORWARD ACTION:</small>
+                <code>{st.target}</code>
+              </div>
+              <div className={`oe-saga-card-comp ${isCompensated ? 'is-fired' : ''}`}>
+                <small>COMPENSATION HANDLER:</small>
+                <code>{st.comp}</code>
+                {isCompensated && <span className="oe-saga-comp-tag">↶ COMPENSATED</span>}
+              </div>
             </div>
-            <h5 className="oe-pillar-title">{p.title}</h5>
-            <span className="oe-pillar-module">{p.module}</span>
-            <p className="oe-pillar-desc">{p.desc}</p>
-            <ul className="oe-pillar-points">
-              {p.points.map((pt, i) => (
-                <li key={i}>{pt}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
+          )
+        })}
+      </div>
+
+      <div className="oe-saga-explanation">
+        <div className="oe-saga-log-pane">
+          <span className="oe-saga-log-head">TRANSACTION AUDIT LOG</span>
+          <pre>
+            {mode === 'fail' && stepIndex >= 3
+              ? `[00:01.210] ERROR: Payment Gateway returned HTTP 504 Gateway Timeout.
+[00:01.215] SAGA EXECUTOR: Initiating backward compensating rollback in reverse topological order.
+${stepIndex >= 4 ? '[00:01.350] COMPENSATING Step 2: unlock_inventory(SKU-8849) -> OK\n' : ''}${stepIndex >= 5 ? '[00:01.480] COMPENSATING Step 1: release_funds($450) -> OK\n[00:01.500] SAGA TERMINAL: Status ROLLED_BACK. Zero orphaned locks. Event logged to DLQ.' : ''}`
+              : `[00:00.100] Step 1: Auth & Reserve Hold -> SUCCEEDED\n${stepIndex >= 2 ? '[00:00.350] Step 2: Lock Warehouse SKU -> SUCCEEDED\n' : ''}${stepIndex >= 3 ? '[00:00.620] Step 3: Charge Payment Gateway -> SUCCEEDED\n' : ''}${stepIndex >= 4 ? '[00:00.890] Step 4: Issue Cryptographic Key -> SUCCEEDED\n[00:00.910] SAGA TERMINAL: Transaction completed cleanly with full persistence.' : ''}`}
+          </pre>
+        </div>
+        <div className="oe-saga-facts-pane">
+          <div className="oe-saga-fact">
+            <b>Reverse Topological Order:</b> Compensations execute in exact reverse sequence (Step 2 $\to$ Step 1), eliminating deadlock and foreign-key constraint violations.
+          </div>
+          <div className="oe-saga-fact">
+            <b>Zero Infrastructure:</b> Operates without Redis, Celery, or JVM Saga brokers. All compensation state committed to embedded SQLite WAL.
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StreamingDiskSpoolSim() {
+  const [inflowBurst, setInflowBurst] = useState(true)
+  const [consumerFast, setConsumerFast] = useState(false)
+  const [bufferedCount, setBufferedCount] = useState(840)
+  const [spooledCount, setSpooledCount] = useState(48210)
+  const [totalProcessed, setTotalProcessed] = useState(52040)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const inflow = inflowBurst ? 240 : 40
+      const drain = consumerFast ? 180 : 35
+      const net = inflow - drain
+
+      setBufferedCount(prev => {
+        const next = Math.max(120, Math.min(1024, prev + net))
+        if (next >= 800) {
+          setSpooledCount(s => s + (inflowBurst ? 150 : 10))
+        }
+        return next
+      })
+      setTotalProcessed(t => t + drain)
+    }, 250)
+    return () => clearInterval(timer)
+  }, [inflowBurst, consumerFast])
+
+  const bufferPct = Math.min(100, Math.round((bufferedCount / 1024) * 100))
+  const isSpoolingActive = bufferedCount >= 800
+
+  return (
+    <div className="oe-sim-container">
+      <div className="oe-sim-topbar">
+        <div className="oe-sim-phase-indicator">
+          <span className="oe-sim-phase-pill">
+            {isSpoolingActive ? '⚡ BUFFER SATURATED -> DISK SPILLOVER ACTIVE' : 'STEADY STREAMING (IN-RAM)'}
+          </span>
+          <span className="oe-sim-state-tag is-active">O(1) CONSTANT FOOTPRINT</span>
+        </div>
+        <div className="oe-sim-controls">
+          <button
+            type="button"
+            className={`oe-sim-mode-btn ${inflowBurst ? 'is-active' : ''}`}
+            onClick={() => setInflowBurst(!inflowBurst)}
+          >
+            {inflowBurst ? 'Inflow: Burst (10,000/s)' : 'Inflow: Normal (1,000/s)'}
+          </button>
+          <button
+            type="button"
+            className={`oe-sim-mode-btn ${consumerFast ? 'is-active' : ''}`}
+            onClick={() => setConsumerFast(!consumerFast)}
+          >
+            {consumerFast ? 'Consumer: Fast (5,000/s)' : 'Consumer: Throttled (500/s)'}
+          </button>
+        </div>
+      </div>
+
+      <div className="oe-stream-gauges-grid">
+        <div className="oe-gauge-card">
+          <div className="oe-gauge-head">
+            <span>PROCESS RAM CONSUMPTION</span>
+            <span className="oe-gauge-badge is-green">FLAT GUARANTEE</span>
+          </div>
+          <div className="oe-gauge-number">
+            14.2 <span>MB</span>
+          </div>
+          <div className="oe-gauge-track">
+            <div className="oe-gauge-bar is-green" style={{ width: '18%' }} />
+          </div>
+          <small>Strictly bounded regardless of whether stream has 100 or 10,000,000 chunks.</small>
+        </div>
+
+        <div className="oe-gauge-card">
+          <div className="oe-gauge-head">
+            <span>IN-MEMORY RING BUFFER</span>
+            <span className={`oe-gauge-badge ${isSpoolingActive ? 'is-warn' : 'is-green'}`}>
+              {bufferedCount} / 1024
+            </span>
+          </div>
+          <div className="oe-gauge-number">
+            {bufferPct}<span>%</span>
+          </div>
+          <div className="oe-gauge-track">
+            <div className={`oe-gauge-bar ${isSpoolingActive ? 'is-amber' : 'is-green'}`} style={{ width: `${bufferPct}%` }} />
+          </div>
+          <small>{isSpoolingActive ? 'Overflow diverted to SQLite WAL disk spool table.' : 'Buffered in RAM ring buffer.'}</small>
+        </div>
+
+        <div className="oe-gauge-card">
+          <div className="oe-gauge-head">
+            <span>SQLITE SPOOL TABLE CHUNKS</span>
+            <span className="oe-gauge-badge is-red">44.7K WRITES/S</span>
+          </div>
+          <div className="oe-gauge-number">
+            {spooledCount.toLocaleString()} <span>items</span>
+          </div>
+          <div className="oe-gauge-track">
+            <div className="oe-gauge-bar is-red" style={{ width: `${Math.min(100, spooledCount / 600)}%` }} />
+          </div>
+          <small>Preserves backpressure; consumers drain from disk without memory pressure.</small>
+        </div>
+
+        <div className="oe-gauge-card">
+          <div className="oe-gauge-head">
+            <span>CONSUMED & SINKED</span>
+            <span className="oe-gauge-badge is-blue">CONTINUOUS</span>
+          </div>
+          <div className="oe-gauge-number">
+            {totalProcessed.toLocaleString()} <span>items</span>
+          </div>
+          <div className="oe-gauge-track">
+            <div className="oe-gauge-bar is-blue" style={{ width: '85%' }} />
+          </div>
+          <small>Downstream sink processing chunks with 0 memory bloat.</small>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function KernelSandboxSim() {
+  const [scenario, setScenario] = useState('timeout') // 'timeout', 'oom', 'clean'
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState('idle') // 'idle', 'running', 'sigkilled', 'caught_oom', 'clean_exit'
+
+  const runScenario = (sc) => {
+    setScenario(sc)
+    setProgress(0)
+    setStatus('running')
+
+    let p = 0
+    const interval = setInterval(() => {
+      p += 15
+      setProgress(p)
+      if (p >= 100) {
+        clearInterval(interval)
+        if (sc === 'timeout') setStatus('sigkilled')
+        else if (sc === 'oom') setStatus('caught_oom')
+        else setStatus('clean_exit')
+      }
+    }, 200)
+  }
+
+  return (
+    <div className="oe-sim-container">
+      <div className="oe-sim-topbar">
+        <div className="oe-sim-phase-indicator">
+          <span className="oe-sim-phase-pill">POSIX KERNEL RESOURCE SANDBOX</span>
+          <span className={`oe-sim-state-tag ${status === 'sigkilled' || status === 'caught_oom' ? 'is-error' : status === 'clean_exit' ? 'is-success' : 'is-active'}`}>
+            {status === 'idle' ? 'STANDBY' : status.toUpperCase()}
+          </span>
+        </div>
+        <div className="oe-sim-controls">
+          <button type="button" className={`oe-sim-mode-btn ${scenario === 'timeout' ? 'is-active' : ''}`} onClick={() => runScenario('timeout')}>
+            Simulate CPU Infinite Spinlock (SIGKILL)
+          </button>
+          <button type="button" className={`oe-sim-mode-btn ${scenario === 'oom' ? 'is-active' : ''}`} onClick={() => runScenario('oom')}>
+            Simulate Memory Allocation Bomb (RLIMIT_AS)
+          </button>
+          <button type="button" className={`oe-sim-mode-btn ${scenario === 'clean' ? 'is-active' : ''}`} onClick={() => runScenario('clean')}>
+            Simulate Compliant Task
+          </button>
+        </div>
+      </div>
+
+      <div className="oe-sandbox-display">
+        <div className="oe-sandbox-worker-card">
+          <div className="oe-sandbox-head">
+            <div>
+              <span className="oe-sandbox-pid">WORKER PROCESS · PID 74218</span>
+              <h4>ProcessExecutor POSIX Isolation Container</h4>
+            </div>
+            <span className={`oe-sandbox-pid-tag status-${status}`}>
+              {status === 'sigkilled' ? 'SIGKILL (-9)' : status === 'caught_oom' ? 'RLIMIT_AS TRAPPED' : status === 'clean_exit' ? 'EXIT (0)' : 'ALIVE'}
+            </span>
+          </div>
+
+          <div className="oe-sandbox-metrics">
+            <div className="oe-sandbox-metric">
+              <span>CPU Execution Time (Limit: 3.0s)</span>
+              <strong>{scenario === 'timeout' ? `${(progress * 0.035).toFixed(2)}s` : '0.04s'}</strong>
+              <div className="oe-sandbox-track">
+                <div className={`oe-sandbox-fill ${scenario === 'timeout' && progress > 80 ? 'is-red' : ''}`} style={{ width: `${scenario === 'timeout' ? progress : 12}%` }} />
+              </div>
+            </div>
+            <div className="oe-sandbox-metric">
+              <span>Virtual Memory Footprint (RLIMIT_AS: 256 MB)</span>
+              <strong>{scenario === 'oom' ? `${Math.round(progress * 2.8)} MB` : '18.4 MB'}</strong>
+              <div className="oe-sandbox-track">
+                <div className={`oe-sandbox-fill ${scenario === 'oom' && progress > 80 ? 'is-red' : ''}`} style={{ width: `${scenario === 'oom' ? progress : 14}%` }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="oe-sandbox-output">
+            <span className="oe-sandbox-output-label">KERNEL SIGNALS & REAPER LOG</span>
+            <pre>
+              {status === 'sigkilled'
+                ? `[00:03.001] WARNING: Task exceeded execution deadline (3.0s limit).
+[00:03.004] KERNEL DISPATCH: Issued SIGTERM with 200ms grace period. Process unresponsive.
+[00:03.205] KERNEL DISPATCH: Issued true POSIX SIGKILL to child PID 74218. Process reaped cleanly.
+[00:03.210] INVARIANT PRESERVED: Coordinator event loop never blocked; 0 orphaned zombie processes.`
+                : status === 'caught_oom'
+                ? `[00:00.820] ALLOCATION AUDIT: Worker attempted to allocate chunk > 256 MB RLIMIT_AS quota.
+[00:00.824] KERNEL INTERCEPT: setrlimit memory guard tripped. Caught with MemoryError inside sandbox.
+[00:00.830] INVARIANT PRESERVED: Host operating system protected from Linux kernel OOM killer.`
+                : status === 'clean_exit'
+                ? `[00:00.042] Task completed successfully in 42 ms. Exit code 0.
+[00:00.045] Output transferred to coordinator via IPC pipe.`
+                : `Ready. Click a scenario button above to trigger kernel resource enforcement.`}
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OeRuntimeLab() {
+  const [activeSim, setActiveSim] = useState('reflection')
+
+  const tabs = [
+    { id: 'reflection', num: '01', title: 'Agentic Reflection Loop', badge: 'CYCLIC GRAPH', desc: 'LLM synthesis -> Critic validation -> StateCheckpointer -> Auto-correction' },
+    { id: 'sagas', num: '02', title: 'Distributed Sagas Rollback', badge: 'REVERSE ROLLBACK', desc: 'Simulate downstream failure & reverse compensating transaction cascade' },
+    { id: 'streaming', num: '03', title: 'O(1) Streaming & Disk Spool', badge: 'CONSTANT RAM', desc: 'Real-time telemetry showing ring buffer saturation & SQLite spillover' },
+    { id: 'sandbox', num: '04', title: 'Kernel Sandbox & SIGKILL', badge: 'POSIX TIMEOUT', desc: 'OS resource quota enforcement (RLIMIT_AS, RLIMIT_CPU) & process reaping' },
+  ]
+
+  return (
+    <div className="oe-runtime-lab-panel">
+      <div className="oe-runtime-lab-head">
+        <div className="oe-runtime-lab-tabs" role="tablist">
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={activeSim === t.id}
+              className={`oe-runtime-tab-btn ${activeSim === t.id ? 'is-active' : ''}`}
+              onClick={() => setActiveSim(t.id)}
+            >
+              <div className="oe-runtime-tab-top">
+                <span className="oe-runtime-tab-num">{t.num}</span>
+                <span className="oe-runtime-tab-badge">{t.badge}</span>
+              </div>
+              <strong className="oe-runtime-tab-title">{t.title}</strong>
+              <small className="oe-runtime-tab-desc">{t.desc}</small>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="oe-runtime-lab-stage">
+        {activeSim === 'reflection' && <AgenticReflectionSim />}
+        {activeSim === 'sagas' && <DistributedSagasSim />}
+        {activeSim === 'streaming' && <StreamingDiskSpoolSim />}
+        {activeSim === 'sandbox' && <KernelSandboxSim />}
       </div>
     </div>
   )
@@ -2775,6 +3489,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
   ]
   const sectionAnchors = [
     { id: 'oe-pillars', label: 'architectural pillars' },
+    { id: 'oe-runtime-lab', label: 'interactive runtime lab' },
     { id: 'oe-s01', label: 'why & alternatives' },
     { id: 'oe-s02', label: 'concurrency & scaling' },
     { id: 'oe-s03', label: 'durability & recovery' },
@@ -2889,7 +3604,25 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
 
       <section className="oe-report-section" id="oe-pillars">
-        <OeArchitecturalPillars />
+        <div className="oe-report-section-label"><span>00</span><p>Architectural pillars</p></div>
+        <div className="oe-report-section-body">
+          <div className="oe-section-intro-block">
+            <h3>Four Core Systems Engineered for Zero-Dependency Production</h3>
+            <p>Every system is implemented strictly within the Python 3.10+ standard library. Together, they eliminate infrastructure sprawl while guaranteeing deterministic execution, transactional safety, and constant-memory streaming.</p>
+          </div>
+          <OeArchitecturalPillars />
+        </div>
+      </section>
+
+      <section className="oe-report-section" id="oe-runtime-lab">
+        <div className="oe-report-section-label"><span>01</span><p>Interactive Runtime Lab</p></div>
+        <div className="oe-report-section-body">
+          <div className="oe-section-intro-block">
+            <h3>The Four Core Systems in Motion: Live Runtime Simulations</h3>
+            <p>Explore how the engine behaves under real-world production stress. Scrub through cyclic agent reflection loops, trigger downstream payment failures to watch reverse compensating rollbacks, observe zero-memory disk spooling, and test kernel SIGKILL timeouts.</p>
+          </div>
+          <OeRuntimeLab />
+        </div>
       </section>
 
       <InteractiveWorkflowSimulator />
