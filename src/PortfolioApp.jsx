@@ -4421,7 +4421,7 @@ function Work() {
 
   const getResponsiveCardConfig = useCallback(() => {
     if (typeof window === 'undefined') {
-      return { width: 800, height: 520, tilt: 0, spread: 0.92, perspective: 1400 }
+      return { width: 800, height: 520, tilt: -70, spread: 0.92, perspective: 1400 }
     }
     const w = window.innerWidth
     const h = window.innerHeight
@@ -4430,34 +4430,34 @@ function Work() {
       // Small mobile phones (320px - 479px)
       const width = Math.max(280, Math.min(w - 24, 350))
       const height = Math.max(420, Math.min(Math.round(h * 0.58), 470))
-      return { width, height, tilt: 0, spread: 0.85, perspective: 1100 }
+      return { width, height, tilt: -70, spread: 0.85, perspective: 1100 }
     }
     if (w < 640) {
       // Standard mobile (480px - 639px)
       const width = Math.min(w - 32, 430)
       const height = Math.max(430, Math.min(Math.round(h * 0.58), 480))
-      return { width, height, tilt: 0, spread: 0.86, perspective: 1150 }
+      return { width, height, tilt: -70, spread: 0.86, perspective: 1150 }
     }
     if (w < 768) {
       // Small tablet portrait / large phones (640px - 767px)
       const width = Math.min(w - 60, 560)
       const height = Math.min(Math.round(h * 0.54), 490)
-      return { width, height, tilt: 0, spread: 0.88, perspective: 1200 }
+      return { width, height, tilt: -70, spread: 0.88, perspective: 1200 }
     }
     if (w < 1024) {
       // Tablet portrait (768px - 1023px)
       const width = Math.min(w - 80, 680)
       const height = Math.min(Math.round(h * 0.54), 520)
-      return { width, height, tilt: 0, spread: 0.90, perspective: 1300 }
+      return { width, height, tilt: -70, spread: 0.90, perspective: 1300 }
     }
     if (w < 1280) {
       // Laptop / Small desktop (1024px - 1279px)
       const width = Math.min(w - 160, 740)
       const height = 510
-      return { width, height, tilt: 0, spread: 0.92, perspective: 1400 }
+      return { width, height, tilt: -70, spread: 0.92, perspective: 1400 }
     }
     // Desktop (1280px+)
-    return { width: Math.min(w - 240, 840), height: 540, tilt: 0, spread: 0.92, perspective: 1450 }
+    return { width: Math.min(w - 240, 840), height: 540, tilt: -70, spread: 0.92, perspective: 1450 }
   }, [])
 
   const [cardDims, setCardDims] = useState(getResponsiveCardConfig)
