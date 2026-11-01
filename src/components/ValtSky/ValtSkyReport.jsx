@@ -3,7 +3,6 @@ import { gsap } from 'gsap'
 import HoldButton from '../../HoldButton'
 import CipherReveal from '../../CipherReveal'
 import GlyphLottery from '../../GlyphLottery'
-import ValtSkyDepthRibbon from './ValtSkyDepthRibbon'
 import ValtSkyNerdConsole from './ValtSkyNerdConsole'
 import './valtsky-report.css'
 
@@ -1139,7 +1138,7 @@ export default function ValtSkyReport({
   const report = useRef(null)
 
   const sectionAnchors = [
-    { id: 'valtsky-overview', label: 'what is valtsky & 3d ribbon' },
+    { id: 'valtsky-overview', label: 'what is valtsky & use cases' },
     { id: 'valtsky-nerds', label: 'for nerds: under the hood' },
     { id: 'valtsky-pillars', label: 'architectural pillars' },
     { id: 'valtsky-runtime-lab', label: 'interactive runtime lab' },
@@ -1320,18 +1319,15 @@ export default function ValtSkyReport({
         <section className="oe-report-section" id="valtsky-overview" data-num="00">
           <div className="oe-report-section-label">
             <span>00</span>
-            <p>Overview &amp; 3D Ribbon</p>
+            <p>Overview &amp; Use Cases</p>
           </div>
           <div className="oe-report-section-body">
             <div className="oe-section-intro-block">
-              <h3>Unmetered 3D Vault: Bit-for-Bit Media Synchronization Winding into the Cloud</h3>
+              <h3>Unmetered Cold Storage: Bit-for-Bit Media Synchronization into Private Cloud Channels</h3>
               <p>
                 ValtSky transforms private Telegram channels into an encrypted, unmetered cold-storage tier for DSLR RAW captures, 4K ProRes videos, and mobile archives. By streaming strictly via binary document endpoints (<code>sendDocument</code>), it preserves 100% of optical EXIF metadata, prevents silent cloud transcoding, and completely avoids recurring subscription taxes.
               </p>
             </div>
-
-            {/* React Bits Pro 3D Depth Ribbon Showcase */}
-            <ValtSkyDepthRibbon />
 
             {/* Real-World Use Cases Bento Grid */}
             <div className="mt-8 space-y-4">
