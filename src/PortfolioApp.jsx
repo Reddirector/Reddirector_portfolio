@@ -13,6 +13,7 @@ import ValtSkyVisual from './components/ValtSky/ValtSkyVisual'
 import ValtSkyReport from './components/ValtSky/ValtSkyReport'
 import BarbaTransitionOverlay from './components/BarbaTransition/BarbaTransitionOverlay'
 import CircularCarousel from './CircularCarousel'
+import { ProjectOrbitCard } from './components/CircularCarousel/ProjectOrbitCard'
 import HoldButton from './HoldButton'
 import CipherReveal from './CipherReveal'
 import GlyphLottery from './GlyphLottery'
@@ -32,7 +33,13 @@ const logoLetters = [
 ]
 const featuredProjects = content.projects
   .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon', 'ValtSky Multiplatform'].includes(project.name))
-  .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
+  .map((project, index) => ({
+    ...project,
+    id: String(index + 1).padStart(2, '0'),
+    title: project.name,
+    subtitle: project.tag,
+    alt: project.name,
+  }))
 
 const SLUG_TO_PROJECT_NAME = {
   'orchestration-engine': 'Orchestration Engine',
@@ -4419,56 +4426,7 @@ function Work() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const carouselRef = useRef(null)
 
-  const getResponsiveCardConfig = useCallback(() => {
-    if (typeof window === 'undefined') {
-      return { width: 800, height: 520, tilt: -70, spread: 0.92, perspective: 1400 }
-    }
-    const w = window.innerWidth
-    const h = window.innerHeight
-
-    if (w < 480) {
-      // Small mobile phones (320px - 479px)
-      const width = Math.max(280, Math.min(w - 24, 350))
-      const height = Math.max(420, Math.min(Math.round(h * 0.58), 470))
-      return { width, height, tilt: -70, spread: 0.85, perspective: 1100 }
-    }
-    if (w < 640) {
-      // Standard mobile (480px - 639px)
-      const width = Math.min(w - 32, 430)
-      const height = Math.max(430, Math.min(Math.round(h * 0.58), 480))
-      return { width, height, tilt: -70, spread: 0.86, perspective: 1150 }
-    }
-    if (w < 768) {
-      // Small tablet portrait / large phones (640px - 767px)
-      const width = Math.min(w - 60, 560)
-      const height = Math.min(Math.round(h * 0.54), 490)
-      return { width, height, tilt: -70, spread: 0.88, perspective: 1200 }
-    }
-    if (w < 1024) {
-      // Tablet portrait (768px - 1023px)
-      const width = Math.min(w - 80, 680)
-      const height = Math.min(Math.round(h * 0.54), 520)
-      return { width, height, tilt: -70, spread: 0.90, perspective: 1300 }
-    }
-    if (w < 1280) {
-      // Laptop / Small desktop (1024px - 1279px)
-      const width = Math.min(w - 160, 740)
-      const height = 510
-      return { width, height, tilt: -70, spread: 0.92, perspective: 1400 }
-    }
-    // Desktop (1280px+)
-    return { width: Math.min(w - 240, 840), height: 540, tilt: -70, spread: 0.92, perspective: 1450 }
-  }, [])
-
-  const [cardDims, setCardDims] = useState(getResponsiveCardConfig)
-
-  useEffect(() => {
-    const handleResize = () => setCardDims(getResponsiveCardConfig())
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [getResponsiveCardConfig])
-
-  const selectedProject = featuredProjects[selectedIndex]
+  const selectedProject = featuredProjects[selectedIndex] || featuredProjects[0]
   const changeProject = (step) => {
     setSelectedIndex((index) => (index + step + featuredProjects.length) % featuredProjects.length)
   }
@@ -4579,79 +4537,15 @@ function Work() {
     })
   }, [updateUrlForProject])
 
-  const renderProjectCard = (project, index) => {
-    const inkIsDark = project.ink === 'dark'
-    const nextIdx = (index + 1) % featuredProjects.length
-    const nextProj = featuredProjects[nextIdx]
-
+  const renderProjectCard = (project, index, { active: isCardActive }) => {
     return (
-      <div
-        className="project-feature grid overflow-hidden md:grid-cols-[1.05fr_.95fr] w-full h-full select-none cursor-pointer"
-        onDoubleClick={(event) => {
-          event.stopPropagation()
-          openProjectDetails(project, event)
-        }}
-        title="Double-click to open case study"
-        style={{
-          background: project.color,
-          color: inkIsDark ? '#0B0708' : '#fff',
-        }}
-      >
-        <div className="project-stage-copy flex min-h-0 flex-col justify-between p-4 sm:p-7 lg:p-10" key={project.id}>
-          <div>
-            <div className="flex items-start justify-between gap-3 sm:gap-4">
-              <div>
-                <p className="font-mono text-[.58rem] sm:text-[.65rem] uppercase tracking-[.1em]">
-                  {project.id} / {index === 0 ? 'Featured project' : 'Selected project'}
-                </p>
-                <p className={`project-tag mt-1 sm:mt-2 font-mono text-[.56rem] sm:text-[.62rem] uppercase leading-relaxed ${inkIsDark ? 'text-black/70' : 'text-white/70'}`}>
-                  {project.tag}
-                </p>
-              </div>
-              <span className="shrink-0 whitespace-nowrap font-mono text-[.58rem] sm:text-[.65rem] tracking-[.08em]">
-                {project.id} / {String(featuredProjects.length).padStart(2, '0')}
-              </span>
-            </div>
-
-            <h3 className="font-display mt-3 sm:mt-7 max-w-xl text-[clamp(1.75rem,2.8vw,3.4rem)] font-black leading-[.88] sm:leading-[.84] tracking-[-.045em] break-normal">
-              {project.name}
-            </h3>
-
-            <p className={`font-serif mt-2.5 sm:mt-5 max-w-lg text-[.82rem] sm:text-[.94rem] leading-[1.6] sm:leading-[1.7] line-clamp-2 sm:line-clamp-3 lg:line-clamp-4 ${inkIsDark ? 'text-black/80' : 'text-white/80'}`}>
-              {project.short}
-            </p>
-          </div>
-
-          <div className="pt-3 sm:pt-6" onPointerDown={(event) => event.stopPropagation()}>
-            <HoldButton
-              size="sm"
-              radius={2}
-              holdTime={600}
-              backgroundColor={inkIsDark ? '#0b0708' : '#141417'}
-              fillColor="#e5484d"
-              textColor={inkIsDark ? '#ffffff' : '#f5f5f5'}
-              fillTextColor="#ffffff"
-              doneLabel="Opening..."
-              onTap={(event) => {
-                openProjectDetails(project, event)
-              }}
-              onHold={(event) => {
-                openProjectDetails(project, event)
-              }}
-            >
-              Open case study ↗
-            </HoldButton>
-          </div>
-        </div>
-
-        <ProjectVisual
-          project={project}
-          index={index}
-          nextProject={nextProj}
-          advance={changeProject}
-          onOpenDetails={openProjectDetails}
-        />
-      </div>
+      <ProjectOrbitCard
+        key={project.id || index}
+        project={project}
+        index={index}
+        isActive={isCardActive}
+        onOpenDetails={openProjectDetails}
+      />
     )
   }
 
@@ -4672,7 +4566,7 @@ function Work() {
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-[.6rem] uppercase tracking-[.1em] text-white/55" aria-live="polite">
             Showing project {selectedProject.id} / {String(featuredProjects.length).padStart(2, '0')}
-            <span className="hidden sm:inline text-white/35 ml-3">· Double-click card to open details</span>
+            <span className="hidden sm:inline text-white/35 ml-3">· Double-click card or tap action to open details</span>
           </p>
           <div className="flex items-center gap-2" role="group" aria-label="Choose a project">
             <button type="button" onClick={() => changeProject(-1)} className="project-step" aria-label="Previous project">←</button>
@@ -4686,7 +4580,7 @@ function Work() {
         className="relative w-full my-6 overflow-visible"
         style={{
           width: '100%',
-          height: `${cardDims.height + (cardDims.width < 640 ? 30 : 60)}px`,
+          height: '560px',
           position: 'relative'
         }}
       >
@@ -4696,20 +4590,18 @@ function Work() {
           selectedIndex={selectedIndex}
           preset="orbit"
           intro="rise"
-          cardWidth={cardDims.width}
-          aspectRatio={cardDims.width / cardDims.height}
-          spread={cardDims.spread}
-          fitScale={null}
+          cardWidth={218}
+          aspectRatio={0.75}
           speed={5}
-          captions={false}
+          captions
           gap={0}
-          tilt={cardDims.tilt}
+          tilt={-17}
           curve={0}
-          perspective={cardDims.perspective}
+          perspective={1500}
+          momentum={0.4}
           autoplay="drift"
           interval={3}
           direction="left"
-          momentum={0.4}
           snap
           pauseOnHover
           focusOnClick
@@ -4717,14 +4609,116 @@ function Work() {
           parallax={0.3}
           stretch={0.5}
           fadeColor="#000000"
-          depthFade={0.5}
+          depthFade={0.55}
           innerShade={0.6}
           cornerRadius={12}
           onChange={(index) => setSelectedIndex(index % featuredProjects.length)}
           onItemClick={(item, index) => setSelectedIndex(index % featuredProjects.length)}
           onItemDoubleClick={(item, index, event) => openProjectDetails(item, event)}
-          renderItem={renderProjectCard}
+          renderCard={renderProjectCard}
         />
+      </div>
+
+      {/* Active Project Spotlight Quick-Access Bar */}
+      <div className="mx-auto max-w-5xl px-5 sm:px-8 mt-4">
+        <div
+          className="rounded-xl p-5 sm:p-6 border transition-all duration-300 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(180deg, #130D0F 0%, #0A0708 100%)',
+            borderColor: 'rgba(229, 72, 77, 0.35)',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(229, 72, 77, 0.1)',
+          }}
+        >
+          {/* Top subtle highlight line */}
+          <div
+            className="absolute top-0 left-0 right-0 h-[2px]"
+            style={{
+              background: 'linear-gradient(90deg, transparent, #E5484D, #ff7176, #E5484D, transparent)',
+            }}
+          />
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+            {/* Left: Project identity & description */}
+            <div className="space-y-2 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs font-bold text-white bg-white/10 px-2.5 py-0.5 rounded border border-white/15">
+                  PROJECT {selectedProject.id} / 04
+                </span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[#E5484D] font-semibold">
+                  {selectedProject.tag}
+                </span>
+              </div>
+              <h3 className="font-display text-xl sm:text-2xl font-black text-white tracking-tight">
+                {selectedProject.name}
+              </h3>
+              <p className="font-serif text-sm text-white/75 leading-relaxed line-clamp-2 max-w-2xl">
+                {selectedProject.short}
+              </p>
+            </div>
+
+            {/* Right: Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0 pt-2 md:pt-0">
+              <button
+                type="button"
+                onClick={(e) => openProjectDetails(selectedProject, e)}
+                className="px-4 py-2.5 rounded-lg bg-[#E5484D] hover:bg-[#ff575d] text-white font-mono text-xs font-semibold uppercase tracking-wider transition-all duration-200 shadow-lg shadow-[#E5484D]/30 flex items-center gap-2"
+                aria-label={`Open full case study for ${selectedProject.name}`}
+              >
+                <span>Read Full Case Study</span>
+                <span className="text-sm">↗</span>
+              </button>
+
+              {selectedProject.link && (
+                <a
+                  href={selectedProject.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-medium uppercase tracking-wider transition-all duration-200 border border-white/15 flex items-center gap-1.5"
+                  aria-label={`View ${selectedProject.name} on GitHub`}
+                >
+                  <span>GitHub</span>
+                  <span className="text-xs">↗</span>
+                </a>
+              )}
+
+              {selectedProject.pypi && (
+                <a
+                  href={selectedProject.pypi}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-medium uppercase tracking-wider transition-all duration-200 border border-white/15 flex items-center gap-1.5"
+                >
+                  <span>PyPI</span>
+                  <span className="text-xs">↗</span>
+                </a>
+              )}
+
+              {selectedProject.web && (
+                <a
+                  href={selectedProject.web}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-medium uppercase tracking-wider transition-all duration-200 border border-white/15 flex items-center gap-1.5"
+                >
+                  <span>Demo</span>
+                  <span className="text-xs">↗</span>
+                </a>
+              )}
+
+              {selectedProject.release && (
+                <a
+                  href={selectedProject.release}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-medium uppercase tracking-wider transition-all duration-200 border border-white/15 flex items-center gap-1.5"
+                >
+                  <span>v2.0 APK</span>
+                  <span className="text-xs">↗</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </Reveal>
     <ProjectModal key={active?.id ?? 'closed'} project={active} openOrigin={openOrigin} close={handleCloseProject} onNavigateProject={handleNavigateProject} />

@@ -127,16 +127,17 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 22px;
+  bottom: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   padding: 0 16px;
-  color: inherit;
+  color: #ffffff;
   text-align: center;
   pointer-events: none;
   animation: circular-carousel-reveal 900ms ease both;
+  z-index: 20;
 }
 
 .circular-carousel__title {
@@ -144,25 +145,43 @@
   max-width: 100%;
   flex-direction: column;
   align-items: center;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.35;
+  font-family: 'Cinzel', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1.25;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
   animation: circular-carousel-title 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .circular-carousel__subtitle {
-  font-weight: 400;
-  opacity: 0.6;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 2px;
 }
 
 .circular-carousel__count {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 12px;
+  gap: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  opacity: 0.5;
+  color: #E5484D;
+  background: rgba(229, 72, 77, 0.12);
+  border: 1px solid rgba(229, 72, 77, 0.3);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 0 12px rgba(229, 72, 77, 0.2);
+  margin-top: 2px;
 }
 
 .circular-carousel__slash {
