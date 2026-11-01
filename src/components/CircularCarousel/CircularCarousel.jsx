@@ -209,7 +209,6 @@ const CircularCarousel = forwardRef(({
   className = '',
   style,
   renderItem,
-  renderCard,
   selectedIndex,
   fitScale,
 }, ref) => {
@@ -905,9 +904,7 @@ const CircularCarousel = forwardRef(({
           className="circular-carousel__frame"
           style={{ height: axis === 'x' ? size : cardH, borderRadius: frameRadius }}
         >
-          {renderCard ? (
-            renderCard(item, index, { active: active === index })
-          ) : renderItem ? (
+          {renderItem ? (
             renderItem(item, index, { active: active === index })
           ) : item.render ? (
             item.render(item, index, { active: active === index })
@@ -997,10 +994,8 @@ const CircularCarousel = forwardRef(({
       {captions && current && (
         <div className="circular-carousel__caption" aria-hidden="true">
           <span key={active} className="circular-carousel__title">
-            {current.title || current.name || current.alt}
-            {(current.subtitle || current.tag) && (
-              <span className="circular-carousel__subtitle">{current.subtitle || current.tag}</span>
-            )}
+            {current.title || current.alt}
+            {current.subtitle && <span className="circular-carousel__subtitle">{current.subtitle}</span>}
           </span>
           <span className="circular-carousel__count">
             <Digits value={active + 1} />
