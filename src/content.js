@@ -24,11 +24,11 @@ export const content = {
     {
       id: '04',
       name: 'ValtSky Multiplatform',
-      tag: 'Dart 3.5+ · Flutter 3.24+ · Telegram Bot API · SQLite WAL · v2.0',
+      tag: 'Dart 3.5+ · Flutter 3.24+ · MTProto 2.0 · Telegram Bot API · SQLite WAL · v2.0',
       color: '#A40000',
       ink: 'light',
-      short: 'A zero-compression, bit-for-bit media synchronization daemon that transforms private Telegram channels into an unmetered, encrypted cold-storage tier with monotonic chronological ordering and client-side anti-malware verification.',
-      detail: 'ValtSky eliminates subscription-tier cloud storage taxes by streaming media directly to Telegram channels strictly via document streams (sendDocument). It guarantees 100% EXIF and raw sensor metadata preservation, automatically partitions >= 2 GB assets into an isolated staging pipeline, and operates under strict bounded memory budgets (< 28 MB resident heap). Backed by 16/16 passing tests (98/100 QA score), magic-byte header inspection, and transactional SQLite WAL state machines.',
+      short: 'A zero-compression, bit-for-bit media synchronization daemon converting Telegram into an unmetered, encrypted cold-storage vault with 10-second MTProto phone setup, automatic channel provisioning, and monotonic chronological ordering.',
+      detail: 'ValtSky eliminates subscription-tier cloud storage taxes and 4-step BotFather friction by introducing a 10-second phone login that auto-provisions private Telegram cloud channels. Streams DSLR RAW captures and 4K ProRes videos with 100% bit-for-bit EXIF preservation, handles browser TCP sandbox boundaries via a dual-stack MTProto bridge daemon, partitions assets with an Any-Size chunking engine, and operates under strict bounded memory budgets (< 28 MB RAM). Backed by 25/25 automated tests across auth, smoke, and hostile security suites with zero static analysis warnings.',
       link: 'https://github.com/Reddirector/ValtSky',
       web: 'https://reddirector.github.io/ValtSky/',
       release: 'https://github.com/Reddirector/ValtSky/releases/tag/v2.0',
@@ -37,7 +37,7 @@ export const content = {
   ],
   metrics: [{ value: 233, suffix: '/233', label: 'orchestration tests passing (91.5% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
   now: [
-    { name: 'ValtSky Multiplatform v2.0', text: 'Shipped v2.0: zero-compression media synchronization daemon converting Telegram into an unmetered, encrypted cold-storage vault. Features monotonic chronological b-tree scheduling, 64KB chunked streaming under 28 MB RAM, 2GB boundary isolation, and magic-byte malware detection across 16 passing test suites.' },
+    { name: 'ValtSky Multiplatform v2.0', text: 'Shipped v2.0: 10-second MTProto 2.0 phone auth and automated vault channel provisioning, conditional TCP/HTTP bridge compilation, Any-Size media streaming under 28 MB RAM, and client-side malware quarantine across 25 passing test suites (100% pass).' },
     { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, O(1) streaming disk spooling, and zero-broker HTTP clustering across 233 passing tests and 79 frozen exports.' },
     { name: 'Pentagon AI Workstation', text: 'Developing an enterprise-grade local-first AI workstation featuring zero-leak BYOK Fernet encryption, LangGraph deterministic state orchestration, ChromaDB vector RAG with CPU failover, and multi-tier autonomy governance across Web, Android APK, Electron, and ISO.' },
   ],

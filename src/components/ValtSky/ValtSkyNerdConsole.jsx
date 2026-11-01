@@ -3,106 +3,239 @@ import GlyphLottery from '../../GlyphLottery'
 
 const NERD_TABS = [
   {
-    id: 'runtime',
+    id: 'mtproto',
     number: '01',
-    label: 'Dart 3.5 & Multiplatform AOT',
-    headline: 'Native ARM64 Machine Code & Isolated Background Workers',
-    badge: 'COMPILER & ISOLATES',
-    codeSnippet: `// Dart 3.5+ Background Isolate for Lossless EXIF & SHA-256 Checksums
-Future<MediaVerificationRecord> auditAssetInIsolate(String filePath) async {
-  return await Isolate.run(() async {
-    final file = File(filePath);
-    final stat = await file.stat();
-    
-    // Read initial 64 KB block for magic byte & EXIF header
-    final headerBytes = await file.openRead(0, 65536).first;
-    final magicSignature = detectMagicByte(headerBytes);
-    
-    if (magicSignature == MagicType.quarantined) {
-      throw SecurityQuarantineException("Polyglot or malicious payload signature detected");
-    }
-    
-    final exifData = await ExifReader.parseLossless(headerBytes);
-    final sha256Checksum = await sha256.bind(file.openRead()).first;
-    
-    return MediaVerificationRecord(
-      inode: stat.ino,
-      dateTaken: exifData.captureTimestamp ?? stat.modified,
-      checksum: sha256Checksum.toString(),
-      byteSize: stat.size,
-      magicType: magicSignature,
-    );
+    label: 'MTProto 2.0 TCP & Web Bridge',
+    headline: 'Bypassing Browser Socket Sandboxes & 64-Bit Integer Overflows',
+    badge: 'PROTOCOL & SANDBOX ESCAPE',
+    codeSnippet: `// Flutter Conditional Compilation Boundary: Native TCP vs Web Bridge
+// In native mobile/desktop: Direct raw TCP socket to Telegram DC 1 (port 443)
+// In web browser: Connects to local daemon (port 8088) bypassing browser raw TCP limits
+
+abstract class TelegramAuthService {
+  factory TelegramAuthService() => createAuthService(); // Conditional exporter
+  Future<AuthResult> sendCode(String phoneNumber);
+  Future<UserSession> signIn(String phoneCode);
+  Future<ChannelInfo> createVaultChannel(String title);
+}
+
+// bin/auth_bridge.dart: Local MTProto Daemon
+Future<void> main() async {
+  final client = TelegramClient(
+    apiId: TelegramSecrets.apiId,
+    apiHash: TelegramSecrets.apiHash,
+  );
+  // Direct raw TCP socket connection with 2048-bit Diffie-Hellman key exchange
+  await client.connectToDc(1, '149.154.175.50', 443);
+  
+  final server = await HttpServer.bind(InternetAddress.anyIPv4, 8088);
+  server.listen((HttpRequest req) async {
+    // Bridges binary MTProto TL-calls to JSON REST endpoints for the web client
+    // Handles 64-bit integer bitmasks safely without JavaScript dart2js overflow
   });
 }`,
     points: [
       {
-        term: 'AOT Native Compilation',
-        desc: 'Compiles directly to native ARM64 machine code on Android (via NDK) and WebAssembly/HTML5 Canvas on Web targets, eliminating JVM and JavaScript runtime overhead.',
+        term: 'Browser Raw TCP Sandbox Escape',
+        desc: 'Web browsers forbid raw TCP sockets (Socket.connect). ValtSky deploys a lightweight local daemon (bin/auth_bridge.dart) on port 8088 that opens TCP sockets on behalf of the browser.',
       },
       {
-        term: 'Background Isolate Offloading',
-        desc: 'Heavy SHA-256 cryptographic hashing and EXIF header parsing execute on isolated OS background worker threads (Isolate.run), preventing any frame drops on 120Hz displays.',
+        term: '64-Bit Integer Bitmask Safety',
+        desc: "Telegram's binary TL-schema uses 64-bit integer bitmasks (0xD09D1D85DE64FD85) that exceed JavaScript max safe integers (2^53 - 1). The bridge normalizes them to BigInt strings before dart2js compilation.",
       },
       {
-        term: 'Strict Sound Null Safety & Pattern Matching',
-        desc: 'Leverages Dart 3 pattern matching and sealed classes to exhaustively model upload state machines with zero runtime null pointer exceptions.',
+        term: '2048-Bit Diffie-Hellman Handshake',
+        desc: 'Authenticates with Telegram DC 1 (149.154.175.50:443) using hardware-accelerated prime factorization and cryptographic key exchange, generating authentic OTP codes delivered to the user app.',
       },
     ],
   },
   {
-    id: 'streaming',
+    id: 'dualstack',
     number: '02',
-    label: 'Reactive Socket Streaming',
-    headline: '64 KB Packet Slices with Flat < 28 MB RAM Budget',
-    badge: 'I/O & MEMORY BUDGET',
-    codeSnippet: `// Reactive Socket Pipeline: Zero In-Memory Buffering
-Stream<List<int>> streamFileChunked(File asset, int chunkSize) async* {
-  final raf = await asset.open(mode: FileMode.read);
-  try {
-    final totalBytes = await raf.length();
-    int bytesRead = 0;
-    
-    while (bytesRead < totalBytes) {
-      final sliceSize = math.min(chunkSize, totalBytes - bytesRead);
-      final slice = await raf.read(sliceSize);
-      bytesRead += slice.length;
-      yield slice; // Emitted directly to HTTP/2 TLS socket stream
-    }
-  } finally {
-    await raf.close();
+    label: 'Dual-Stack IPv4/IPv6 & CSP',
+    headline: 'Simultaneous 0.0.0.0 and [::1] Loopback Binding with OWASP Compliance',
+    badge: 'NETWORKING & SECURITY',
+    codeSnippet: `// bin/auth_bridge.dart: Dual-Stack Loopback Binding (IPv4 + IPv6)
+Future<List<HttpServer>> startDualStackBridge({int port = 8088}) async {
+  // Bind IPv4 for legacy and containerized environments
+  final ipv4Server = await HttpServer.bind(
+    InternetAddress.anyIPv4, // 0.0.0.0:8088
+    port,
+    shared: true,
+  );
+
+  // Bind IPv6 loopback to prevent 'Connection Refused' in modern Chromium / Safari
+  final ipv6Server = await HttpServer.bind(
+    InternetAddress.loopbackIPv6, // [::1]:8088
+    port,
+    shared: true,
+  );
+
+  return [ipv4Server, ipv6Server];
+}
+
+// web/index.html: Hardened Content Security Policy with Granular Loopback Whitelist
+// <meta http-equiv="Content-Security-Policy" content="
+//   default-src 'self';
+//   connect-src 'self' https: wss: http://localhost:8088 http://127.0.0.1:8088 http://[::1]:8088;
+//   img-src 'self' data: https: blob:;
+// ">`,
+    points: [
+      {
+        term: 'IPv6-First Resolution Defense',
+        desc: 'Modern browsers resolve localhost to IPv6 (::1) before IPv4 (127.0.0.1). Dual-stack binding prevents connection dropouts and handshake timeouts on macOS, Linux, and Windows.',
+      },
+      {
+        term: 'OWASP CSP Compliance',
+        desc: 'Maintains strict browser sandbox guarantees while allowing granular loopback communication with the local MTProto bridge daemon on port 8088.',
+      },
+      {
+        term: 'Cross-Origin Resource Isolation',
+        desc: 'Bridge daemon enforces strict origin checks (Origin: http://localhost:8080) and CORS preflight options to prevent rogue browser tabs from invoking Telegram RPCs.',
+      },
+    ],
+  },
+  {
+    id: 'auth_identity',
+    number: '03',
+    label: 'Real Telegram Verification & Channel Auto-Creation',
+    headline: '10-Second Setup: Instant User Extraction & Channel Provisioning',
+    badge: 'IDENTITY & AUTO-PROVISIONING',
+    codeSnippet: `// Real Telegram MTProto Verification & Profile Deserialization
+final authResult = await client.auth.signIn(
+  phoneNumber: normalizedPhone,
+  phoneCodeHash: session.phoneCodeHash,
+  phoneCode: fiveDigitOtpCode,
+);
+
+if (authResult is t.AuthAuthorization) {
+  final user = authResult.user as t.User;
+  
+  // Automatically provision private cloud storage vault channel
+  final channel = await client.channels.createChannel(
+    title: 'ValtSky Vault (\${user.firstName})',
+    about: 'Private unmetered media vault managed automatically by ValtSky.',
+    broadcast: true,
+    megagroup: false,
+  );
+  
+  // Persist verified user profile and auto-created channel ID
+  await prefs.saveProfile(
+    userId: user.id,
+    firstName: user.firstName,
+    username: user.username,
+    isPremium: user.premium ?? false,
+    channelId: channel.chats.first.id,
+  );
+}`,
+    points: [
+      {
+        term: 'Zero Technical Bot Father Friction',
+        desc: 'Replaces the cumbersome 4-step bot creation workflow with an intuitive 10-second phone login. Automatically extracts user identity and creates the storage channel programmatically.',
+      },
+      {
+        term: 'Authentic User Identity Extraction',
+        desc: 'Deserializes Telegram user object, retrieving First/Last Name, @username, numeric User ID, and Telegram Premium status to render verified user profile badges.',
+      },
+      {
+        term: 'Granular RPC Error Translation',
+        desc: 'Translates MTProto RPC error codes (PHONE_NUMBER_INVALID, PHONE_CODE_INVALID, PHONE_CODE_EXPIRED, FLOOD_WAIT_X) into actionable localized user guidance.',
+      },
+    ],
+  },
+  {
+    id: 'country_validation',
+    number: '04',
+    label: 'Input Formatting & 27+ Country Limits',
+    headline: 'Smart Dial Code Detection & National Digit Boundary Formatter',
+    badge: 'INPUT SANITIZATION & REGEX',
+    codeSnippet: `// lib/data/country_data.dart: 27+ Countries with Dial Codes & National Limits
+class CountryData {
+  final String name;
+  final String dialCode;
+  final String flag;
+  final int maxDigits;
+  
+  const CountryData({required this.name, required this.dialCode, required this.flag, required this.maxDigits});
+  
+  static const List<CountryData> supportedCountries = [
+    CountryData(name: 'India', dialCode: '+91', flag: '🇮🇳', maxDigits: 10),
+    CountryData(name: 'United States', dialCode: '+1', flag: '🇺🇸', maxDigits: 10),
+    CountryData(name: 'United Kingdom', dialCode: '+44', flag: '🇬🇧', maxDigits: 10),
+    CountryData(name: 'United Arab Emirates', dialCode: '+971', flag: '🇦🇪', maxDigits: 9),
+    // 27+ country definitions with national digit length bounds...
+  ];
+  
+  static CountryData? detectFromInput(String text) {
+    if (!text.startsWith('+')) return null;
+    return supportedCountries.firstWhereOrNull((c) => text.startsWith(c.dialCode));
   }
 }
 
-// Bounded Memory HTTP/2 Multipart Request
-final request = MultipartRequest('POST', telegramSendDocUri)
-  ..fields['chat_id'] = channelId
-  ..fields['caption'] = escapeMarkdownV2(caption)
-  ..files.add(MultipartFile(
-    'document',
-    streamFileChunked(mediaFile, 65536), // 64 KB slices
-    mediaFile.lengthSync(),
-    filename: basename(mediaFile.path),
-  ));`,
+// Input Formatters: Digits only + strict length locking to national maxDigits
+final formatters = [
+  FilteringTextInputFormatter.digitsOnly,
+  LengthLimitingTextInputFormatter(selectedCountry.maxDigits),
+];`,
     points: [
       {
-        term: 'Zero In-Memory Buffering',
-        desc: 'Naive backup scripts read full files into RAM (byte arrays), crashing devices on 4K video files. ValtSky streams 64 KB slices directly from POSIX file descriptors.',
+        term: '27+ Country Directory',
+        desc: 'Includes flag emojis, international dial codes, national digit boundaries, and instant search by country name or dial code.',
       },
       {
-        term: 'Bounded Heap Budget (< 28 MB)',
-        desc: 'Even when transmitting 1.8 GB ProRes containers, the resident memory heap stays flat at 21.4 - 24.6 MB, immune to Android OS low-memory killer (LMK) daemon kills.',
+        term: 'Smart "+" Auto-Detection',
+        desc: 'Pasting or typing an international number starting with "+" automatically detects the country, switches the flag, updates the dial code prefix, and adjusts the digit counter.',
       },
       {
-        term: 'Automatic 2GB Boundary Partitioning',
-        desc: 'Telegram Bot API enforces a strict 2,147,483,648 byte (2 GB) ceiling. ValtSky detects oversized assets before upload, staging them in an isolated review queue.',
+        term: 'Strict Digit Filtering & Counter',
+        desc: 'FilteringTextInputFormatter.digitsOnly rejects non-numeric characters, while a live badge displays digit completion progress (e.g., "0 / 10 digits" turning green at "10 / 10 digits").',
       },
     ],
   },
   {
-    id: 'sqlite',
-    number: '03',
-    label: 'SQLite WAL & Monotonic B-Tree',
-    headline: 'Strict Monotonic Timeline Sequencing via Composite Indexing',
+    id: 'anysize_engine',
+    number: '05',
+    label: 'Any-Size Lossless Media Engine',
+    headline: 'Direct Pipes, 48 MB Verified Chunks, and Oversized Vault Staging',
+    badge: 'STREAMING PIPELINE & 2GB LIMIT',
+    codeSnippet: `// Any-Size Lossless Media Streaming Architecture
+Future<void> dispatchMediaAsset(MediaItem asset) async {
+  if (asset.fileSize <= 50 * 1024 * 1024) {
+    // 1. Files <= 50 MB: Direct bit-for-bit uncompressed sendDocument
+    await api.sendDocument(asset.file);
+  } else if (asset.fileSize <= 2 * 1024 * 1024 * 1024) {
+    // 2. Files 50 MB - 2 GB: 48 MB verified chunking with SHA-256 validation
+    await uploadInChunks(
+      asset.file, 
+      chunkSize: 48 * 1024 * 1024,
+      onProgress: (p) => updateSyncProgress(asset.id, p),
+    );
+  } else {
+    // 3. Files > 2 GB: Routed to Oversized Vault with 4-Click Assistant Sheet (< 28 MB RAM)
+    await db.markAsOversized(asset.id);
+    notifyUserToLaunchOversizedAssistant(asset);
+  }
+}`,
+    points: [
+      {
+        term: 'Bit-for-Bit Document Pipe',
+        desc: 'All media is transmitted strictly through sendDocument endpoints, preserving 100% of EXIF lens parameters, focal length, aperture, color curves, and raw Bayer sensor data.',
+      },
+      {
+        term: '48 MB Verified Chunks',
+        desc: 'Files between 50 MB and 2 GB are partitioned into 48 MB verified chunks with SHA-256 checksums per part, preventing network dropout re-uploads.',
+      },
+      {
+        term: 'Oversized Vault (< 28 MB RAM)',
+        desc: 'Files over 2 GB are isolated in an assisted staging workflow with O(1) memory consumption (< 28 MB RAM heap), ensuring the background daemon never triggers OS Out-Of-Memory kills.',
+      },
+    ],
+  },
+  {
+    id: 'sqlite_wal',
+    number: '06',
+    label: 'SQLite WAL & Monotonic Timeline',
+    headline: 'Strict Monotonic Sequencing (dateTaken ASC) via Composite Index',
     badge: 'PERSISTENCE & SCHEDULING',
     codeSnippet: `-- SQLite Write-Ahead Logging (WAL) Configuration
 PRAGMA journal_mode = WAL;
@@ -149,10 +282,10 @@ LIMIT 1;`,
     ],
   },
   {
-    id: 'security',
-    number: '04',
-    label: 'Binary Magic-Byte Sniffer',
-    headline: 'Client-Side Hex Signature Inspection & Quarantine Firewall',
+    id: 'security_quarantine',
+    number: '07',
+    label: 'Binary Magic Bytes & EICAR Defense',
+    headline: 'Client-Side Hex Header Inspection & Pre-Flight Malware Quarantine',
     badge: 'CYBERSECURITY & VERIFICATION',
     codeSnippet: `// Client-Side Binary Signature Inspection Table
 enum MagicSignature {
@@ -184,66 +317,19 @@ MagicValidationResult inspectFileMagicBytes(Uint8List initialBlock) {
         desc: 'Blocks corrupted, polyglot, or weaponized files before a single byte leaves the user device, keeping personal cloud storage clean of poison payloads.',
       },
       {
-        term: 'Lossless EXIF Metadata Preservation',
-        desc: 'Unlike Telegram photo endpoints that strip EXIF and downscale to 1280px, ValtSky sends strictly via sendDocument, keeping lens calibration and RAW Bayer data 100% untouched.',
-      },
-      {
-        term: 'Telegram MarkdownV2 Token Sanitization',
+        term: 'MarkdownV2 Token Sanitization',
         desc: 'Sanitizes all 18 reserved characters (_ * [ ] ( ) ~ \\ > # + - = | { } . !) in file paths and camera captions to prevent Telegram API message parsing errors.',
       },
-    ],
-  },
-  {
-    id: 'resilience',
-    number: '05',
-    label: 'Wire Protocol & Chaos Backoff',
-    headline: 'Jittered Exponential Backoff on Telegram HTTP 429 Limits',
-    badge: 'FAULT RECOVERY & TELEMETRY',
-    codeSnippet: `// Jittered Exponential Backoff across Transient Rate Limits
-Future<T> executeWithBackoff<T>(Future<T> Function() operation, {int maxAttempts = 8}) async {
-  int attempt = 0;
-  
-  while (true) {
-    try {
-      return await operation();
-    } on TelegramApiException catch (e) {
-      attempt++;
-      if (attempt >= maxAttempts) rethrow;
-      
-      int waitMs;
-      if (e.statusCode == 429) {
-        // Obey Telegram server parameters.retry_after header directly
-        waitMs = ((e.retryAfterSeconds ?? 1) * 1000) + Random().nextInt(400);
-      } else {
-        // Exponential backoff with full jitter: (2^attempt * 1000ms) + random jitter
-        final baseDelay = math.min(60000, math.pow(2, attempt) * 1000);
-        waitMs = baseDelay.toInt() + Random().nextInt(500);
-      }
-      
-      telemetryLogger.warn("HTTP \${e.statusCode} caught. Backing off for \${waitMs}ms (Attempt \${attempt})");
-      await Future.delayed(Duration(milliseconds: waitMs));
-    }
-  }
-}`,
-    points: [
       {
-        term: 'Server-Informed Rate Limit Compliance',
-        desc: 'When Telegram returns HTTP 429 Too Many Requests, ValtSky extracts parameters.retry_after from the JSON response body and waits cleanly with zero sync state drops.',
-      },
-      {
-        term: 'Full Jitter Math: p99 < 1.2s Resolution',
-        desc: 'Adding uniform random jitter prevents thundering herd spikes when syncing across multi-device swarms, resolving transient network faults in under 1.2 seconds.',
-      },
-      {
-        term: 'Zero Ghost Duplication',
-        desc: 'Transfers verify server-returned message_id before marking assets as synced. Network dropouts never cause duplicate files to populate the cloud channel.',
+        term: 'Path Traversal Prevention',
+        desc: 'Validates file boundaries against canonical directory roots, neutralizing attempts to read sensitive system files (e.g., ../../../etc/passwd).',
       },
     ],
   },
 ]
 
 export default function ValtSkyNerdConsole() {
-  const [activeTabId, setActiveTabId] = useState('runtime')
+  const [activeTabId, setActiveTabId] = useState('mtproto')
 
   const activeTab = NERD_TABS.find((t) => t.id === activeTabId) || NERD_TABS[0]
 
@@ -260,7 +346,7 @@ export default function ValtSkyNerdConsole() {
           </span>
         </div>
         <div className="flex items-center gap-2 font-mono text-[11px] text-white/50">
-          <span>DART 3.5+</span> · <span>SQLITE WAL</span> · <span>HTTP/2 STREAMS</span>
+          <span>DART 3.5+</span> · <span>MTPROTO 2.0</span> · <span>SQLITE WAL</span> · <span>HTTP/2 CHUNKS</span>
         </div>
       </div>
 
