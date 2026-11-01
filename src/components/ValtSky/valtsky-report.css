@@ -458,3 +458,43 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* ==========================================================================
+   ValtSky 3D Depth Ribbon Showcase & Systems Architecture Console
+   ========================================================================== */
+
+.valtsky-depth-ribbon-showcase {
+  box-shadow: 0 0 50px -15px rgb(229 72 77 / .18), 0 20px 40px -20px rgb(0 0 0 / .85);
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+
+.valtsky-depth-ribbon-showcase:hover {
+  border-color: rgb(229 72 77 / .3);
+  box-shadow: 0 0 60px -10px rgb(229 72 77 / .24), 0 24px 48px -20px rgb(0 0 0 / .9);
+}
+
+.valtsky-nerd-console {
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / .7);
+  transition: border-color .25s ease;
+}
+
+.valtsky-nerd-console:hover {
+  border-color: rgb(255 255 255 / .18);
+}
+
+.valtsky-nerd-console pre code {
+  color: #e6e6e6;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+@media (max-width: 768px) {
+  .valtsky-depth-ribbon-showcase {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .valtsky-nerd-console {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+

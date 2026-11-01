@@ -3,6 +3,8 @@ import { gsap } from 'gsap'
 import HoldButton from '../../HoldButton'
 import CipherReveal from '../../CipherReveal'
 import GlyphLottery from '../../GlyphLottery'
+import ValtSkyDepthRibbon from './ValtSkyDepthRibbon'
+import ValtSkyNerdConsole from './ValtSkyNerdConsole'
 import './valtsky-report.css'
 
 const VALTSKY_REPO_URL = 'https://github.com/Reddirector/ValtSky'
@@ -1137,6 +1139,8 @@ export default function ValtSkyReport({
   const report = useRef(null)
 
   const sectionAnchors = [
+    { id: 'valtsky-overview', label: 'what is valtsky & 3d ribbon' },
+    { id: 'valtsky-nerds', label: 'for nerds: under the hood' },
     { id: 'valtsky-pillars', label: 'architectural pillars' },
     { id: 'valtsky-runtime-lab', label: 'interactive runtime lab' },
     { id: 'valtsky-s01', label: 'why & alternatives' },
@@ -1312,10 +1316,117 @@ export default function ValtSkyReport({
           ValtSky v2.0 solves the chronic silent data degradation of mobile backup systems by strictly streaming uncompressed document payloads directly to Telegram channels without intermediate server hosting fees.
         </p>
 
-        {/* SECTION 00: ARCHITECTURAL PILLARS */}
-        <section className="oe-report-section" id="valtsky-pillars" data-num="00">
+        {/* SECTION 00: WHAT IS VALTSKY & REAL-WORLD USE CASES */}
+        <section className="oe-report-section" id="valtsky-overview" data-num="00">
           <div className="oe-report-section-label">
             <span>00</span>
+            <p>Overview &amp; 3D Ribbon</p>
+          </div>
+          <div className="oe-report-section-body">
+            <div className="oe-section-intro-block">
+              <h3>Unmetered 3D Vault: Bit-for-Bit Media Synchronization Winding into the Cloud</h3>
+              <p>
+                ValtSky transforms private Telegram channels into an encrypted, unmetered cold-storage tier for DSLR RAW captures, 4K ProRes videos, and mobile archives. By streaming strictly via binary document endpoints (<code>sendDocument</code>), it preserves 100% of optical EXIF metadata, prevents silent cloud transcoding, and completely avoids recurring subscription taxes.
+              </p>
+            </div>
+
+            {/* React Bits Pro 3D Depth Ribbon Showcase */}
+            <ValtSkyDepthRibbon />
+
+            {/* Real-World Use Cases Bento Grid */}
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h4 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                  Target Workloads &amp; Real-World Use Cases
+                </h4>
+                <span className="font-mono text-[11px] text-[#E5484D]">PRODUCTION READY</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <article className="p-5 rounded-lg bg-black/40 border border-white/10 hover:border-[#E5484D]/40 transition-all duration-200 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E5484D]" />
+                    <h5 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                      01 / DSLR, Mirrorless &amp; ProRAW Photographers
+                    </h5>
+                  </div>
+                  <p className="font-serif text-xs text-white/75 leading-relaxed">
+                    Mainstream cloud lockers (Google Photos, iCloud) strip raw sensor Bayer arrays and lens profile curves. ValtSky retains 100% bit-for-bit fidelity for Sony ARW, Canon CR3, Nikon NEF, and Apple ProRAW DNG files down to SHA-256 parity.
+                  </p>
+                  <div className="font-mono text-[11px] text-white/50 pt-1 border-t border-white/5">
+                    Preserves: Lens serial, focal length, f-stop, ISO, exposure compensation, and GPS geotags.
+                  </div>
+                </article>
+
+                <article className="p-5 rounded-lg bg-black/40 border border-white/10 hover:border-[#E5484D]/40 transition-all duration-200 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E5484D]" />
+                    <h5 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                      02 / Mobile Power Users &amp; 4K Videographers
+                    </h5>
+                  </div>
+                  <p className="font-serif text-xs text-white/75 leading-relaxed">
+                    High-bitrate 60fps 4K video container files routinely trigger Out-Of-Memory (OOM) background kills on iOS and Android. ValtSky streams 64 KB socket slices under a bounded &lt; 28 MB RAM budget, never crashing mobile background runners.
+                  </p>
+                  <div className="font-mono text-[11px] text-white/50 pt-1 border-t border-white/5">
+                    Safe Boundary: Automated 2GB request partition staging protects Telegram API limits.
+                  </div>
+                </article>
+
+                <article className="p-5 rounded-lg bg-black/40 border border-white/10 hover:border-[#E5484D]/40 transition-all duration-200 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E5484D]" />
+                    <h5 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                      03 / Personal Zero-Cost Cold Storage Vault
+                    </h5>
+                  </div>
+                  <p className="font-serif text-xs text-white/75 leading-relaxed">
+                    Eliminates recurring $9.99/month subscription fees by turning private Telegram channel sharding into an unmetered, encrypted personal storage tier backed by Telegram's distributed global server infrastructure.
+                  </p>
+                  <div className="font-mono text-[11px] text-white/50 pt-1 border-t border-white/5">
+                    Zero Host Tax: No personal VPS, S3 buckets, or database server hosting bills required.
+                  </div>
+                </article>
+
+                <article className="p-5 rounded-lg bg-black/40 border border-white/10 hover:border-[#E5484D]/40 transition-all duration-200 space-y-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E5484D]" />
+                    <h5 className="font-mono text-xs uppercase tracking-wider text-white font-bold">
+                      04 / Historical Archives &amp; Monotonic Chronology
+                    </h5>
+                  </div>
+                  <p className="font-serif text-xs text-white/75 leading-relaxed">
+                    Naive backup bots upload files in arbitrary filesystem inode order, inverting family albums and placing decades-old memories at the bottom. ValtSky enforces monotonic timeline sequencing (dateTaken ASC) via SQLite WAL B-tree index.
+                  </p>
+                  <div className="font-mono text-[11px] text-white/50 pt-1 border-t border-white/5">
+                    Chronological Guarantee: Historical 2012 archives always precede recent 2026 media.
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 01: FOR NERDS: UNDER THE HOOD & SYSTEMS ARCHITECTURE */}
+        <section className="oe-report-section oe-report-section--flip" id="valtsky-nerds" data-num="01">
+          <div className="oe-report-section-label">
+            <span>01</span>
+            <p>For Nerds: Low-Level Tech</p>
+          </div>
+          <div className="oe-report-section-body">
+            <div className="oe-section-intro-block">
+              <h3>Low-Level Internals: Dart 3.5, SQLite WAL Monotonic B-Trees, and Reactive Sockets</h3>
+              <p>
+                An exhaustive engineering breakdown for compiler architects, low-level hackers, and systems engineers: explore background isolates, POSIX file descriptor stream chunking, single-writer SQLite WAL transactions, client-side hex magic-byte sniffing, and chaos-resistant jittered backoff.
+              </p>
+            </div>
+            <ValtSkyNerdConsole />
+          </div>
+        </section>
+
+        {/* SECTION 02: ARCHITECTURAL PILLARS */}
+        <section className="oe-report-section" id="valtsky-pillars" data-num="02">
+          <div className="oe-report-section-label">
+            <span>02</span>
             <p>Architectural pillars</p>
           </div>
           <div className="oe-report-section-body">
@@ -1330,10 +1441,10 @@ export default function ValtSkyReport({
           </div>
         </section>
 
-        {/* SECTION 01: INTERACTIVE RUNTIME LAB */}
-        <section className="oe-report-section oe-report-section--flip" id="valtsky-runtime-lab" data-num="01">
+        {/* SECTION 03: INTERACTIVE RUNTIME LAB */}
+        <section className="oe-report-section oe-report-section--flip" id="valtsky-runtime-lab" data-num="03">
           <div className="oe-report-section-label">
-            <span>01</span>
+            <span>03</span>
             <p>Interactive Runtime Lab</p>
           </div>
           <div className="oe-report-section-body">
@@ -1347,10 +1458,10 @@ export default function ValtSkyReport({
           </div>
         </section>
 
-        {/* SECTION 02: WHY BUILD THIS? (DECISION MATRIX) */}
-        <section className="oe-report-section" id="valtsky-s01" data-num="02">
+        {/* SECTION 04: WHY BUILD THIS? (DECISION MATRIX) */}
+        <section className="oe-report-section" id="valtsky-s01" data-num="04">
           <div className="oe-report-section-label">
-            <span>02</span>
+            <span>04</span>
             <p>Why build this? (Engine vs. Alternatives)</p>
           </div>
           <div className="oe-report-section-body">
@@ -1376,10 +1487,10 @@ export default function ValtSkyReport({
           </div>
         </section>
 
-        {/* SECTION 03: CONCURRENCY & DURABILITY MODEL */}
-        <section className="oe-report-section oe-report-section--flip" id="valtsky-s02" data-num="03">
+        {/* SECTION 05: CONCURRENCY & DURABILITY MODEL */}
+        <section className="oe-report-section oe-report-section--flip" id="valtsky-s02" data-num="05">
           <div className="oe-report-section-label">
-            <span>03</span>
+            <span>05</span>
             <p>Concurrency &amp; durability model</p>
           </div>
           <div className="oe-report-section-body">
@@ -1411,10 +1522,10 @@ export default function ValtSkyReport({
           </div>
         </section>
 
-        {/* SECTION 04: VERIFICATION & TEST MATRIX */}
-        <section className="oe-report-section" id="valtsky-s03" data-num="04">
+        {/* SECTION 06: VERIFICATION & TEST MATRIX */}
+        <section className="oe-report-section" id="valtsky-s03" data-num="06">
           <div className="oe-report-section-label">
-            <span>04</span>
+            <span>06</span>
             <p>Verification &amp; test matrix</p>
           </div>
           <div className="oe-report-section-body">
@@ -1444,10 +1555,10 @@ export default function ValtSkyReport({
           </div>
         </section>
 
-        {/* SECTION 05: PRODUCTION CODE BLUEPRINT */}
-        <section className="oe-report-section oe-report-section--flip" id="valtsky-s04" data-num="05">
+        {/* SECTION 07: PRODUCTION CODE BLUEPRINT */}
+        <section className="oe-report-section oe-report-section--flip" id="valtsky-s04" data-num="07">
           <div className="oe-report-section-label">
-            <span>05</span>
+            <span>07</span>
             <p>Production code blueprint</p>
           </div>
           <div className="oe-report-section-body">
@@ -1508,10 +1619,10 @@ void main() async {
           </div>
         </section>
 
-        {/* SECTION 06: PRODUCTION COMMANDS & VERIFICATION */}
-        <section className="oe-report-section" id="valtsky-s05" data-num="06">
+        {/* SECTION 08: PRODUCTION COMMANDS & VERIFICATION */}
+        <section className="oe-report-section" id="valtsky-s05" data-num="08">
           <div className="oe-report-section-label">
-            <span>06</span>
+            <span>08</span>
             <p>Binary verification</p>
           </div>
           <div className="oe-report-section-body">
