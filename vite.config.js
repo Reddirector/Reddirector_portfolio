@@ -11,6 +11,12 @@ function generateSpaRoutes() {
     'projects/orchestration-engine',
     'projects/sae-reproduction',
     'projects/pentagon',
+    'projects/valtsky-lossless-cloud-vault',
+    'projects/valtsky',
+    'projects/01',
+    'projects/02',
+    'projects/03',
+    'projects/04',
   ]
   return {
     name: 'generate-spa-routes',

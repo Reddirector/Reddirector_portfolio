@@ -846,10 +846,10 @@ CREATE TABLE IF NOT EXISTS autonomy_settings (
                 textColor="#ffffff"
                 fillTextColor="#ffffff"
                 doneLabel="Opening..."
-                onTap={() => onNavigateProject('orchestration-engine')}
-                onHold={() => onNavigateProject('orchestration-engine')}
+                onTap={() => onNavigateProject('valtsky-lossless-cloud-vault')}
+                onHold={() => onNavigateProject('valtsky-lossless-cloud-vault')}
               >
-                First: Orchestration Engine →
+                Next: ValtSky Multiplatform →
               </HoldButton>
             )}
           </div>

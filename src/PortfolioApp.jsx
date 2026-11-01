@@ -9,6 +9,8 @@ import Intro from './components/Intro/Intro'
 import { useIntro } from './components/Intro/useIntro'
 import PentagonVisual from './components/Pentagon/PentagonVisual'
 import PentagonWorkstationReport from './components/Pentagon/PentagonReport'
+import ValtSkyVisual from './components/ValtSky/ValtSkyVisual'
+import ValtSkyReport from './components/ValtSky/ValtSkyReport'
 import BarbaTransitionOverlay from './components/BarbaTransition/BarbaTransitionOverlay'
 import CircularCarousel from './CircularCarousel'
 import HoldButton from './HoldButton'
@@ -29,22 +31,26 @@ const logoLetters = [
   ['E', 18, 16], ['C', 21, 18], ['T', 24, 20], ['O', 27, 22], ['R', 30, 24],
 ]
 const featuredProjects = content.projects
-  .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon'].includes(project.name))
+  .filter((project) => ['Orchestration Engine', 'SAE Reproduction', 'Pentagon', 'ValtSky Multiplatform'].includes(project.name))
   .map((project, index) => ({ ...project, id: String(index + 1).padStart(2, '0') }))
 
 const SLUG_TO_PROJECT_NAME = {
   'orchestration-engine': 'Orchestration Engine',
   'sae-reproduction': 'SAE Reproduction',
   'pentagon': 'Pentagon',
+  'valtsky-lossless-cloud-vault': 'ValtSky Multiplatform',
+  'valtsky': 'ValtSky Multiplatform',
   '01': 'Orchestration Engine',
   '02': 'SAE Reproduction',
   '03': 'Pentagon',
+  '04': 'ValtSky Multiplatform',
 }
 
 const PROJECT_NAME_TO_SLUG = {
   'Orchestration Engine': 'orchestration-engine',
   'SAE Reproduction': 'sae-reproduction',
   'Pentagon': 'pentagon',
+  'ValtSky Multiplatform': 'valtsky-lossless-cloud-vault',
 }
 
 export function getAppBasePath() {
@@ -75,7 +81,7 @@ function parseCurrentRoute() {
   const hash = window.location.hash.toLowerCase()
 
   // 1. Check pathname: /projects/<slug> or /<slug>
-  const pathMatch = path.match(/(?:^|\/)(?:projects\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)(?:\/|$)/)
+  const pathMatch = path.match(/(?:^|\/)(?:projects\/)?(orchestration-engine|sae-reproduction|pentagon|valtsky-lossless-cloud-vault|valtsky|01|02|03|04)(?:\/|$)/)
   if (pathMatch) {
     const slug = pathMatch[1]
     const projName = SLUG_TO_PROJECT_NAME[slug]
@@ -84,7 +90,7 @@ function parseCurrentRoute() {
   }
 
   // 2. Check hash: #/projects/<slug> or #<slug>
-  const hashMatch = hash.match(/#(?:(?:\/projects\/)?|\/)?(orchestration-engine|sae-reproduction|pentagon|01|02|03)(?:\/|$)/)
+  const hashMatch = hash.match(/#(?:(?:\/projects\/)?|\/)?(orchestration-engine|sae-reproduction|pentagon|valtsky-lossless-cloud-vault|valtsky|01|02|03|04)(?:\/|$)/)
   if (hashMatch) {
     const slug = hashMatch[1]
     const projName = SLUG_TO_PROJECT_NAME[slug]
@@ -3809,7 +3815,8 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
   const isResearch = project?.name === 'SAE Reproduction'
   const isOrchestration = project?.name === 'Orchestration Engine'
   const isPentagon = project?.name === 'Pentagon'
-  const usesVenom = isResearch || isOrchestration || isPentagon
+  const isValtSky = project?.name === 'ValtSky Multiplatform'
+  const usesVenom = isResearch || isOrchestration || isPentagon || isValtSky
   const entranceDelay = 0.15
   useLayoutEffect(() => {
     if (!project || !panel.current) return undefined
@@ -3906,7 +3913,7 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
         <div role="status" aria-live="polite">{reportReady ? `${project.name} report ready.` : `Opening ${project.name} case study.`}</div>
         {!reportReady && <><h2 id="project-title">{project.name}</h2><p id="project-detail">Opening the {project.name} case study.</p></>}
       </div>}
-      <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration || isPentagon ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'text-white'}`} style={!usesVenom ? { backgroundColor: project.color || 'var(--color-accent)' } : undefined}>
+      <article ref={panel} aria-hidden={usesVenom && !reportReady} className={`relative min-h-full overflow-hidden ${isResearch ? `sae-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : isOrchestration || isPentagon || isValtSky ? `oe-report-panel ${reportReady ? 'is-ready' : 'is-covered'}` : 'text-white'}`} style={!usesVenom ? { backgroundColor: project.color || 'var(--color-accent)' } : undefined}>
         {!usesVenom && <i aria-hidden="true" className="absolute -right-[10%] -top-[12%] h-[62vw] w-[62vw] rounded-full border border-white/25" />}
         {reportReady && (!usesVenom || transitionDone) && <CaseFileProgress tone={usesVenom ? 'lime' : 'ink'} />}
         {isResearch && reportReady ? <>
@@ -3989,6 +3996,36 @@ function ProjectModal({ project, close, openOrigin, onNavigateProject }) {
             </div>
           </header>
           <PentagonWorkstationReport
+            entranceDelay={entranceDelay}
+            setupScrollFx={setupCaseFileScrollFx}
+            useReadout={useCaseFileReadout}
+            onBackToHome={close}
+            onNavigateProject={onNavigateProject}
+          />
+        </> : isValtSky && reportReady ? <>
+          <header className="oe-report-topbar">
+            <p>04 / Storage case file <span>·</span> ValtSky Multiplatform <i className="oe-readout-sep" aria-hidden="true">//</i> <span className="oe-readout-value">vault</span></p>
+            <div className="oe-topbar-meta">
+              <span className="oe-live-dot" aria-hidden="true" />
+              <span className="oe-live-label" aria-hidden="true">daemon live</span>
+              <HoldButton
+                size="sm"
+                radius={2}
+                holdTime={500}
+                backgroundColor="#141417"
+                fillColor="#e5484d"
+                textColor="#ffffff"
+                fillTextColor="#ffffff"
+                className="oe-topbar-back-btn"
+                doneLabel="Returning..."
+                onTap={close}
+                onHold={close}
+              >
+                ← Back to Overview
+              </HoldButton>
+            </div>
+          </header>
+          <ValtSkyReport
             entranceDelay={entranceDelay}
             setupScrollFx={setupCaseFileScrollFx}
             useReadout={useCaseFileReadout}
@@ -4115,9 +4152,10 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
     'Orchestration Engine': '233 / 233 tests · 91.5% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
+    'ValtSky Multiplatform': '100% Bit-for-Bit · < 28 MB RAM',
   }[project.name]
   useLayoutEffect(() => {
-    if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon') return undefined
+    if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon' || project.name === 'ValtSky Multiplatform') return undefined
     const section = visual.current?.closest('#work')
     const context = gsap.context(() => {
       gsap.fromTo(scene.current, { y: 18, rotate: -.7, scale: .985 }, { y: -18, rotate: .7, scale: 1.015, ease: 'none', scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1 } })
@@ -4321,7 +4359,7 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
       <span>Project representation</span><span>{project.id} / {String(featuredProjects.length).padStart(2, '0')}</span>
     </div>
     <div ref={scene} className="project-visual-scene">
-      <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''} ${project.name === 'Pentagon' ? '!min-h-0 !p-0 !justify-stretch h-full flex flex-col' : ''}`} key={project.id} aria-hidden="true">
+      <div className={`project-visual-art project-visual-art--${index + 1} ${project.name === 'Orchestration Engine' ? 'oe-project-art' : ''} ${project.name === 'Pentagon' || project.name === 'ValtSky Multiplatform' ? '!min-h-0 !p-0 !justify-stretch h-full flex flex-col' : ''}`} key={project.id} aria-hidden="true">
       {project.name === 'Orchestration Engine' && <>
         <OeVisualHalo />
         <div className="flex items-center justify-between relative z-10 font-mono text-[.6rem] uppercase tracking-[.12em] text-white/55">
@@ -4355,6 +4393,7 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
         <div className="mt-7 grid grid-cols-2 gap-4 border-t border-white/15 pt-4 font-mono uppercase"><span><small>Features</small><strong>2,048 → 4,096</strong></span><span><small>Validation</small><strong>0.897562</strong></span></div>
       </>}
       {project.name === 'Pentagon' && <PentagonVisual />}
+      {project.name === 'ValtSky Multiplatform' && <ValtSkyVisual />}
       </div>
     </div>
     <div className="mt-6 flex items-end justify-between gap-3 border-t border-white/15 pt-4 text-left">

@@ -1,0 +1,299 @@
+/* ValtSky Multiplatform — Systems Report & Ambience Styles */
+
+.valtsky-report-panel {
+  position: relative;
+  background-color: var(--surface-deep, #060405);
+  color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Ambient Visual Effects */
+.valtsky-ambience-ring--spin {
+  top: -12rem;
+  right: -14rem;
+  width: clamp(22rem, 44vw, 42rem);
+  aspect-ratio: 1;
+}
+
+.valtsky-ambience-ring--orbit {
+  top: 32%;
+  left: -26rem;
+  width: 48rem;
+  height: 48rem;
+  border-style: dashed;
+  border-color: rgb(229 72 77 / .08);
+}
+
+.valtsky-ambience-diamond {
+  position: absolute;
+  top: 22%;
+  right: 5%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid rgb(229 72 77 / .35);
+  transform: rotate(45deg);
+}
+
+.valtsky-ambience-float {
+  position: absolute;
+  display: block;
+}
+
+/* Pipeline Simulator in ValtSky Runtime Lab */
+.valtsky-sim-stage {
+  border: 1px solid rgb(255 255 255 / .12);
+  background: rgb(15 13 16 / .9);
+  padding: 1.25rem;
+  border-radius: 4px;
+  margin-top: 1.25rem;
+}
+
+.valtsky-sim-timeline {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+}
+
+.valtsky-timeline-step {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  padding: .65rem .75rem;
+  background: rgb(255 255 255 / .025);
+  border: 1px solid rgb(255 255 255 / .08);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s ease;
+  text-align: left;
+}
+
+.valtsky-timeline-step:hover {
+  border-color: rgb(229 72 77 / .4);
+  background: rgb(229 72 77 / .04);
+}
+
+.valtsky-timeline-step.is-active {
+  border-color: var(--color-interactive, #e5484d);
+  background: rgb(229 72 77 / .12);
+  box-shadow: 0 0 16px rgb(229 72 77 / .15);
+}
+
+.valtsky-timeline-step.is-past {
+  border-color: rgb(229 72 77 / .35);
+  background: rgb(229 72 77 / .04);
+}
+
+.valtsky-timeline-num {
+  font-family: var(--font-mono);
+  font-size: .56rem;
+  font-weight: 700;
+  color: var(--color-interactive, #e5484d);
+}
+
+.valtsky-timeline-name {
+  font-family: var(--font-mono);
+  font-size: .62rem;
+  letter-spacing: .04em;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.valtsky-sim-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .85rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: .85rem;
+  border-bottom: 1px solid rgb(255 255 255 / .08);
+}
+
+.valtsky-mode-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.valtsky-mode-btn {
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .35rem .75rem;
+  border: 1px solid rgb(255 255 255 / .15);
+  background: rgb(255 255 255 / .03);
+  color: rgb(255 255 255 / .7);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+
+.valtsky-mode-btn:hover {
+  border-color: var(--color-interactive, #e5484d);
+  color: #ffffff;
+}
+
+.valtsky-mode-btn.is-active {
+  border-color: var(--color-interactive, #e5484d);
+  background: rgb(229 72 77 / .16);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.valtsky-sim-status-card {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1.25rem;
+  background: rgb(0 0 0 / .55);
+  border: 1px solid rgb(255 255 255 / .09);
+  padding: 1.2rem;
+  border-radius: 3px;
+}
+
+.valtsky-sim-narrative {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.valtsky-sim-narrative h4 {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.valtsky-sim-narrative p {
+  margin: 0;
+  font-size: .78rem;
+  line-height: 1.6;
+  color: rgb(255 255 255 / .72);
+}
+
+.valtsky-sim-telemetry {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  border-left: 1px solid rgb(255 255 255 / .1);
+  padding-left: 1.25rem;
+}
+
+.valtsky-telem-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: .64rem;
+}
+
+.valtsky-telem-label {
+  color: rgb(255 255 255 / .5);
+}
+
+.valtsky-telem-val {
+  color: #f5f5f5;
+  font-weight: 600;
+}
+
+.valtsky-telem-val.is-ok {
+  color: #4ade80;
+}
+
+.valtsky-telem-val.is-warn {
+  color: #fbbf24;
+}
+
+.valtsky-telem-val.is-err {
+  color: #f87171;
+}
+
+.valtsky-telem-bar {
+  height: 4px;
+  background: rgb(255 255 255 / .08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: .15rem;
+}
+
+.valtsky-telem-bar-fill {
+  height: 100%;
+  background: var(--color-interactive, #e5484d);
+  transition: width .4s ease;
+}
+
+/* 4-Click Staging Assistant Visual */
+.valtsky-staging-wizard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.valtsky-wizard-card {
+  padding: .85rem;
+  background: rgb(229 72 77 / .05);
+  border: 1px solid rgb(229 72 77 / .25);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.valtsky-wizard-step {
+  font-family: var(--font-mono);
+  font-size: .52rem;
+  letter-spacing: .08em;
+  color: var(--color-interactive, #e5484d);
+  text-transform: uppercase;
+}
+
+.valtsky-wizard-title {
+  font-size: .78rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.valtsky-wizard-desc {
+  font-size: .68rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / .65);
+}
+
+/* Responsive adjustments */
+@media (max-width: 860px) {
+  .valtsky-sim-timeline {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valtsky-sim-status-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .valtsky-sim-telemetry {
+    border-left: 0;
+    border-top: 1px solid rgb(255 255 255 / .1);
+    padding-left: 0;
+    padding-top: .85rem;
+  }
+  .valtsky-staging-wizard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .valtsky-sim-timeline {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .valtsky-staging-wizard {
+    grid-template-columns: 1fr;
+  }
+}
