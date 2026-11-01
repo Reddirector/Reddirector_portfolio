@@ -301,6 +301,7 @@ Future<void> routeToChannel(String targetChannelId) async {
 function ValtSkyRuntimeLab() {
   const [currentStep, setCurrentStep] = useState(0)
   const [activeMode, setActiveMode] = useState('happy') // happy | rate_limit | oversized | malware
+  const [wizardStep, setWizardStep] = useState(0)
 
   const scenarios = {
     happy: {
@@ -673,33 +674,384 @@ function ValtSkyRuntimeLab() {
       {/* 4-Click Staging Assistant Walkthrough (shown when oversized is active) */}
       {activeMode === 'oversized' && (
         <div className="mt-4 pt-3 border-t border-white/10">
-          <span className="font-mono text-[.58rem] uppercase tracking-wider text-accent font-semibold block mb-2">
-            ⚡ 4-Click Assisted Staging Protocol (Manual Upload Sheet)
-          </span>
-          <div className="valtsky-staging-wizard">
-            <div className="valtsky-wizard-card">
-              <span className="valtsky-wizard-step">Click 1</span>
-              <strong className="valtsky-wizard-title">Review Channel ID</strong>
-              <p className="valtsky-wizard-desc">Confirm target private storage channel (-1001234567890) and security key.</p>
-            </div>
-            <div className="valtsky-wizard-card">
-              <span className="valtsky-wizard-step">Click 2</span>
-              <strong className="valtsky-wizard-title">Verify File Path</strong>
-              <p className="valtsky-wizard-desc">Inspect exact local path (/storage/emulated/0/DCIM/...) and verified SHA-256 hash.</p>
-            </div>
-            <div className="valtsky-wizard-card">
-              <span className="valtsky-wizard-step">Click 3</span>
-              <strong className="valtsky-wizard-title">Start Manual Upload</strong>
-              <p className="valtsky-wizard-desc">Copies path, bypasses automated daemon, and prepares clipboard transfer.</p>
-            </div>
-            <div className="valtsky-wizard-card">
-              <span className="valtsky-wizard-step">Click 4</span>
-              <strong className="valtsky-wizard-title">Open in Telegram</strong>
-              <p className="valtsky-wizard-desc">Launches native tg://resolve URI directly to the target channel for uncompressed file drop.</p>
-            </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-mono text-[.58rem] uppercase tracking-wider text-accent font-semibold">
+              ⚡ 4-Click Assisted Staging Protocol (Manual Upload Sheet) · Click steps to simulate:
+            </span>
+            <span className="font-mono text-[.6rem] text-emerald-400 font-bold">
+              {wizardStep === 4 ? '✓ STAGING COMPLETE (LAUNCHED tg://)' : `Step ${wizardStep} of 4 Complete`}
+            </span>
           </div>
+          <div className="valtsky-staging-wizard">
+            {[
+              {
+                step: 'Click 1',
+                title: 'Review Channel ID',
+                desc: 'Confirm target private storage channel (-1001234567890) and security key.',
+              },
+              {
+                step: 'Click 2',
+                title: 'Verify File Path',
+                desc: 'Inspect exact local path (/storage/emulated/0/DCIM/...) and verified SHA-256 hash.',
+              },
+              {
+                step: 'Click 3',
+                title: 'Start Manual Upload',
+                desc: 'Copies path, bypasses automated daemon, and prepares clipboard transfer.',
+              },
+              {
+                step: 'Click 4',
+                title: 'Open in Telegram',
+                desc: 'Launches native tg://resolve URI directly to the target channel for uncompressed file drop.',
+              },
+            ].map((st, sIdx) => {
+              const isDone = wizardStep > sIdx
+              return (
+                <div
+                  key={sIdx}
+                  onClick={() => setWizardStep((prev) => (prev > sIdx ? sIdx : sIdx + 1))}
+                  className={`valtsky-wizard-card ${isDone ? 'is-done' : ''}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="valtsky-wizard-step">{st.step}</span>
+                    {isDone && <span className="text-emerald-400 text-[.6rem] font-bold">✓</span>}
+                  </div>
+                  <strong className="valtsky-wizard-title">{st.title}</strong>
+                  <p className="valtsky-wizard-desc">{st.desc}</p>
+                </div>
+              )
+            })}
+          </div>
+          {wizardStep === 4 && (
+            <div className="mt-2 p-2 bg-emerald-950/20 border border-emerald-500/40 rounded flex items-center justify-between text-[.62rem] text-emerald-300 font-mono">
+              <span>✓ Assisted Hand-off Successful: 3.4 GB ProRes file routed via Telegram desktop/mobile client without API 2GB rejection.</span>
+              <button
+                type="button"
+                onClick={() => setWizardStep(0)}
+                className="text-[.54rem] uppercase bg-white/10 hover:bg-white/20 text-white px-2 py-0.5 rounded cursor-pointer"
+              >
+                Reset Wizard ↺
+              </button>
+            </div>
+          )}
         </div>
       )}
+    </div>
+  )
+}
+
+// Interactive Socket Streaming & Memory Gauge Studio
+function ValtSkyStreamBench() {
+  const [fileSizeMb, setFileSizeMb] = useState(1800)
+  const [mode, setMode] = useState('valtsky') // 'valtsky' | 'naive'
+  const [streaming, setStreaming] = useState(false)
+  const [progress, setProgress] = useState(mode === 'valtsky' ? 76 : 100)
+
+  const isOOM = mode === 'naive' && fileSizeMb >= 500
+
+  const runSimulation = () => {
+    setStreaming(true)
+    setProgress(0)
+    let p = 0
+    const interval = setInterval(() => {
+      p += 15
+      if (p >= 100) {
+        p = 100
+        clearInterval(interval)
+        setStreaming(false)
+      }
+      setProgress(p)
+    }, 120)
+  }
+
+  const memoryHeap = mode === 'valtsky' ? (21.4 + (progress / 100) * 2.8).toFixed(1) : (fileSizeMb * 1.05).toFixed(0)
+
+  return (
+    <div className="valtsky-stream-bench">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-accent text-[.64rem] font-mono uppercase font-bold">STREAM BENCH:</span>
+          <span className="text-white/80 font-mono text-[.7rem]">Socket Pipe vs. Naive In-Memory Buffer</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMode('valtsky')}
+            className={`valtsky-mode-btn ${mode === 'valtsky' ? 'is-active' : ''}`}
+          >
+            ValtSky 64KB Slices
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('naive')}
+            className={`valtsky-mode-btn ${mode === 'naive' ? 'is-active' : ''}`}
+          >
+            Naive readAsBytes()
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-4 text-[.68rem] font-mono">
+        <div className="p-3 bg-black/40 border border-white/10 rounded">
+          <span className="text-white/50 block text-[.58rem] uppercase">Asset Container</span>
+          <div className="flex gap-1 mt-1.5">
+            {[84, 500, 1800].map((sz) => (
+              <button
+                key={sz}
+                type="button"
+                onClick={() => setFileSizeMb(sz)}
+                className={`px-2 py-1 rounded border text-[.6rem] cursor-pointer ${fileSizeMb === sz ? 'bg-red-500/20 border-red-500 text-white' : 'border-white/10 text-white/50 hover:text-white'}`}
+              >
+                {sz >= 1000 ? `${(sz / 1000).toFixed(1)} GB` : `${sz} MB`}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-3 bg-black/40 border border-white/10 rounded">
+          <span className="text-white/50 block text-[.58rem] uppercase">Resident Heap RAM</span>
+          <strong className={`text-[1.1rem] block mt-1 ${isOOM ? 'text-red-400 font-bold' : 'text-emerald-400'}`}>
+            {isOOM ? 'OOM CRASH' : `${memoryHeap} MB`}
+          </strong>
+          <small className="text-white/40 text-[.55rem]">{mode === 'valtsky' ? 'Pinned under 28 MB budget' : 'Full asset buffered in RAM'}</small>
+        </div>
+
+        <div className="p-3 bg-black/40 border border-white/10 rounded flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-white/50 text-[.58rem] uppercase">Stream Progress</span>
+            <span className="text-white font-bold">{progress}%</span>
+          </div>
+          <div className="valtsky-telem-bar mt-1">
+            <div className={`valtsky-telem-bar-fill ${isOOM ? '!bg-red-500' : ''}`} style={{ width: `${progress}%` }} />
+          </div>
+          <button
+            type="button"
+            onClick={runSimulation}
+            disabled={streaming}
+            className="mt-2 text-[.56rem] uppercase tracking-wider py-1 bg-white/10 hover:bg-red-500/20 hover:text-white border border-white/20 rounded cursor-pointer transition-all"
+          >
+            {streaming ? 'Piping Slices...' : 'Simulate Socket Transfer ↻'}
+          </button>
+        </div>
+      </div>
+
+      {isOOM ? (
+        <div className="valtsky-oom-alert">
+          <span className="text-red-400 font-bold text-[.85rem]">⚠</span>
+          <div>
+            <strong>FATAL OS EXCEPTION: Out-Of-Memory (LMK / Jetsam Kill)</strong>
+            <p className="text-[.62rem] text-white/70 m-0">
+              Naive backup scripts buffer all {fileSizeMb} MB into resident memory before transmission. Mobile operating systems immediately terminate the background process to protect system stability.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/30 rounded flex items-center justify-between text-[.62rem] text-emerald-300 font-mono">
+          <span>✓ Socket Stream Invariant Verified: Bounded memory footprint remains flat regardless of asset size.</span>
+          <span className="font-bold">HTTP/2 Chunked Pipeline Active</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Anti-Malware Header Sniffer & Entity Sanitizer
+function ValtSkySecurityGuardLab() {
+  const [selectedFileType, setSelectedFileType] = useState('dng')
+  const [customCaption, setCustomCaption] = useState('Family trip photo! *important* [link](http://site.com) #2026 >quote')
+
+  const fileSignatures = {
+    dng: {
+      name: 'RAW Camera DNG',
+      ext: 'dng',
+      status: 'TRUSTED RAW BAYER',
+      pass: true,
+      bytes: ['49', '49', '2A', '00', '08', '00', '00', '00', '10', '00', 'FE', '00', '04', '00', '01', '00'],
+      desc: 'TIFF little-endian container specification. All raw Bayer arrays and camera calibration metadata preserved.',
+    },
+    jpeg: {
+      name: 'Standard JPEG Photo',
+      ext: 'jpg',
+      status: 'AUTHENTICATED EXIF',
+      pass: true,
+      bytes: ['FF', 'D8', 'FF', 'E0', '00', '10', '4A', '46', '49', '46', '00', '01', '01', '01', '00', '60'],
+      desc: 'Standard JPEG SOI (Start of Image) header marker. Verified compliant with camera color profiles.',
+    },
+    png: {
+      name: 'Lossless PNG Graphic',
+      ext: 'png',
+      status: 'AUTHENTICATED PNG',
+      pass: true,
+      bytes: ['89', '50', '4E', '47', '0D', '0A', '1A', '0A', '00', '00', '00', '0D', '49', '48', '44', '52'],
+      desc: 'Standard 8-byte PNG file signature. Protects pixel transparency and ICC color profiles.',
+    },
+    malware: {
+      name: 'Disguised Executable (.exe as .jpg)',
+      ext: 'jpg',
+      status: 'SECURITY DROP: MALWARE SIGNATURE',
+      pass: false,
+      bytes: ['4D', '5A', '90', '00', '03', '00', '00', '00', '04', '00', '00', '00', 'FF', 'FF', '00', '00'],
+      desc: 'Hostile attack detected: File claims .jpg extension, but raw magic bytes match Windows PE Executable (MZ). Quarantined immediately.',
+    },
+    eicar: {
+      name: 'EICAR Anti-Virus Test String',
+      ext: 'bin',
+      status: 'SECURITY DROP: EICAR SIGNATURE',
+      pass: false,
+      bytes: ['58', '35', '4F', '21', '50', '25', '40', '41', '50', '5B', '34', '5C', '50', '5A', '58', '35'],
+      desc: 'Standard cybersecurity test signature recognized. Zero bytes emitted to network socket.',
+    },
+  }
+
+  const activeSig = fileSignatures[selectedFileType]
+
+  const sanitizeMarkdownV2 = (text) => {
+    return text.replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, '\\$1')
+  }
+
+  return (
+    <div className="valtsky-hex-card">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-wrap gap-2">
+        <div>
+          <span className="text-accent text-[.64rem] font-mono uppercase font-bold">SECURITY GATEWAY:</span>
+          <h4 className="text-white text-[.82rem] font-mono m-0">Pre-Network Magic Byte Sniffer &amp; Entity Sanitizer</h4>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {Object.entries(fileSignatures).map(([k, v]) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setSelectedFileType(k)}
+              className={`px-2 py-1 rounded text-[.58rem] font-mono border cursor-pointer transition-all ${selectedFileType === k ? (v.pass ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'border-white/10 text-white/50 hover:text-white'}`}
+            >
+              {v.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-[.62rem] font-mono">
+          <span className="text-white/60">First 16 Bytes Binary Hex Dump:</span>
+          <span className={`font-bold ${activeSig.pass ? 'text-emerald-400' : 'text-red-400'}`}>
+            {activeSig.status}
+          </span>
+        </div>
+
+        <div className="valtsky-hex-grid">
+          {activeSig.bytes.map((byte, idx) => (
+            <div
+              key={idx}
+              className={`valtsky-hex-byte ${!activeSig.pass ? 'is-malware' : idx < 4 ? 'is-sig' : ''}`}
+            >
+              <span className="block font-bold">{byte}</span>
+              <span className="block text-[.48rem] text-white/40">{`0x0${idx.toString(16)}`}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[.7rem] font-mono text-white/70 m-0 border-l-2 border-accent pl-2.5 py-0.5">
+          {activeSig.desc}
+        </p>
+      </div>
+
+      <div className="valtsky-sanitizer-box">
+        <span className="text-white/50 text-[.58rem] font-mono uppercase block mb-1.5">
+          Telegram MarkdownV2 Entity Sanitization Playground
+        </span>
+        <input
+          type="text"
+          value={customCaption}
+          onChange={(e) => setCustomCaption(e.target.value)}
+          placeholder="Type string containing * [ ] ( ) _ ~ # > to test escaping..."
+          className="w-full bg-black/60 border border-white/20 rounded px-2.5 py-1.5 font-mono text-[.68rem] text-white outline-none focus:border-red-500"
+        />
+        <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[.62rem] font-mono">
+          <span className="text-white/40">Sanitized Output (Escape 18 Punctuation Tokens):</span>
+          <code className="text-emerald-300 bg-white/5 px-2 py-0.5 rounded">{sanitizeMarkdownV2(customCaption)}</code>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Monotonic Timeline Comparator
+function MonotonicTimelineComparator() {
+  const [mode, setMode] = useState('valtsky') // 'valtsky' | 'naive'
+
+  const items = [
+    { title: 'Graduation Ceremony', year: '2019', date: '2019-06-15' },
+    { title: 'First Developer Job', year: '2021', date: '2021-02-01' },
+    { title: 'Mountain Expedition', year: '2023', date: '2023-08-20' },
+    { title: 'ValtSky v2.0 Launch', year: '2026', date: '2026-11-01' },
+  ]
+
+  const displayOrder = mode === 'valtsky' ? items : [...items].reverse()
+
+  return (
+    <div className="my-5 border border-white/12 bg-black/40 p-4 rounded">
+      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
+        <div>
+          <span className="text-accent text-[.6rem] font-mono uppercase font-bold">TIMELINE INTEGRITY:</span>
+          <h4 className="text-white text-[.85rem] font-mono m-0">Monotonic Sorting vs. Inverted Feed Disaster</h4>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMode('valtsky')}
+            className={`valtsky-mode-btn ${mode === 'valtsky' ? 'is-active' : ''}`}
+          >
+            ValtSky (dateTaken ASC)
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('naive')}
+            className={`valtsky-mode-btn ${mode === 'naive' ? 'is-active' : ''}`}
+          >
+            Naive Ingestion (mtime DESC)
+          </button>
+        </div>
+      </div>
+
+      <div className="valtsky-timeline-compare">
+        <div className={`valtsky-compare-pane ${mode === 'valtsky' ? 'is-valtsky' : ''}`}>
+          <div className="flex items-center justify-between text-[.64rem] font-mono">
+            <span className="text-white/60">SIMULATED TELEGRAM CHANNEL FEED</span>
+            <span className={mode === 'valtsky' ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+              {mode === 'valtsky' ? '✓ MONOTONIC CHRONOLOGICAL' : '✗ INVERTED (OLDEST AT BOTTOM)'}
+            </span>
+          </div>
+
+          <div className="valtsky-feed-preview">
+            {displayOrder.map((it, idx) => (
+              <div key={idx} className={`valtsky-feed-bubble ${idx === 0 ? 'is-first' : ''}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/40">{idx + 1}.</span>
+                  <span className="text-white font-bold">{it.title}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/50 text-[.55rem]">{it.date}</span>
+                  <span className="text-accent bg-red-950/40 px-1.5 py-0.5 rounded text-[.52rem] font-bold">{it.year}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-3.5 bg-black/50 border border-white/10 rounded font-mono text-[.7rem] flex flex-col justify-between">
+          <div>
+            <span className="text-accent text-[.58rem] uppercase font-bold block mb-1">Algorithmic Consequence</span>
+            <p className="text-white/80 text-[.74rem] leading-relaxed m-0">
+              {mode === 'valtsky'
+                ? 'ValtSky indexes media via SQLite b-trees using `ORDER BY date_taken ASC`. By uploading the oldest memories first, your private Telegram channel naturally reads chronologically forward like a permanent camera album.'
+                : 'Naive backup loops sort descending or read filesystem inodes arbitrarily. When uploaded, recent captures enter first and historical photos sit at the very bottom, completely inverting chronological album navigation.'}
+            </p>
+          </div>
+          <div className="border-t border-white/10 pt-2 text-[.6rem] text-white/50 flex items-center justify-between">
+            <span>Query Strategy:</span>
+            <code className="text-white font-bold">{mode === 'valtsky' ? 'ORDER BY date_taken ASC' : 'mtime DESC (Flawed)'}</code>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -974,6 +1326,7 @@ export default function ValtSkyReport({
               </p>
             </div>
             <ValtSkyArchitecturalPillars />
+            <MonotonicTimelineComparator />
           </div>
         </section>
 
@@ -1054,6 +1407,7 @@ export default function ValtSkyReport({
                 </p>
               </article>
             </div>
+            <ValtSkyStreamBench />
           </div>
         </section>
 
@@ -1068,6 +1422,7 @@ export default function ValtSkyReport({
             <p>
               Every release is verified across automated widget smoke suites, adversarial cybersecurity injection attacks, path traversal probes, and high-concurrency database stress runs.
             </p>
+            <ValtSkySecurityGuardLab />
             <div className="oe-test-table">
               <div className="oe-test-table-head">
                 <span>Test Suite Target</span>

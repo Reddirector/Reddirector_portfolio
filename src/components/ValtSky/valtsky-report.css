@@ -246,6 +246,18 @@
   display: flex;
   flex-direction: column;
   gap: .4rem;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.valtsky-wizard-card:hover {
+  border-color: var(--color-interactive, #e5484d);
+  background: rgb(229 72 77 / .1);
+}
+
+.valtsky-wizard-card.is-done {
+  border-color: #4ade80;
+  background: rgb(74 222 128 / .06);
 }
 
 .valtsky-wizard-step {
@@ -254,6 +266,10 @@
   letter-spacing: .08em;
   color: var(--color-interactive, #e5484d);
   text-transform: uppercase;
+}
+
+.valtsky-wizard-card.is-done .valtsky-wizard-step {
+  color: #4ade80;
 }
 
 .valtsky-wizard-title {
@@ -267,6 +283,142 @@
   font-size: .68rem;
   line-height: 1.45;
   color: rgb(255 255 255 / .65);
+}
+
+/* Interactive Hex Inspector */
+.valtsky-hex-card {
+  margin: 1.25rem 0;
+  background: rgb(12 10 12 / .95);
+  border: 1px solid rgb(255 255 255 / .12);
+  border-radius: 4px;
+  padding: 1.25rem;
+}
+
+.valtsky-hex-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: .35rem;
+  margin: 1rem 0;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+}
+
+.valtsky-hex-byte {
+  padding: .45rem .25rem;
+  text-align: center;
+  border-radius: 2px;
+  background: rgb(255 255 255 / .04);
+  border: 1px solid rgb(255 255 255 / .1);
+  color: #ffffff;
+  transition: all .2s ease;
+}
+
+.valtsky-hex-byte.is-sig {
+  background: rgb(74 222 128 / .18);
+  border-color: #4ade80;
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.valtsky-hex-byte.is-malware {
+  background: rgb(239 68 68 / .2);
+  border-color: #ef4444;
+  color: #ef4444;
+  font-weight: 700;
+  animation: valtsky-pulse 1.5s infinite;
+}
+
+@keyframes valtsky-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Stream Bench & RAM Gauge Simulator */
+.valtsky-stream-bench {
+  margin: 1.5rem 0;
+  border: 1px solid rgb(229 72 77 / .28);
+  background: rgb(15 13 16 / .95);
+  padding: 1.25rem;
+  border-radius: 4px;
+}
+
+.valtsky-ram-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  background: rgb(0 0 0 / .6);
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 3px;
+}
+
+.valtsky-oom-alert {
+  padding: .65rem .85rem;
+  background: rgb(239 68 68 / .15);
+  border: 1px solid #ef4444;
+  border-radius: 3px;
+  color: #fca5a5;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-top: .75rem;
+}
+
+/* Monotonic Timeline Comparator */
+.valtsky-timeline-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 1.25rem 0;
+}
+
+.valtsky-compare-pane {
+  background: rgb(0 0 0 / .5);
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.valtsky-compare-pane.is-valtsky {
+  border-color: rgb(229 72 77 / .4);
+  background: rgb(229 72 77 / .03);
+}
+
+.valtsky-feed-preview {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+
+.valtsky-feed-bubble {
+  padding: .5rem .75rem;
+  border-radius: 4px;
+  background: rgb(255 255 255 / .06);
+  border: 1px solid rgb(255 255 255 / .12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: .64rem;
+}
+
+.valtsky-feed-bubble.is-first {
+  border-color: var(--color-interactive, #e5484d);
+  background: rgb(229 72 77 / .12);
+}
+
+/* Sanitizer Playground */
+.valtsky-sanitizer-box {
+  background: rgb(0 0 0 / .55);
+  border: 1px solid rgb(255 255 255 / .12);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
 }
 
 /* Responsive adjustments */
@@ -287,6 +439,12 @@
   .valtsky-staging-wizard {
     grid-template-columns: repeat(2, 1fr);
   }
+  .valtsky-hex-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  .valtsky-timeline-compare {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 540px) {
@@ -295,5 +453,8 @@
   }
   .valtsky-staging-wizard {
     grid-template-columns: 1fr;
+  }
+  .valtsky-hex-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
