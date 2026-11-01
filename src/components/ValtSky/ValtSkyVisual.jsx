@@ -134,32 +134,42 @@ export default function ValtSkyVisual() {
   const containerRef = useRef(null)
   const [stageDimensions, setStageDimensions] = useState({ width: 340, height: 210 })
 
-  // Measure container dimensions responsively
+  // Measure container dimensions responsively using un-transformed layout dimensions
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
     const updateSize = () => {
-      const rect = el.getBoundingClientRect()
-      if (rect.width > 0 && rect.height > 0) {
+      const w = el.clientWidth || 340
+      const h = el.clientHeight || 300
+      if (w > 0 && h > 0) {
         setStageDimensions({
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
+          width: Math.round(w),
+          height: Math.round(h),
         })
       }
     }
     updateSize()
-    const ro = new ResizeObserver(updateSize)
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (entry?.contentRect) {
+        const w = entry.contentRect.width
+        const h = entry.contentRect.height
+        if (w > 0 && h > 0) {
+          setStageDimensions({ width: Math.round(w), height: Math.round(h) })
+        }
+      }
+    })
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
-  // Proportional card dimensions
+  // Proportional card dimensions expanded to take the full visual area
   const { cardWidth, cardHeight, cardGap, duration } = useMemo(() => {
     const w = stageDimensions.width
     const h = stageDimensions.height
-    const cWidth = Math.min(150, Math.max(120, Math.floor(w * 0.40)))
-    const cHeight = Math.min(210, Math.max(155, Math.floor(h * 0.90)))
-    const cGap = Math.min(32, Math.max(18, Math.floor(w * 0.07)))
+    const cWidth = Math.min(200, Math.max(130, Math.floor(w * 0.44)))
+    const cHeight = Math.min(330, Math.max(180, Math.floor(h * 0.90)))
+    const cGap = Math.min(32, Math.max(16, Math.floor(w * 0.06)))
     return {
       cardWidth: cWidth,
       cardHeight: cHeight,
@@ -171,43 +181,31 @@ export default function ValtSkyVisual() {
   return (
     <div
       ref={containerRef}
-      className="valtsky-visual-container flex flex-col justify-between h-full w-full select-none relative font-mono text-white p-2 sm:p-2.5 overflow-hidden rounded-lg bg-[#050406] border border-white/10 shadow-[0_0_30px_rgba(42,171,238,0.1)]"
+      className="valtsky-visual-container h-full w-full select-none relative font-mono text-white overflow-hidden rounded-lg bg-[#050406] border border-white/10 shadow-[0_0_30px_rgba(42,171,238,0.1)]"
     >
-      {/* Pure, Clean Animation Stage */}
-      <div className="relative flex-1 w-full min-h-[180px] sm:min-h-[210px] overflow-hidden rounded-lg bg-black/60 border border-white/10">
-        <MagicTransform
-          documents={VALTSKY_PHOTOS}
-          height="100%"
-          width="100%"
-          documentDuration={duration}
-          documentWidth={cardWidth}
-          documentHeight={cardHeight}
-          documentGap={cardGap}
-          axisColor="#2AABEE"
-          backgroundColor="transparent"
-          centerSize={36}
-          particleCount={0}
-          classNames={{
-            center: '!rounded-full !bg-black/95 !border-[#2AABEE]/60 !shadow-[0_0_20px_rgba(42,171,238,0.4)]',
-          }}
-          centerContent={
-            <div className="flex items-center justify-center text-[#2AABEE]">
-              <TelegramIcon size={18} className="drop-shadow-[0_0_8px_#2AABEE]" />
-            </div>
-          }
-          renderDocument={(doc) => <NormalPhotoCard item={doc} />}
-          renderOutputCard={(doc) => <TelegramCloudCard item={doc} />}
-        />
-      </div>
-
-      {/* Clean, Subtle Bottom Indicator */}
-      <div className="flex items-center justify-between pt-1 text-[.55rem] text-white/45 font-mono">
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#2AABEE] inline-block animate-pulse" />
-          <span>Device Photos ➔ Telegram Cloud Storage</span>
-        </span>
-        <span className="text-[#2AABEE]/80">Lossless · Encrypted</span>
-      </div>
+      <MagicTransform
+        documents={VALTSKY_PHOTOS}
+        height="100%"
+        width="100%"
+        documentDuration={duration}
+        documentWidth={cardWidth}
+        documentHeight={cardHeight}
+        documentGap={cardGap}
+        axisColor="#2AABEE"
+        backgroundColor="transparent"
+        centerSize={36}
+        particleCount={0}
+        classNames={{
+          center: '!rounded-full !bg-black/95 !border-[#2AABEE]/60 !shadow-[0_0_20px_rgba(42,171,238,0.4)]',
+        }}
+        centerContent={
+          <div className="flex items-center justify-center text-[#2AABEE]">
+            <TelegramIcon size={18} className="drop-shadow-[0_0_8px_#2AABEE]" />
+          </div>
+        }
+        renderDocument={(doc) => <NormalPhotoCard item={doc} />}
+        renderOutputCard={(doc) => <TelegramCloudCard item={doc} />}
+      />
     </div>
   )
 }
