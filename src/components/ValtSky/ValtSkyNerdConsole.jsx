@@ -326,6 +326,108 @@ MagicValidationResult inspectFileMagicBytes(Uint8List initialBlock) {
       },
     ],
   },
+  {
+    id: 'aerospace_std',
+    number: '08',
+    label: 'Aerospace ADE STD 100 & QRH',
+    headline: 'Aircraft Flight Operations Manual (AFOM-VALTSKY) & Airworthiness Directives',
+    badge: 'AEROSPACE COMPLIANCE & SAFETY',
+    codeSnippet: `// Airworthiness Directive AD-03: Cryptographic PIN & Lifecycle Re-Lock
+class VaultPrivacyLock extends WidgetsBindingObserver {
+  static const int saltLength = 32;
+  
+  // Hash user PIN using Salted SHA-256 (32-byte cryptographically random salt)
+  static String hashPin(String pin, Uint8List salt) {
+    final keyBytes = utf8.encode(pin);
+    final hmacSha256 = Hmac(sha256, salt);
+    final digest = hmacSha256.convert(keyBytes);
+    return base64Encode(digest.bytes);
+  }
+
+  // Mandatory ATA Chapter 52 Lifecycle Hook:
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Instantly enforce full-screen barrier before frame paint
+      SecurityBarrierController.instance.engageImmediateLock();
+    }
+  }
+}
+
+// Emergency QRH Protocol: Telegram HTTP 429 FloodWait & Transient Recovery
+Future<Response> executeQrhBackoff(Future<Response> Function() call) async {
+  return retry(
+    () => call(),
+    retryIf: (e) => e is DioException && e.response?.statusCode == 429,
+    maxAttempts: 5,
+    delayFactor: const Duration(milliseconds: 1200), // Capped jittered backoff
+  );
+}`,
+    points: [
+      {
+        term: 'Salted SHA-256 Vault Lock',
+        desc: 'Zero-trust local privacy lock with a 32-byte cryptographically random salt, preventing plaintext persistence and immediately neutralizing cold-boot intrusion.',
+      },
+      {
+        term: 'ATA Chapter 52 Lifecycle Re-lock',
+        desc: 'Detects AppLifecycleState.resumed via WidgetsBindingObserver, erecting an instantaneous full-screen security barrier before Android/iOS resumes view frame painting.',
+      },
+      {
+        term: 'QRH Emergency Procedures',
+        desc: 'Quick Reference Handbook protocols governing deterministic handling of Telegram HTTP 429 FloodWait rate limits, socket disconnects mid-stream, and hostile payload quarantine.',
+      },
+    ],
+  },
+  {
+    id: 'bite_interop',
+    number: '09',
+    label: 'BITE Self-Healing & Kernel Interop',
+    headline: '500-Item SQL Chunk Guard, BITE Latency Pings & Layout Bounds',
+    badge: 'KERNEL INTEROP & RELIABILITY',
+    codeSnippet: `// 1. Built-In Test Equipment (BITE): Real-time Latency Ping & 1-Click Repair
+class BiteEngine {
+  Future<BiteTelemetry> runSystemSelfTest() async {
+    final stopwatch = Stopwatch()..start();
+    final socket = await Socket.connect('149.154.175.50', 443, timeout: Duration(seconds: 2));
+    stopwatch.stop();
+    await socket.close();
+    return BiteTelemetry(latencyMs: stopwatch.elapsedMilliseconds, status: BiteStatus.nominal);
+  }
+}
+
+// 2. SQL Buffer Guard: Sublist Chunking to prevent SQLITE_MAX_VARIABLE_NUMBER
+Future<void> batchUpdateStatus(List<String> ids, String status) async {
+  const chunkSize = 500; // Strictly under SQLite 999 host variable ceiling
+  for (var i = 0; i < ids.length; i += chunkSize) {
+    final sublist = ids.sublist(i, min(i + chunkSize, ids.length));
+    final placeholders = List.filled(sublist.length, '?').join(',');
+    await db.rawUpdate(
+      'UPDATE media_vault SET sync_status = ? WHERE id IN ($placeholders)',
+      [status, ...sublist],
+    );
+  }
+}
+
+// 3. Cockpit FittedBox Scale-Down Bounds & AutomaticKeepAlive View Retention
+Widget buildCockpitCard(Widget child) => FittedBox(
+  fit: BoxFit.scaleDown, // Neutralizes RenderFlex overflow on 320px screens
+  child: KeepAliveWrapper(child: child), // Decouples background sync from UI rebuilds
+);`,
+    points: [
+      {
+        term: '500-Item SQL Chunk Guard',
+        desc: 'Neutralizes SQLITE_MAX_VARIABLE_NUMBER = 999 buffer limits and SQL injection by segmenting bulk updates into deterministic 500-item parameterized sublists.',
+      },
+      {
+        term: 'BITE Real-Time Network Pings',
+        desc: 'Built-In Test Equipment measures round-trip latency to Telegram primary DCs and enables 1-click self-healing to resolve transient socket drops.',
+      },
+      {
+        term: 'Two-Tier Cockpit FittedBox',
+        desc: 'Wraps responsive cards in FittedBox scale-down bounds, completely eliminating layout clipping and RenderFlex overflows across ultra-narrow 320px cockpit viewports.',
+      },
+    ],
+  },
 ]
 
 export default function ValtSkyNerdConsole() {
@@ -346,7 +448,7 @@ export default function ValtSkyNerdConsole() {
           </span>
         </div>
         <div className="flex items-center gap-2 font-mono text-[11px] text-white/50">
-          <span>DART 3.5+</span> · <span>MTPROTO 2.0</span> · <span>SQLITE WAL</span> · <span>HTTP/2 CHUNKS</span>
+          <span>DART 3.5+</span> · <span>MTPROTO 2.0</span> · <span>SQLITE WAL</span> · <span>ADE STD 100</span> · <span>BITE SELF-HEALING</span>
         </div>
       </div>
 

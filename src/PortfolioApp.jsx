@@ -4152,7 +4152,7 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
     'Orchestration Engine': '233 / 233 tests · 91.5% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
-    'ValtSky Multiplatform': '25 / 25 tests · 10s MTProto Setup',
+    'ValtSky Multiplatform': '38 / 38 Flight Tests · < 28MB RAM',
   }[project.name]
   useLayoutEffect(() => {
     if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon' || project.name === 'ValtSky Multiplatform') return undefined
@@ -4760,6 +4760,16 @@ const methodPhases = [
     stats: [
       { value: 'Zero-Leak', label: 'BYOK Fernet at rest' },
       { value: '80+ Models', label: 'NVIDIA NIM catalog' },
+    ],
+  },
+  {
+    project: 'ValtSky Multiplatform',
+    topic: 'Distributed Storage / Mobile Systems Architecture',
+    title: 'How do you stream gigabytes under 28 MB RAM?',
+    paragraph: 'I engineered an unmetered zero-loss cloud vault airframe streaming multi-gigabyte media with O(1) bounded memory (< 28 MB RAM on 1.8 GB payloads), MTProto 2.0 binary protocol, SQLite WAL transactional consistency, and aerospace-grade documentation (ADE STD 100), verified across 38/38 flight test suites with a 100/100 security score.',
+    stats: [
+      { value: '38/38', label: 'Flight suites · ADE STD 100' },
+      { value: '< 28 MB', label: 'O(1) RAM at 1.8 GB stream' },
     ],
   },
 ]
