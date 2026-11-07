@@ -124,7 +124,7 @@ export default function ModernProjects({ onOpenDossier }) {
                       SYSTEM 02
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-emerald-400">
-                      49/49 AUTOMATED TESTS · 100/100 SEC
+                      50/50 AUTOMATED TESTS · 100/100 SEC
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-white/40">
                       DUAL-LANE SPLIT UPLOADER v2.1.0
