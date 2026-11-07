@@ -8,7 +8,7 @@ import './valtsky-report.css'
 
 const VALTSKY_REPO_URL = 'https://github.com/Reddirector/ValtSky'
 const VALTSKY_WEB_URL = 'https://reddirector.github.io/ValtSky/'
-const VALTSKY_RELEASE_URL = 'https://github.com/Reddirector/ValtSky/releases/tag/v2.0'
+const VALTSKY_RELEASE_URL = 'https://github.com/Reddirector/ValtSky/releases/tag/v2.1'
 const VALTSKY_DOCS_URL = 'https://github.com/Reddirector/ValtSky#readme'
 const VALTSKY_LICENSE_URL = 'https://github.com/Reddirector/ValtSky/blob/main/LICENSE'
 
@@ -87,7 +87,7 @@ function ValtSkyQuickInstall() {
   const [copied, setCopied] = useState(false)
 
   const commands = {
-    adb: 'adb install -r releases/valtsky-v2.0-release.apk',
+    adb: 'adb install -r releases/valtsky-v2.1-release.apk',
     web: 'cd valtsky_flutter && flutter pub get && flutter run -d chrome',
     test: 'cd valtsky_flutter && flutter test --reporter expanded',
   }
@@ -1350,7 +1350,7 @@ function ValtSkyArchitectureLayers() {
   )
 }
 
-// Verification, Testing & QA Scorecard (38/38 Flight Suites & 100/100 Security)
+// Verification, Testing & QA Scorecard (42/42 Flight Suites & 100/100 Security)
 function ValtSkyQAScorecard() {
   const suites = [
     {
@@ -1363,8 +1363,8 @@ function ValtSkyQAScorecard() {
     {
       category: 'UI Smoke & Responsive Bounds Suite',
       file: 'widget_test.dart',
-      passed: '16 / 16',
-      checks: '4-tab navigation, 320px FittedBox scale-down bounds, oversized vault assistant sheet, theme rendering, memory-pinned keep-alive views.',
+      passed: '20 / 20',
+      checks: '4-tab navigation, 320px FittedBox scale-down bounds, oversized vault assistant sheet, walkthrough guide, interactive beacons, debounced retry-all.',
       status: '100% Pass',
     },
     {
@@ -1762,7 +1762,7 @@ export default function ValtSkyReport({
     { id: 'valtsky-s01', label: '07 / why & decision matrix' },
     { id: 'valtsky-s02', label: '08 / concurrency & durability' },
     { id: 'valtsky-interview', label: '09 / system design interview' },
-    { id: 'valtsky-s03', label: '10 / flight test scorecard (38/38)' },
+    { id: 'valtsky-s03', label: '10 / flight test scorecard (42/42)' },
     { id: 'valtsky-skills', label: '11 / staff engineer skills matrix' },
     { id: 'valtsky-files', label: '12 / files created & modified' },
     { id: 'valtsky-s04', label: '13 / production blueprint' },
@@ -1987,7 +1987,7 @@ export default function ValtSkyReport({
                 <p className="font-serif text-[11px] text-white/70">Fully documented under ADE STD 100 with ATA specification matrices, QRH emergency recovery, and FMEA analysis.</p>
               </div>
               <div className="p-3.5 rounded-lg bg-black/40 border border-white/10 space-y-1">
-                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 38/38 FLIGHT TEST SUITES</span>
+                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 42/42 FLIGHT TEST SUITES</span>
                 <p className="font-serif text-[11px] text-white/70">100% automated test coverage, 100/100 security score, and zero analyzer warnings on physical Android hardware.</p>
               </div>
             </div>
@@ -2253,10 +2253,10 @@ export default function ValtSkyReport({
         <section className="oe-report-section oe-report-section--flip" id="valtsky-s03" data-num="10">
           <div className="oe-report-section-label">
             <span>10</span>
-            <p>Flight Test Scorecard (38/38)</p>
+            <p>Flight Test Scorecard (42/42)</p>
           </div>
           <div className="oe-report-section-body">
-            <h3>38 / 38 Flight Test Suites · 100/100 Security Score.</h3>
+            <h3>42 / 42 Flight Test Suites · 100/100 Security Score.</h3>
             <p>
               Certified under aerospace specification ADE STD 100 across MTProto authentication, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
             </p>
@@ -2376,7 +2376,7 @@ void main() async {
             </p>
             <div className="oe-arch-card mt-5">
               <div className="p-4 bg-black/60 border border-white/10 rounded font-mono text-[.74rem] text-white/90 overflow-x-auto">
-                <pre>{`# Run full automated test suite with race-condition detection (38/38 passing)
+                <pre>{`# Run full automated test suite with race-condition detection (42/42 passing)
 cd valtsky_flutter && flutter test --reporter expanded
 
 # Run strict Dart static analyzer (zero warnings threshold)
@@ -2386,8 +2386,8 @@ flutter analyze --fatal-infos --fatal-warnings
 flutter build apk --release
 
 # Inspect and verify binary SHA-256 integrity hash
-sha256sum ../releases/valtsky-v2.1.0-release.apk
-# Target: ce7e19ae17b2ba76a2a20e7d002e095693b9a97543b4c39772eb3efa1cdbd65d`}</pre>
+sha256sum ../releases/valtsky-v2.1-release.apk
+# Target: 417edc160df719d4de5cba7e972cb658b8d1f8af00be85cba4810568acc9dbcc`}</pre>
               </div>
             </div>
           </div>
@@ -2396,7 +2396,7 @@ sha256sum ../releases/valtsky-v2.1.0-release.apk
         {/* REPORT FOOTER */}
         <footer className="oe-report-footer">
           <span>04 / ValtSky Multiplatform</span>
-          <span>v2.0.0 · Multiplatform Production</span>
+          <span>v2.1.0 · Multiplatform Production Airframe</span>
           <p>
             Source: ValtSky Multiplatform Architecture Specification and deployed production binaries. All transfers are uncompressed, encrypted in transit via TLS 1.3, and verified bit-for-bit against client-side camera hashes.
           </p>

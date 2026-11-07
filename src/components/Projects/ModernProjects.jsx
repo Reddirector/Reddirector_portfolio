@@ -124,7 +124,7 @@ export default function ModernProjects({ onOpenDossier }) {
                       SYSTEM 02
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-emerald-400">
-                      38/38 FLIGHT TESTS · 100/100 SEC
+                      42/42 FLIGHT TESTS · 100/100 SEC
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-white/40">
                       ADE STD 100 v2.1.0
@@ -172,6 +172,14 @@ export default function ModernProjects({ onOpenDossier }) {
                     className="inline-flex items-center gap-1.5 rounded-sm border border-white/15 bg-white/5 px-3 py-2 font-mono text-xs font-semibold text-white/80 hover:border-white/40 hover:text-white transition-all"
                   >
                     Web Client ↗
+                  </a>
+                  <a
+                    href="https://github.com/Reddirector/ValtSky/releases/download/v2.1/valtsky-v2.1-release.apk"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-sm border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 font-mono text-xs font-semibold text-cyan-300 hover:border-cyan-400 hover:text-white transition-all"
+                  >
+                    Release APK 📥
                   </a>
                   <a
                     href="https://github.com/Reddirector/ValtSky"
