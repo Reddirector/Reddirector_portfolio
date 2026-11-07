@@ -4160,7 +4160,7 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
     'Orchestration Engine': '301 / 301 tests · 92.35% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
-    'ValtSky Multiplatform': '46 / 46 Automated Tests · < 28MB RAM',
+    'ValtSky Multiplatform': '49 / 49 Automated Tests · < 28MB RAM',
   }[project.name]
   useLayoutEffect(() => {
     if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon' || project.name === 'ValtSky Multiplatform') return undefined
@@ -4774,9 +4774,9 @@ const methodPhases = [
     project: 'ValtSky Multiplatform',
     topic: 'Distributed Storage / Mobile Systems Architecture',
     title: 'How do you stream gigabytes under 28 MB RAM?',
-    paragraph: 'I engineered an unmetered zero-loss personal cloud vault with Dual-Lane Split Uploader architecture streaming multi-gigabyte media with O(1) bounded memory (< 28 MB RAM on 1.8 GB payloads), MTProto 2.0 binary protocol, and SQLite WAL transactional consistency, verified across 46/46 automated test suites with a 100/100 security score.',
+    paragraph: 'I engineered an unmetered zero-loss personal cloud vault with Dual-Lane Split Uploader architecture streaming multi-gigabyte media with O(1) bounded memory (< 28 MB RAM on 1.8 GB payloads), MTProto 2.0 binary protocol, and SQLite WAL transactional consistency, verified across 49/49 automated test suites with a 100/100 security score.',
     stats: [
-      { value: '46/46', label: 'Automated test suites' },
+      { value: '49/49', label: 'Automated test suites' },
       { value: '< 28 MB', label: 'O(1) RAM at 1.8 GB stream' },
     ],
   },

@@ -1350,7 +1350,7 @@ function ValtSkyArchitectureLayers() {
   )
 }
 
-// Verification, Testing & QA Scorecard (42/42 Flight Suites & 100/100 Security)
+// Verification, Testing & QA Scorecard (49/49 Test Suites & 100/100 Security)
 function ValtSkyQAScorecard() {
   const suites = [
     {
@@ -1364,7 +1364,7 @@ function ValtSkyQAScorecard() {
       category: 'UI Smoke & Responsive Bounds Suite',
       file: 'widget_test.dart',
       passed: '20 / 20',
-      checks: '4-tab navigation, 320px FittedBox scale-down bounds, oversized vault assistant sheet, walkthrough guide, interactive beacons, debounced retry-all.',
+      checks: '4-tab navigation, four-block telemetry rendering, oversized vault assistant sheet, walkthrough guide, interactive beacons, debounced retry-all.',
       status: '100% Pass',
     },
     {
@@ -1372,6 +1372,13 @@ function ValtSkyQAScorecard() {
       file: 'security_and_stress_test.dart',
       passed: '12 / 12',
       checks: 'Path traversal guards, EICAR virus quarantine, magic bytes inspection (JPEG/PNG/MP4), SSRF defense, SHA-256 deduplication, salted PIN barrier.',
+      status: '100% Pass',
+    },
+    {
+      category: 'Dual-Lane Split Uploader Suite',
+      file: 'split_uploader_test.dart',
+      passed: '7 / 7',
+      checks: 'Dedicated photo & video workers, concurrent parallel execution without head-of-line blocking, four-block queue telemetry live aggregation.',
       status: '100% Pass',
     },
     {
@@ -1386,7 +1393,7 @@ function ValtSkyQAScorecard() {
       file: 'flutter analyze',
       passed: '0 issues',
       checks: 'Zero warnings, zero deprecations, zero lint errors across entire multiplatform codebase.',
-      status: 'Airworthy',
+      status: 'Clean',
     },
     {
       category: 'Secret Audit',
@@ -1400,7 +1407,7 @@ function ValtSkyQAScorecard() {
   return (
     <div className="oe-test-table my-6">
       <div className="oe-test-table-head">
-        <span>Flight Suite &amp; Category</span>
+        <span>Verification Suite &amp; Category</span>
         <span>Coverage Scope &amp; Verified Invariants (Dual-Lane Uploader)</span>
         <span className="text-right">Result</span>
       </div>
@@ -1479,9 +1486,9 @@ function ValtSkyStarCaseStudies() {
         'Documented mandatory Airworthiness Directives (AD-01 through AD-04) enforcing salted SHA-256 PIN hashing, SQLite WAL parameterization, and lifecycle re-lock barriers.',
         'Created an emergency Quick Reference Handbook (QRH) defining deterministic procedures for Telegram HTTP 429 FloodWait rate limits, socket disconnects mid-stream, and hostile payload quarantine.',
       ],
-      result: 'Eliminated head-of-line blocking completely, backed by 46 passing verification suites and zero static analyzer warnings.',
+      result: 'Eliminated head-of-line blocking completely, backed by 49 passing verification suites and zero static analyzer warnings.',
       metrics: [
-        { label: 'Flight Test Suites', value: '42 / 42 Pass' },
+        { label: 'Verification Test Suites', value: '49 / 49 Pass' },
         { label: 'Security Score', value: '100 / 100' },
         { label: 'Architecture', value: 'Dual-Lane Uploader' },
       ],
@@ -1762,7 +1769,7 @@ export default function ValtSkyReport({
     { id: 'valtsky-s01', label: '07 / why & decision matrix' },
     { id: 'valtsky-s02', label: '08 / concurrency & durability' },
     { id: 'valtsky-interview', label: '09 / system design interview' },
-    { id: 'valtsky-s03', label: '10 / flight test scorecard (42/42)' },
+    { id: 'valtsky-s03', label: '10 / verification test scorecard (49/49)' },
     { id: 'valtsky-skills', label: '11 / staff engineer skills matrix' },
     { id: 'valtsky-files', label: '12 / files created & modified' },
     { id: 'valtsky-s04', label: '13 / production blueprint' },
@@ -1799,7 +1806,7 @@ export default function ValtSkyReport({
           {/* Asymmetric Side Panel */}
           <aside className="oe-hero-side-panel" aria-label="Key ValtSky stats">
             <div className="oe-hero-side-stat">
-              <strong>42 / 42</strong>
+              <strong>49 / 49</strong>
               <span>Automated test suites · 100% Passing</span>
             </div>
             <div className="oe-hero-side-divider" />
@@ -1911,8 +1918,8 @@ export default function ValtSkyReport({
         <section className="oe-report-metrics" aria-label="ValtSky project snapshot">
           <article>
             <span>Deterministic Verification</span>
-            <strong><GlyphLottery text="46 / 46 Automated Tests" accentColor="var(--color-interactive)" /></strong>
-            <small>46 test suites · Dual-Lane Uploader · 0 analyzer warnings</small>
+            <strong><GlyphLottery text="49 / 49 Automated Tests" accentColor="var(--color-interactive)" /></strong>
+            <small>49 test suites · Dual-Lane Uploader · 0 analyzer warnings</small>
           </article>
           <article>
             <span>Security &amp; Airworthiness</span>
@@ -1987,7 +1994,7 @@ export default function ValtSkyReport({
                 <p className="font-serif text-[11px] text-white/70">Concurrent Photo and Video lanes prevent head-of-line blocking, allowing rapid photo sync while videos stream in parallel.</p>
               </div>
               <div className="p-3.5 rounded-lg bg-black/40 border border-white/10 space-y-1">
-                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 46/46 AUTOMATED TEST SUITES</span>
+                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 49/49 AUTOMATED TEST SUITES</span>
                 <p className="font-serif text-[11px] text-white/70">100% automated test coverage, 100/100 security score, and zero analyzer warnings on physical Android hardware.</p>
               </div>
             </div>
@@ -2253,12 +2260,12 @@ export default function ValtSkyReport({
         <section className="oe-report-section oe-report-section--flip" id="valtsky-s03" data-num="10">
           <div className="oe-report-section-label">
             <span>10</span>
-            <p>Flight Test Scorecard (42/42)</p>
+            <p>Verification Test Scorecard (49/49)</p>
           </div>
           <div className="oe-report-section-body">
-            <h3>46 / 46 Automated Test Suites · 100/100 Security Score.</h3>
+            <h3>49 / 49 Automated Test Suites · 100/100 Security Score.</h3>
             <p>
-              Certified across 46 automated verification suites for MTProto authentication, dual-lane queue isolation, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
+              Certified across 49 automated verification suites for MTProto authentication, dual-lane queue isolation, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
             </p>
             <ValtSkyQAScorecard />
             <ValtSkySecurityGuardLab />
@@ -2376,7 +2383,7 @@ void main() async {
             </p>
             <div className="oe-arch-card mt-5">
               <div className="p-4 bg-black/60 border border-white/10 rounded font-mono text-[.74rem] text-white/90 overflow-x-auto">
-                <pre>{`# Run full automated test suite with race-condition detection (42/42 passing)
+                <pre>{`# Run full automated test suite with race-condition detection (49/49 passing)
 cd valtsky_flutter && flutter test --reporter expanded
 
 # Run strict Dart static analyzer (zero warnings threshold)
@@ -2387,7 +2394,7 @@ flutter build apk --release
 
 # Inspect and verify binary SHA-256 integrity hash
 sha256sum ../releases/valtsky-v2.1-release.apk
-# Target: 417edc160df719d4de5cba7e972cb658b8d1f8af00be85cba4810568acc9dbcc`}</pre>
+# Target: fad2e6607edee2a2df4720159a0a41f5c644f8109ba0c2869d203a0dd6938407`}</pre>
               </div>
             </div>
           </div>
