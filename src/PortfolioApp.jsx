@@ -4160,7 +4160,7 @@ function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) 
     'Orchestration Engine': '301 / 301 tests · 92.35% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
-    'ValtSky Multiplatform': '50 / 50 Automated Tests · < 28MB RAM',
+    'ValtSky Multiplatform': '53 / 53 Automated Tests · < 28MB RAM',
   }[project.name]
   useLayoutEffect(() => {
     if (reduceMotion() || project.name === 'Orchestration Engine' || project.name === 'Pentagon' || project.name === 'ValtSky Multiplatform') return undefined
