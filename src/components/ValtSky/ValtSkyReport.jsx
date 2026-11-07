@@ -1479,9 +1479,9 @@ function ValtSkyStarCaseStudies() {
         'Documented mandatory Airworthiness Directives (AD-01 through AD-04) enforcing salted SHA-256 PIN hashing, SQLite WAL parameterization, and lifecycle re-lock barriers.',
         'Created an emergency Quick Reference Handbook (QRH) defining deterministic procedures for Telegram HTTP 429 FloodWait rate limits, socket disconnects mid-stream, and hostile payload quarantine.',
       ],
-      result: 'Elevated ValtSky into an enterprise-ready, mission-critical airframe backed by 38 passing verification suites and verified hardware-in-the-loop validation on physical Android hardware.',
+      result: 'Elevated ValtSky into an enterprise-ready, mission-critical airframe backed by 42 passing verification suites and verified hardware-in-the-loop validation on physical Android hardware.',
       metrics: [
-        { label: 'Flight Test Suites', value: '38 / 38 Pass' },
+        { label: 'Flight Test Suites', value: '42 / 42 Pass' },
         { label: 'Security Score', value: '100 / 100' },
         { label: 'Standard Spec', value: 'ADE STD 100' },
       ],
@@ -1799,7 +1799,7 @@ export default function ValtSkyReport({
           {/* Asymmetric Side Panel */}
           <aside className="oe-hero-side-panel" aria-label="Key ValtSky stats">
             <div className="oe-hero-side-stat">
-              <strong>38 / 38</strong>
+              <strong>42 / 42</strong>
               <span>Automated flight test suites · 100% Airworthiness</span>
             </div>
             <div className="oe-hero-side-divider" />
@@ -1898,7 +1898,7 @@ export default function ValtSkyReport({
               onTap={() => window.open(VALTSKY_LICENSE_URL, '_blank')}
               onHold={() => window.open(VALTSKY_LICENSE_URL, '_blank')}
             >
-              MIT License ↗
+              MIT &amp; Apache 2.0 ↗
             </HoldButton>
           </div>
           <i className="oe-hero-bracket oe-hero-bracket--tl" aria-hidden="true" />
@@ -1911,8 +1911,8 @@ export default function ValtSkyReport({
         <section className="oe-report-metrics" aria-label="ValtSky project snapshot">
           <article>
             <span>Deterministic Verification</span>
-            <strong><GlyphLottery text="38 / 38 Flight Tests" accentColor="var(--color-interactive)" /></strong>
-            <small>38 flight suites · ADE STD 100 · 0 analyzer warnings</small>
+            <strong><GlyphLottery text="42 / 42 Flight Tests" accentColor="var(--color-interactive)" /></strong>
+            <small>42 flight suites · ADE STD 100 · 0 analyzer warnings</small>
           </article>
           <article>
             <span>Security &amp; Airworthiness</span>
