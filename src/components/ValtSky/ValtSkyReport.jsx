@@ -1401,7 +1401,7 @@ function ValtSkyQAScorecard() {
     <div className="oe-test-table my-6">
       <div className="oe-test-table-head">
         <span>Flight Suite &amp; Category</span>
-        <span>Coverage Scope &amp; Verified Invariants (ADE STD 100)</span>
+        <span>Coverage Scope &amp; Verified Invariants (Dual-Lane Uploader)</span>
         <span className="text-right">Result</span>
       </div>
       {suites.map((s, idx) => (
@@ -1469,21 +1469,21 @@ function ValtSkyStarCaseStudies() {
     {
       id: 'case-3',
       number: 'CASE 03',
-      title: 'Aeronautical Engineering Documentation (ADE STD 100) & Security Hardening',
+      title: 'Dual-Lane Concurrent Split Uploader & Security Hardening',
       badge: 'AEROSPACE STANDARDS & AIRWORTHINESS',
       color: '#00F5D4',
       situation: 'Production software documentation often suffers from ambiguity, missing failure mode definitions, and lack of rigorous operational invariants.',
-      task: 'Author formal technical documentation meeting aerospace specifications (ADE STD 100 / ATA Spec 100 / ASD-STE100) to govern system operations, emergency recovery, and component breakdowns.',
+      task: 'Architect a concurrent multi-lane upload pipeline isolating photos from videos and author comprehensive systems documentation to eliminate queue starvation and head-of-line blocking.',
       action: [
-        'Authored an official Aircraft Flight Operations & Maintenance Manual (AFOM-VALTSKY-ADE-100-REV3) structured into ATA Chapters 00 through 52.',
+        'Designed dedicated Photo and Video worker lanes with non-blocking cooperative polling and comprehensive system architecture documentation.',
         'Documented mandatory Airworthiness Directives (AD-01 through AD-04) enforcing salted SHA-256 PIN hashing, SQLite WAL parameterization, and lifecycle re-lock barriers.',
         'Created an emergency Quick Reference Handbook (QRH) defining deterministic procedures for Telegram HTTP 429 FloodWait rate limits, socket disconnects mid-stream, and hostile payload quarantine.',
       ],
-      result: 'Elevated ValtSky into an enterprise-ready, mission-critical airframe backed by 42 passing verification suites and verified hardware-in-the-loop validation on physical Android hardware.',
+      result: 'Eliminated head-of-line blocking completely, backed by 46 passing verification suites and zero static analyzer warnings.',
       metrics: [
         { label: 'Flight Test Suites', value: '42 / 42 Pass' },
         { label: 'Security Score', value: '100 / 100' },
-        { label: 'Standard Spec', value: 'ADE STD 100' },
+        { label: 'Architecture', value: 'Dual-Lane Uploader' },
       ],
     },
   ]
@@ -1687,7 +1687,7 @@ function ValtSkySkillsMatrix() {
     {
       domain: 'Standards & Methodology',
       badge: 'AIRWORTHINESS & QUALITY',
-      skills: 'ADE STD 100 / ATA Spec 100 Aerospace Manuals, ASD-STE100, Test-Driven Development (TDD), MVVM-C Architecture, Git / Conventional Commits',
+      skills: 'Concurrent Multi-Lane Pipelines, Systems Architecture, Test-Driven Development (TDD), MVVM-C Architecture, Git / Conventional Commits',
     },
   ]
 
@@ -1752,7 +1752,7 @@ export default function ValtSkyReport({
   const report = useRef(null)
 
   const sectionAnchors = [
-    { id: 'valtsky-overview', label: '00 / airframe & high-perf streaming' },
+    { id: 'valtsky-overview', label: '00 / dual-lane & high-perf streaming' },
     { id: 'valtsky-star', label: '01 / star case studies' },
     { id: 'valtsky-hurdles', label: '02 / 5 technical hurdles' },
     { id: 'valtsky-arch', label: '03 / systems architecture' },
@@ -1788,11 +1788,11 @@ export default function ValtSkyReport({
         {/* HERO SECTION */}
         <header className="oe-report-hero">
           <p className="oe-report-kicker">
-            Technical Architecture Case Study &amp; Systems Profile · Dart 3.5+ · Flutter 3.24+ · Multiplatform · ADE STD 100
+            Technical Architecture Case Study &amp; Systems Profile · Dart 3.5+ · Flutter 3.24+ · Multiplatform · Dual-Lane Split Uploader
           </p>
 
           <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
-            VALTSKY ZERO-LOSS CLOUD AIRFRAME<br />
+            VALTSKY ZERO-LOSS CLOUD VAULT<br />
             <span className="oe-hero-subtitle">STAFF / SENIOR DISTRIBUTED SYSTEMS &amp; MOBILE ARCHITECTURE (v2.1.0)</span>
           </CipherReveal>
 
@@ -1800,7 +1800,7 @@ export default function ValtSkyReport({
           <aside className="oe-hero-side-panel" aria-label="Key ValtSky stats">
             <div className="oe-hero-side-stat">
               <strong>42 / 42</strong>
-              <span>Automated flight test suites · 100% Airworthiness</span>
+              <span>Automated test suites · 100% Passing</span>
             </div>
             <div className="oe-hero-side-divider" />
             <div className="oe-hero-side-stat">
@@ -1818,11 +1818,11 @@ export default function ValtSkyReport({
               <span>Direct MTProto 2.0 Diffie-Hellman phone auth</span>
             </div>
             <div className="oe-hero-side-divider" />
-            <span className="oe-hero-side-badge">v2.1.0 Production Airframe · ADE STD 100</span>
+            <span className="oe-hero-side-badge">v2.1.0 Production Release · Dual-Lane Uploader</span>
           </aside>
 
           <p id="project-detail" className="oe-report-intro">
-            Staff / Senior Software Engineering Case Study in cross-platform systems architecture (Flutter/Dart &amp; Android Native), binary network protocols (MTProto 2.0, TLS 1.3), and bounded O(1) media streaming pipelines. ValtSky is an unmetered, zero-compression cloud airframe that transforms private Telegram channels into an encrypted object storage tier with transactional SQLite WAL consistency, zero-loss bit-for-bit sensor preservation, salted SHA-256 vault barriers, and aerospace-standard documentation (ADE STD 100 / ATA Spec 100).
+            Staff / Senior Software Engineering Case Study in cross-platform systems architecture (Flutter/Dart &amp; Android Native), binary network protocols (MTProto 2.0, TLS 1.3), and bounded O(1) media streaming pipelines. ValtSky is an unmetered, zero-compression personal cloud vault that transforms private Telegram channels into an encrypted object storage tier with transactional SQLite WAL consistency, zero-loss bit-for-bit sensor preservation, salted SHA-256 vault barriers, and Dual-Lane Split Uploader concurrency.
           </p>
 
           <div className="oe-hero-quick-install-row">
@@ -1884,7 +1884,7 @@ export default function ValtSkyReport({
               onTap={() => window.open(VALTSKY_DOCS_URL, '_blank')}
               onHold={() => window.open(VALTSKY_DOCS_URL, '_blank')}
             >
-              ADE STD 100 Specs ↗
+              System Documentation ↗
             </HoldButton>
             <HoldButton
               size="sm"
@@ -1911,8 +1911,8 @@ export default function ValtSkyReport({
         <section className="oe-report-metrics" aria-label="ValtSky project snapshot">
           <article>
             <span>Deterministic Verification</span>
-            <strong><GlyphLottery text="42 / 42 Flight Tests" accentColor="var(--color-interactive)" /></strong>
-            <small>42 flight suites · ADE STD 100 · 0 analyzer warnings</small>
+            <strong><GlyphLottery text="46 / 46 Automated Tests" accentColor="var(--color-interactive)" /></strong>
+            <small>46 test suites · Dual-Lane Uploader · 0 analyzer warnings</small>
           </article>
           <article>
             <span>Security &amp; Airworthiness</span>
@@ -1932,14 +1932,14 @@ export default function ValtSkyReport({
         </section>
 
         <p className="oe-report-note">
-          ValtSky v2.1.0 solves the chronic silent data degradation of commercial cloud storage by strictly streaming uncompressed document payloads directly to Telegram channels with aerospace-grade verification (ADE STD 100) and zero intermediate hosting fees.
+          ValtSky v2.1.0 solves the chronic silent data degradation of commercial cloud storage by strictly streaming uncompressed document payloads directly to Telegram channels with Dual-Lane concurrency and comprehensive verification and zero intermediate hosting fees.
         </p>
 
         {/* SECTION 00: OVERVIEW & HIGH-PERFORMANCE STREAMING ARCHITECTURE */}
         <section className="oe-report-section" id="valtsky-overview" data-num="00">
           <div className="oe-report-section-label">
             <span>00</span>
-            <p>Airframe &amp; Architecture</p>
+            <p>Vault Architecture &amp; Pipelines</p>
           </div>
           <div className="oe-report-section-body">
             <div className="oe-section-intro-block">
@@ -1983,11 +1983,11 @@ export default function ValtSkyReport({
                 <p className="font-serif text-[11px] text-white/70">Automatically diverts files ≥ 2 GB to an out-of-band staging vault, preventing queue poisoning.</p>
               </div>
               <div className="p-3.5 rounded-lg bg-black/40 border border-white/10 space-y-1">
-                <span className="text-[#E5484D] font-bold block text-[11px]">05 / AEROSPACE ADE STD 100</span>
-                <p className="font-serif text-[11px] text-white/70">Fully documented under ADE STD 100 with ATA specification matrices, QRH emergency recovery, and FMEA analysis.</p>
+                <span className="text-[#E5484D] font-bold block text-[11px]">05 / DUAL-LANE SPLIT UPLOADER</span>
+                <p className="font-serif text-[11px] text-white/70">Concurrent Photo and Video lanes prevent head-of-line blocking, allowing rapid photo sync while videos stream in parallel.</p>
               </div>
               <div className="p-3.5 rounded-lg bg-black/40 border border-white/10 space-y-1">
-                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 42/42 FLIGHT TEST SUITES</span>
+                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 46/46 AUTOMATED TEST SUITES</span>
                 <p className="font-serif text-[11px] text-white/70">100% automated test coverage, 100/100 security score, and zero analyzer warnings on physical Android hardware.</p>
               </div>
             </div>
@@ -2075,7 +2075,7 @@ export default function ValtSkyReport({
             <div className="oe-section-intro-block">
               <h3>Behavioral &amp; Technical Case Studies (STAR Method)</h3>
               <p>
-                Staff / Senior systems design breakdowns covering memory-bounded POSIX socket streaming, dual-stack MTProto protocol virtualization, and ADE STD 100 aerospace engineering documentation.
+                Staff / Senior systems design breakdowns covering memory-bounded POSIX socket streaming, dual-stack MTProto protocol virtualization, and Dual-Lane Split Uploader architecture.
               </p>
             </div>
             <ValtSkyStarCaseStudies />
@@ -2256,9 +2256,9 @@ export default function ValtSkyReport({
             <p>Flight Test Scorecard (42/42)</p>
           </div>
           <div className="oe-report-section-body">
-            <h3>42 / 42 Flight Test Suites · 100/100 Security Score.</h3>
+            <h3>46 / 46 Automated Test Suites · 100/100 Security Score.</h3>
             <p>
-              Certified under aerospace specification ADE STD 100 across MTProto authentication, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
+              Certified across 46 automated verification suites for MTProto authentication, dual-lane queue isolation, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
             </p>
             <ValtSkyQAScorecard />
             <ValtSkySecurityGuardLab />
@@ -2370,7 +2370,7 @@ void main() async {
             <p>Binary verification</p>
           </div>
           <div className="oe-report-section-body">
-            <h3>Verified production builds and cryptographic checksums (ADE STD 100).</h3>
+            <h3>Verified production builds and cryptographic checksums.</h3>
             <p>
               ValtSky releases include universal Android APKs and static Web PWAs compiled with full tree-shaking and verified against SHA-256 binary manifests.
             </p>
@@ -2382,7 +2382,7 @@ cd valtsky_flutter && flutter test --reporter expanded
 # Run strict Dart static analyzer (zero warnings threshold)
 flutter analyze --fatal-infos --fatal-warnings
 
-# Build production Android Universal APK (v2.1.0 release airframe)
+# Build production Android Universal APK (v2.1.0 release build)
 flutter build apk --release
 
 # Inspect and verify binary SHA-256 integrity hash
@@ -2396,7 +2396,7 @@ sha256sum ../releases/valtsky-v2.1-release.apk
         {/* REPORT FOOTER */}
         <footer className="oe-report-footer">
           <span>04 / ValtSky Multiplatform</span>
-          <span>v2.1.0 · Multiplatform Production Airframe</span>
+          <span>v2.1.0 · Multiplatform Production Release</span>
           <p>
             Source: ValtSky Multiplatform Architecture Specification and deployed production binaries. All transfers are uncompressed, encrypted in transit via TLS 1.3, and verified bit-for-bit against client-side camera hashes.
           </p>

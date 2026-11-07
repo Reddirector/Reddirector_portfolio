@@ -11,7 +11,7 @@ export default function ModernCommandPalette({ isOpen, onClose, onSelectAction }
     { id: 'pentagon-work', label: 'Jump to Pentagon AI Workstation (System 03)', group: 'Flagship Systems', action: () => { window.location.hash = '#work' } },
     { id: 'sae-work', label: 'Jump to SAE Reproduction (System 04)', group: 'Flagship Systems', action: () => { window.location.hash = '#work' } },
     { id: 'oe-report', label: 'Open Orchestration Engine 10-Chapter Dossier', group: 'Technical Dossiers', action: () => onSelectAction?.('dossier', 'orchestration-engine') },
-    { id: 'valtsky-report', label: 'Open ValtSky Aircraft Flight Manual Dossier', group: 'Technical Dossiers', action: () => onSelectAction?.('dossier', 'valtsky-lossless-cloud-vault') },
+    { id: 'valtsky-report', label: 'Open ValtSky System Architecture Dossier', group: 'Technical Dossiers', action: () => onSelectAction?.('dossier', 'valtsky-lossless-cloud-vault') },
     { id: 'pentagon-report', label: 'Open Pentagon Enterprise Architecture Dossier', group: 'Technical Dossiers', action: () => onSelectAction?.('dossier', 'pentagon') },
     { id: 'sae-report', label: 'Open SAE Research Reproduction Case Study', group: 'Technical Dossiers', action: () => onSelectAction?.('dossier', 'sae-reproduction') },
     { id: 'method', label: 'Jump to Systems Lab & Benchmarks', group: 'Navigation', action: () => { window.location.hash = '#method' } },

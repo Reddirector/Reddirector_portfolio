@@ -70,7 +70,7 @@ const ARSENAL_ITEMS = [
     name: 'BYOK Fernet AES-128-CBC + HMAC',
     category: 'SECURITY & STORAGE',
     level: 'CLIENT-SIDE CRYPTOGRAPHY',
-    verification: 'Zero server trust · 100/100 Security Score · ADE STD 100',
+    verification: 'Zero server trust · 100/100 Security Score · Dual-Lane Concurrency',
     project: 'Pentagon & ValtSky',
   },
   {
@@ -108,7 +108,7 @@ export default function ModernArsenal() {
             </p>
           </div>
           <span className="font-mono text-[0.68rem] uppercase tracking-wider text-white/40">
-            PROVEN IN PRODUCTION AIRFRAMES
+            PROVEN IN PRODUCTION SYSTEMS
           </span>
         </div>
 
@@ -116,7 +116,7 @@ export default function ModernArsenal() {
           THE ENGINEERING ARSENAL.
         </h2>
         <p className="mt-4 max-w-2xl font-sans text-base text-slate-300">
-          Core capabilities proven across 4 end-to-end production architectures, audited under rigorous aerospace standards (ADE STD 100) and verified by 336+ passing automated test suites.
+          Core capabilities proven across 4 end-to-end production architectures, audited under rigorous engineering standards and verified by 340+ passing automated test suites.
         </p>
 
         {/* Filter Pills */}

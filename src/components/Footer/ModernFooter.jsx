@@ -89,14 +89,14 @@ export default function ModernFooter() {
           <div className="flex flex-wrap items-center gap-4">
             <span>© 2026 ADITYA KUMAR SINGH (REDDIRECTOR)</span>
             <span className="text-white/20">|</span>
-            <span className="text-emerald-400/90 font-bold">ADE STD 100 AIRFRAME COMPLIANT</span>
+            <span className="text-emerald-400/90 font-bold">DISTRIBUTED SYSTEMS &amp; OPEN SOURCE</span>
           </div>
 
           <a
             href="#top"
             className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
-            BACK TO FLIGHT DECK ↑
+            BACK TO TOP ↑
           </a>
         </div>
       </div>

@@ -124,10 +124,10 @@ export default function ModernProjects({ onOpenDossier }) {
                       SYSTEM 02
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-emerald-400">
-                      42/42 FLIGHT TESTS · 100/100 SEC
+                      46/46 AUTOMATED TESTS · 100/100 SEC
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-white/40">
-                      ADE STD 100 v2.1.0
+                      DUAL-LANE SPLIT UPLOADER v2.1.0
                     </span>
                   </div>
 
@@ -135,11 +135,11 @@ export default function ModernProjects({ onOpenDossier }) {
                     VALTSKY MULTIPLATFORM
                   </h3>
                   <p className="mt-1 font-mono text-xs text-white/50">
-                    MTProto 2.0 Binary Protocol · Flutter &amp; Dart Native · O(1) POSIX Streaming
+                    Dual-Lane Split Uploader · MTProto 2.0 · Flutter &amp; Dart Native · O(1) POSIX Streaming
                   </p>
 
                   <p className="mt-4 font-sans text-sm sm:text-base leading-relaxed text-slate-300">
-                    An aircraft-grade zero-loss cloud vault airframe streaming multi-gigabyte media with bounded memory (&lt; 28 MB RAM on 1.8 GB payloads). Features 10-second MTProto 2.0 phone auth via 2048-bit Diffie-Hellman key negotiation (zero @BotFather friction), a dual-stack WebSocket-to-TCP bridge virtualizing raw sockets for sandboxed browsers, and monotonic B-tree chronological ordering.
+                    A high-performance zero-loss cloud vault with Dual-Lane Split Uploader architecture, streaming multi-gigabyte media with bounded memory (&lt; 28 MB RAM on 1.8 GB payloads). Features concurrent photo and video upload lanes, 10-second MTProto 2.0 phone auth via 2048-bit Diffie-Hellman key negotiation (zero @BotFather friction), a dual-stack WebSocket-to-TCP bridge for browsers, and monotonic chronological ordering.
                   </p>
 
                   {/* Telemetry pill row */}
@@ -163,7 +163,7 @@ export default function ModernProjects({ onOpenDossier }) {
                     onClick={() => onOpenDossier?.('valtsky-lossless-cloud-vault')}
                     className="inline-flex items-center gap-2 rounded-sm border border-cyan-500 bg-cyan-600 px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-white shadow-[0_0_15px_rgba(0,216,255,0.3)] transition-all hover:bg-cyan-500 hover:shadow-[0_0_25px_rgba(0,216,255,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                   >
-                    AIRCRAFT FLIGHT MANUAL DOSSIER ↗
+                    SYSTEM ARCHITECTURE DOSSIER ↗
                   </button>
                   <a
                     href="https://reddirector.github.io/ValtSky/"
