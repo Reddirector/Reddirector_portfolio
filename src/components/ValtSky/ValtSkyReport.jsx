@@ -1350,7 +1350,7 @@ function ValtSkyArchitectureLayers() {
   )
 }
 
-// Verification, Testing & QA Scorecard (50/50 Test Suites & 100/100 Security)
+// Verification, Testing & QA Scorecard (52/52 Test Suites & 100/100 Security)
 function ValtSkyQAScorecard() {
   const suites = [
     {
@@ -1363,8 +1363,8 @@ function ValtSkyQAScorecard() {
     {
       category: 'UI Smoke & Responsive Bounds Suite',
       file: 'widget_test.dart',
-      passed: '20 / 20',
-      checks: '4-tab navigation, four-block telemetry rendering, oversized vault assistant sheet, walkthrough guide, interactive beacons, debounced retry-all.',
+      passed: '21 / 21',
+      checks: '4-tab navigation, four-block telemetry rendering, decoupled pause/resume upload controls, oversized vault assistant sheet, walkthrough guide, interactive beacons.',
       status: '100% Pass',
     },
     {
@@ -1377,8 +1377,8 @@ function ValtSkyQAScorecard() {
     {
       category: 'Dual-Lane Split Uploader Suite',
       file: 'split_uploader_test.dart',
-      passed: '8 / 8',
-      checks: 'Dedicated photo & video workers, concurrent parallel execution without head-of-line blocking, high-speed sliding window pipelining, four-block queue telemetry live aggregation.',
+      passed: '9 / 9',
+      checks: 'Dedicated photo & video workers, decoupled gallery monitoring & continuous queue upload draining, high-speed sliding window pipelining, four-block live aggregation.',
       status: '100% Pass',
     },
     {
@@ -1769,7 +1769,7 @@ export default function ValtSkyReport({
     { id: 'valtsky-s01', label: '07 / why & decision matrix' },
     { id: 'valtsky-s02', label: '08 / concurrency & durability' },
     { id: 'valtsky-interview', label: '09 / system design interview' },
-    { id: 'valtsky-s03', label: '10 / verification test scorecard (50/50)' },
+    { id: 'valtsky-s03', label: '10 / verification test scorecard (52/52)' },
     { id: 'valtsky-skills', label: '11 / staff engineer skills matrix' },
     { id: 'valtsky-files', label: '12 / files created & modified' },
     { id: 'valtsky-s04', label: '13 / production blueprint' },
@@ -1994,7 +1994,7 @@ export default function ValtSkyReport({
                 <p className="font-serif text-[11px] text-white/70">Concurrent Photo and Video lanes prevent head-of-line blocking, allowing rapid photo sync while videos stream in parallel.</p>
               </div>
               <div className="p-3.5 rounded-lg bg-black/40 border border-white/10 space-y-1">
-                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 50/50 AUTOMATED TEST SUITES</span>
+                <span className="text-[#E5484D] font-bold block text-[11px]">06 / 52/52 AUTOMATED TEST SUITES</span>
                 <p className="font-serif text-[11px] text-white/70">100% automated test coverage, 100/100 security score, and zero analyzer warnings on physical Android hardware.</p>
               </div>
             </div>
@@ -2260,12 +2260,12 @@ export default function ValtSkyReport({
         <section className="oe-report-section oe-report-section--flip" id="valtsky-s03" data-num="10">
           <div className="oe-report-section-label">
             <span>10</span>
-            <p>Verification Test Scorecard (50/50)</p>
+            <p>Verification Test Scorecard (52/52)</p>
           </div>
           <div className="oe-report-section-body">
-            <h3>50 / 50 Automated Test Suites · 100/100 Security Score.</h3>
+            <h3>52 / 52 Automated Test Suites · 100/100 Security Score.</h3>
             <p>
-              Certified across 50 automated verification suites for MTProto authentication, dual-lane queue isolation, high-speed sliding window pipelining, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
+              Certified across 52 automated verification suites for MTProto authentication, decoupled gallery scanning & continuous queue upload draining, dual-lane queue isolation, high-speed sliding window pipelining, UI widget smoke suites, adversarial red-team cybersecurity exploits, and physical Android kernel interop with zero analyzer warnings and zero secret leaks.
             </p>
             <ValtSkyQAScorecard />
             <ValtSkySecurityGuardLab />
@@ -2383,7 +2383,7 @@ void main() async {
             </p>
             <div className="oe-arch-card mt-5">
               <div className="p-4 bg-black/60 border border-white/10 rounded font-mono text-[.74rem] text-white/90 overflow-x-auto">
-                <pre>{`# Run full automated test suite with race-condition detection (50/50 passing)
+                <pre>{`# Run full automated test suite with race-condition detection (52/52 passing)
 cd valtsky_flutter && flutter test --reporter expanded
 
 # Run strict Dart static analyzer (zero warnings threshold)
@@ -2394,7 +2394,7 @@ flutter build apk --release
 
 # Inspect and verify binary SHA-256 integrity hash
 sha256sum ../releases/valtsky-v2.1-release.apk
-# Target: bae0bf29df105ab9fcf7c20327afb85ec526547ce6cff39f57cb927fbfb47059`}</pre>
+# Target: 7bc2dd5297733366819ba7eef841259e011bc9be18717c8f2bb48d5c4cf8e2cd`}</pre>
               </div>
             </div>
           </div>

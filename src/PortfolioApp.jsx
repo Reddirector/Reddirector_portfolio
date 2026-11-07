@@ -4774,9 +4774,9 @@ const methodPhases = [
     project: 'ValtSky Multiplatform',
     topic: 'Distributed Storage / Mobile Systems Architecture',
     title: 'How do you stream gigabytes under 28 MB RAM?',
-    paragraph: 'I engineered an unmetered zero-loss personal cloud vault with Dual-Lane Split Uploader architecture streaming multi-gigabyte media with O(1) bounded memory (< 28 MB RAM on 1.8 GB payloads), MTProto 2.0 binary protocol, and SQLite WAL transactional consistency, verified across 50/50 automated test suites with a 100/100 security score.',
+    paragraph: 'I engineered an unmetered zero-loss personal cloud vault with Dual-Lane Split Uploader architecture streaming multi-gigabyte media with O(1) bounded memory (< 28 MB RAM on 1.8 GB payloads), MTProto 2.0 binary protocol, and SQLite WAL transactional consistency, verified across 52/52 automated test suites with a 100/100 security score.',
     stats: [
-      { value: '50/50', label: 'Automated test suites' },
+      { value: '52/52', label: 'Automated test suites' },
       { value: '< 28 MB', label: 'O(1) RAM at 1.8 GB stream' },
     ],
   },
