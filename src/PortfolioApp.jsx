@@ -12,6 +12,13 @@ import PentagonWorkstationReport from './components/Pentagon/PentagonReport'
 import ValtSkyVisual from './components/ValtSky/ValtSkyVisual'
 import ValtSkyReport from './components/ValtSky/ValtSkyReport'
 import BarbaTransitionOverlay from './components/BarbaTransition/BarbaTransitionOverlay'
+import ModernHUDNav from './components/Navigation/ModernHUDNav'
+import ModernHero from './components/Hero/ModernHero'
+import ModernProjects from './components/Projects/ModernProjects'
+import ModernMethod from './components/Method/ModernMethod'
+import ModernArsenal from './components/Arsenal/ModernArsenal'
+import ModernFooter from './components/Footer/ModernFooter'
+import ModernCommandPalette from './components/CommandPalette/ModernCommandPalette'
 import CircularCarousel from './CircularCarousel'
 import HoldButton from './HoldButton'
 import CipherReveal from './CipherReveal'
@@ -2603,7 +2610,7 @@ function OeTransformationGrid() {
       id: 'G7–G13 · Production Readiness',
       title: 'CLI, Dynamic Validation & Safety Limits',
       before: 'Hardcoded relative DB path, no CLI, 58 tests, unvalidated cyclical DAG inputs.',
-      after: 'Configurable/in-memory SQLite, 298 tests (100% pass, 0 flakes, 92.6% cov), 158 frozen public exports, 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
+      after: 'Configurable/in-memory SQLite, 301 tests (100% pass, 0 flakes, 92.35% cov), 158 frozen public exports, 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
     },
   ]
 
@@ -3492,7 +3499,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
     ['O(1) Memory Streaming & Disk Spooling', 'StreamPipe generator pipeline maintaining constant RAM footprint regardless of dataset size via SQLite disk spillover.'],
     ['SIGKILL & POSIX Kernel Sandboxing', 'Resource limits enforced via setrlimit (RLIMIT_AS, RLIMIT_CPU); non-blocking hard timeouts with true SIGKILL process termination.'],
     ['CDC Replication, Work Stealing & Supervision', 'Multi-node SQLite Change Data Capture over stdlib HTTP, dynamic peer work-stealing with heartbeat reclamation, and self-healing watchdog supervision with automatic retry remediation.'],
-    ['Production Packaging & 158 Public Exports', '298 automated tests (100% pass, 0 flakes across 20 runs, 92.60% coverage), 158 frozen public symbols, 100% strict mypy compliance across 116 source files, zero runtime dependencies.'],
+    ['Production Packaging & 158 Public Exports', '301 automated tests (100% pass, 0 flakes across 20 runs, 92.35% coverage), 158 frozen public symbols, 100% strict mypy compliance across 116 source files, zero runtime dependencies.'],
   ]
   const sectionAnchors = [
     { id: 'oe-pillars', label: 'architectural pillars' },
@@ -3604,7 +3611,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
         <article><span>Latest release</span><strong><GlyphLottery text="v0.9.0" accentColor="var(--color-interactive)" /></strong><small>Production Beta · PyPI package</small></article>
-        <article><span>Automated tests</span><strong><GlyphLottery text="298 / 298" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 92.60% line cov</small></article>
+        <article><span>Automated tests</span><strong><GlyphLottery text="301 / 301" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 92.35% line cov</small></article>
         <article><span>Public API Surface</span><strong><GlyphLottery text="158 symbols" accentColor="var(--color-interactive)" /></strong><small>Strict Mypy · 0 Runtime Deps</small></article>
         <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594 tasks / second throughput</small></article>
       </section>
@@ -3681,8 +3688,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <section className="oe-report-section" id="oe-s04">
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
-          <h3>298 automated tests, 158 public exports, and quantitative performance profiling.</h3>
-          <p>The v0.9.0 test suite spans 298 passing tests across 32 test modules, achieving 92.60% line coverage across all 52 core engine modules with 0 flakes and 100% strict mypy compliance across 116 source files.</p>
+          <h3>301 automated tests, 158 public exports, and quantitative performance profiling.</h3>
+          <p>The v0.9.0 test suite spans 301 passing tests across 35 test modules, achieving 92.35% line coverage across all 55 core engine modules with 0 flakes and 100% strict mypy compliance across 116 source files.</p>
           <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Empirical Evidence & Invariants</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
           <div className="oe-verification-strip">
             <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, 158 symbols, and packaging verified without side effects.</span></p>
@@ -4150,7 +4157,7 @@ function OeVisualHalo() {
 function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) {
   const visual = useRef(null), scene = useRef(null), starField = useRef(null), progressTrack = useRef(null), progressCount = useRef(null), transferSpark = useRef(null), touchStart = useRef(null), swiped = useRef(false)
   const proof = {
-    'Orchestration Engine': '298 / 298 tests · 92.6% cov',
+    'Orchestration Engine': '301 / 301 tests · 92.35% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
     'ValtSky Multiplatform': '38 / 38 Flight Tests · < 28MB RAM',
@@ -4747,9 +4754,9 @@ const methodPhases = [
     project: 'Orchestration Engine',
     topic: 'Systems / Task reliability',
     title: 'What survives a failed task?',
-    paragraph: 'I hand-wrote a zero-dependency workflow and agentic graph orchestration system from first principles for Python 3.10+. I engineered cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with reverse rollback, O(1) streaming disk spooling, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing watchdog supervision, verified across 298 automated tests and 158 frozen public exports.',
+    paragraph: 'I hand-wrote a zero-dependency workflow and agentic graph orchestration system from first principles for Python 3.10+. I engineered cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with reverse rollback, O(1) streaming disk spooling, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing watchdog supervision, verified across 301 automated tests and 158 frozen public exports.',
     stats: [
-      { value: '298/298', label: '100% tests passing · 92.6% cov' },
+      { value: '301/301', label: '100% tests passing · 92.35% cov' },
       { value: '158 Exports', label: 'Frozen public API · PyPI' },
     ],
   },
@@ -5015,20 +5022,106 @@ export default function PortfolioApp() {
   useSmoothScroll()
   const { playing, done } = useIntro()
   const contentRef = useRef(null)
+  const [activeModalProject, setActiveModalProject] = useState(null)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+
+  // Auto-open project if URL points to it on mount
+  useEffect(() => {
+    const route = parseCurrentRoute()
+    if (route.page === 'project' && route.project) {
+      setActiveModalProject(route.project)
+      document.title = `${route.project.name} | Reddirector`
+    }
+  }, [])
+
+  // Handle browser back / forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseCurrentRoute()
+      if (route.page === 'project' && route.project) {
+        setActiveModalProject(route.project)
+        document.title = `${route.project.name} | Reddirector`
+      } else {
+        setActiveModalProject(null)
+        document.title = 'Aditya Kumar Singh | Systems, ML & Engineering Portfolio'
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const handleOpenDossier = (slugOrName) => {
+    const projName = SLUG_TO_PROJECT_NAME[slugOrName] || slugOrName
+    const proj = featuredProjects.find((p) => p.name === projName || p.id === slugOrName)
+    if (proj) {
+      setActiveModalProject(proj)
+      const slug = PROJECT_NAME_TO_SLUG[proj.name] || proj.id
+      const basePath = getAppBasePath()
+      window.history.pushState({ project: slug }, '', `${basePath}projects/${slug}`)
+      document.title = `${proj.name} | Reddirector`
+    }
+  }
+
+  const handleCloseModal = () => {
+    setActiveModalProject(null)
+    const basePath = getAppBasePath()
+    window.history.pushState(null, '', `${basePath}#work`)
+    document.title = 'Aditya Kumar Singh | Systems, ML & Engineering Portfolio'
+  }
+
+  const handleNavigateProject = (nextProject) => {
+    if (nextProject) {
+      setActiveModalProject(nextProject)
+      const slug = PROJECT_NAME_TO_SLUG[nextProject.name] || nextProject.id
+      const basePath = getAppBasePath()
+      window.history.pushState({ project: slug }, '', `${basePath}projects/${slug}`)
+      document.title = `${nextProject.name} | Reddirector`
+    }
+  }
 
   useEffect(() => {
     const cleanup = initBarba()
     return () => cleanup?.()
   }, [])
 
-  return <div style={{ '--color-accent': content.accent }} className="portfolio-root" inert={playing || undefined} aria-hidden={playing || undefined}>
-    <BarbaTransitionOverlay />
-    <Intro active={playing} onDone={done} contentRef={contentRef} />
-    <div className="portfolio-content" ref={contentRef}>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <Header shown={!playing} />
-      <main id="main" data-barba="container" data-barba-namespace="portfolio-home"><Hero shown={!playing} /><Work /><Method /><About /><Now /></main>
-      <Contact />
+  return (
+    <div
+      style={{ '--color-accent': content.accent }}
+      className="portfolio-root bg-black text-white selection:bg-red-600 selection:text-white min-h-screen"
+      inert={playing || undefined}
+      aria-hidden={playing || undefined}
+    >
+      <BarbaTransitionOverlay />
+      <Intro active={playing} onDone={done} contentRef={contentRef} />
+      <div className="portfolio-content" ref={contentRef}>
+        <a className="skip-link" href="#main">Skip to content</a>
+        <ModernHUDNav onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
+        <main id="main" data-barba="container" data-barba-namespace="portfolio-home">
+          <ModernHero onExploreWork={() => {}} onOpenDossier={handleOpenDossier} />
+          <ModernProjects onOpenDossier={handleOpenDossier} />
+          <ModernMethod />
+          <ModernArsenal />
+        </main>
+        <ModernFooter />
+      </div>
+
+      <ModernCommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onSelectAction={(type, payload) => {
+          if (type === 'dossier') handleOpenDossier(payload)
+          if (type === 'open-palette') setCommandPaletteOpen(true)
+        }}
+      />
+
+      {activeModalProject && (
+        <ProjectModal
+          key={activeModalProject.id}
+          project={activeModalProject}
+          close={handleCloseModal}
+          onNavigateProject={handleNavigateProject}
+        />
+      )}
     </div>
-  </div>
+  )
 }
