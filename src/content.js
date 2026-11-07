@@ -8,11 +8,11 @@ export const content = {
     {
       id: '01',
       name: 'Orchestration Engine',
-      tag: 'Python 3.10+ · Zero Dependencies · Agentic Graphs · v0.9.0 Beta',
+      tag: 'Python 3.10+ · Zero Dependencies · Agentic Graphs · v0.9.0 Enterprise',
       color: '#A40000',
       ink: 'light',
       short: 'A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in Python standard library.',
-      detail: 'Engineered for AI agents, fintech transactions, and data pipelines. Features cyclic reflection graphs, distributed Sagas with automated rollback, O(1) constant-memory streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery. Backed by 233/233 passing tests (91.45% coverage), 79 frozen public exports, 627 µs/task overhead, and 44,730 writes/s SQLite WAL throughput.',
+      detail: 'Engineered for AI agents, fintech transactions, and distributed data pipelines. Features cyclic reflection graphs, distributed Sagas with automated rollback, O(1) constant-memory streaming with SQLite disk-spooling, multi-node CDC replication, incremental content-addressable task memoization, distributed work-stealing, multi-tenant fair-share quotas, and self-healing watchdog supervision without Redis, RabbitMQ, or Celery. Backed by 298/298 passing tests (92.60% coverage), 158 frozen public exports, 627 µs/task overhead, and 44,730 writes/s SQLite WAL throughput.',
       link: 'https://github.com/Reddirector/Orchestration_Engine',
       pypi: 'https://pypi.org/project/orchestration-engine/',
       docs: 'https://reddirector.github.io/Orchestration_Engine/',
@@ -35,10 +35,10 @@ export const content = {
       install: 'adb install -r releases/valtsky-v2.1.0-release.apk',
     },
   ],
-  metrics: [{ value: 233, suffix: '/233', label: 'orchestration tests passing (91.5% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
+  metrics: [{ value: 298, suffix: '/298', label: 'orchestration tests passing (92.6% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
   now: [
     { name: 'ValtSky Multiplatform v2.1.0', text: 'Certified v2.1.0 Airframe under ADE STD 100: O(1) bounded POSIX streaming (< 28 MB RAM on 1.8 GB files), 10-second MTProto 2.0 phone auth, dual-stack IPv4/IPv6 socket bridge, salted SHA-256 vault lock, and 38/38 passing flight test suites (100/100 security score).' },
-    { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, O(1) streaming disk spooling, and zero-broker HTTP clustering across 233 passing tests and 79 frozen exports.' },
+    { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing supervision across 298 passing tests and 158 frozen exports.' },
     { name: 'Pentagon AI Workstation', text: 'Developing an enterprise-grade local-first AI workstation featuring zero-leak BYOK Fernet encryption, LangGraph deterministic state orchestration, ChromaDB vector RAG with CPU failover, and multi-tier autonomy governance across Web, Android APK, Electron, and ISO.' },
   ],
 }

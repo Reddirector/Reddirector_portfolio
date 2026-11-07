@@ -2603,7 +2603,7 @@ function OeTransformationGrid() {
       id: 'G7–G13 · Production Readiness',
       title: 'CLI, Dynamic Validation & Safety Limits',
       before: 'Hardcoded relative DB path, no CLI, 58 tests, unvalidated cyclical DAG inputs.',
-      after: 'Configurable/in-memory SQLite, 233 tests (100% pass, 0 flakes, 91.5% cov), 79 frozen public exports, 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
+      after: 'Configurable/in-memory SQLite, 298 tests (100% pass, 0 flakes, 92.6% cov), 158 frozen public exports, 10MB/5k task guard limits, zero-dep CLI with strict exit codes (0, 1, 2, 3).',
     },
   ]
 
@@ -3491,7 +3491,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
     ['Multi-Worker Concurrency Scaling', '7.86x speedup on 8 worker threads/processes (98.2% scaling efficiency) under 16 parallel tasks with 50ms I/O latency; 1,000+ concurrent asyncio tasks.'],
     ['O(1) Memory Streaming & Disk Spooling', 'StreamPipe generator pipeline maintaining constant RAM footprint regardless of dataset size via SQLite disk spillover.'],
     ['SIGKILL & POSIX Kernel Sandboxing', 'Resource limits enforced via setrlimit (RLIMIT_AS, RLIMIT_CPU); non-blocking hard timeouts with true SIGKILL process termination.'],
-    ['Production Packaging & 79 Public Exports', '233 automated tests (100% pass, 0 flakes across 20 runs, 91.45% coverage), 79 frozen public symbols, 100% strict mypy compliance, zero runtime dependencies.'],
+    ['CDC Replication, Work Stealing & Supervision', 'Multi-node SQLite Change Data Capture over stdlib HTTP, dynamic peer work-stealing with heartbeat reclamation, and self-healing watchdog supervision with automatic retry remediation.'],
+    ['Production Packaging & 158 Public Exports', '298 automated tests (100% pass, 0 flakes across 20 runs, 92.60% coverage), 158 frozen public symbols, 100% strict mypy compliance across 116 source files, zero runtime dependencies.'],
   ]
   const sectionAnchors = [
     { id: 'oe-pillars', label: 'architectural pillars' },
@@ -3603,8 +3604,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
         <article><span>Latest release</span><strong><GlyphLottery text="v0.9.0" accentColor="var(--color-interactive)" /></strong><small>Production Beta · PyPI package</small></article>
-        <article><span>Automated tests</span><strong><GlyphLottery text="233 / 233" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 91.45% line cov</small></article>
-        <article><span>Public API Surface</span><strong><GlyphLottery text="79 symbols" accentColor="var(--color-interactive)" /></strong><small>Strict Mypy · 0 Runtime Deps</small></article>
+        <article><span>Automated tests</span><strong><GlyphLottery text="298 / 298" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 92.60% line cov</small></article>
+        <article><span>Public API Surface</span><strong><GlyphLottery text="158 symbols" accentColor="var(--color-interactive)" /></strong><small>Strict Mypy · 0 Runtime Deps</small></article>
         <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594 tasks / second throughput</small></article>
       </section>
       <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
@@ -3680,11 +3681,11 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <section className="oe-report-section" id="oe-s04">
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
-          <h3>233 automated tests, 79 public exports, and quantitative performance profiling.</h3>
-          <p>The v0.9.0 test suite spans 233 passing tests across 20 test modules, achieving 91.45% line coverage across all 15 core engine modules with 0 flakes across 20 consecutive stress runs and 100% strict mypy compliance across 36 source files.</p>
+          <h3>298 automated tests, 158 public exports, and quantitative performance profiling.</h3>
+          <p>The v0.9.0 test suite spans 298 passing tests across 32 test modules, achieving 92.60% line coverage across all 52 core engine modules with 0 flakes and 100% strict mypy compliance across 116 source files.</p>
           <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Empirical Evidence & Invariants</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
           <div className="oe-verification-strip">
-            <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, 79 symbols, and packaging verified without side effects.</span></p>
+            <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, 158 symbols, and packaging verified without side effects.</span></p>
             <p><b>02 / Multi-Worker Consumer</b><span>Tested non-linear DAG execution under ThreadExecutor and ProcessExecutor with real network latency and payload passing.</span></p>
             <p><b>03 / Parameterized SQL Audit</b><span>100% of SQL statements parameterized (24 distinct queries audited); max 10MB workflow size & 5,000 tasks guard enforced.</span></p>
           </div>
@@ -3694,8 +3695,8 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <section className="oe-report-section" id="oe-s05">
         <div className="oe-report-section-label"><span>05</span><p>API surface & zero-dependency CLI</p></div>
         <div className="oe-report-section-body">
-          <h3>79 frozen public symbols, typed TaskResult passing, and robust zero-dependency CLI.</h3>
-          <p>The public API exposes 79 frozen public symbols across all 4 architectural pillars: Agentic AI Core, Resilience Suite, Data & Streaming, and High-Throughput Runtime. The built-in CLI provides complete workflow orchestration from the terminal with deterministic exit codes: 0 (Success), 1 (Task Failure), 2 (Validation Error), 3 (Fatal Runtime Error).</p>
+          <h3>158 frozen public symbols, typed TaskResult passing, and robust zero-dependency CLI.</h3>
+          <p>The public API exposes 158 frozen public symbols across all architectural systems: Agentic AI Core, Resilience Suite, Data & Streaming, High-Throughput Runtime, CDC Replication, Incremental Evaluation, and Governance. The built-in CLI provides complete workflow orchestration from the terminal with deterministic exit codes: 0 (Success), 1 (Task Failure), 2 (Validation Error), 3 (Fatal Runtime Error).</p>
           <ApiSurfaceExplorer />
           <OeCliReference />
           <p>Workflow definitions are JSON or Python fluent builder objects. They decouple identity and task intent from runtime state, allowing identical workflows to run ephemerally in-memory or persisted across SQLite restarts.</p>
@@ -4149,7 +4150,7 @@ function OeVisualHalo() {
 function ProjectVisual({ project, index, nextProject, advance, onOpenDetails }) {
   const visual = useRef(null), scene = useRef(null), starField = useRef(null), progressTrack = useRef(null), progressCount = useRef(null), transferSpark = useRef(null), touchStart = useRef(null), swiped = useRef(false)
   const proof = {
-    'Orchestration Engine': '233 / 233 tests · 91.5% cov',
+    'Orchestration Engine': '298 / 298 tests · 92.6% cov',
     'SAE Reproduction': '0.897562 validation similarity',
     'Pentagon': 'Zero-Leak BYOK · 80+ Models',
     'ValtSky Multiplatform': '38 / 38 Flight Tests · < 28MB RAM',
@@ -4746,10 +4747,10 @@ const methodPhases = [
     project: 'Orchestration Engine',
     topic: 'Systems / Task reliability',
     title: 'What survives a failed task?',
-    paragraph: 'I hand-wrote a zero-dependency workflow and agentic graph orchestration system from first principles for Python 3.10+. I engineered cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with reverse rollback, O(1) streaming disk spooling, and zero-broker HTTP clusters, verified across 233 automated tests and 79 frozen public exports.',
+    paragraph: 'I hand-wrote a zero-dependency workflow and agentic graph orchestration system from first principles for Python 3.10+. I engineered cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with reverse rollback, O(1) streaming disk spooling, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing watchdog supervision, verified across 298 automated tests and 158 frozen public exports.',
     stats: [
-      { value: '233/233', label: '100% tests passing · 91.5% cov' },
-      { value: '79 Exports', label: 'Frozen public API · PyPI' },
+      { value: '298/298', label: '100% tests passing · 92.6% cov' },
+      { value: '158 Exports', label: 'Frozen public API · PyPI' },
     ],
   },
   {

@@ -109,7 +109,7 @@ export const SKILLS = [
 ]
 
 export const ACHIEVEMENTS = [
-  { title: 'Orchestration Engine v0.9.0 published on PyPI', detail: 'Zero runtime dependencies, 233 passing tests (91.45% coverage), 79 frozen exports, cyclic agentic graphs, and distributed Sagas.' },
+  { title: 'Orchestration Engine v0.9.0 published on PyPI', detail: 'Zero runtime dependencies, 298 passing tests (92.60% coverage), 158 frozen exports, cyclic agentic graphs, multi-node CDC replication, and distributed Sagas.' },
   { title: 'Sparse autoencoder reproduction', detail: 'Validation cosine similarity 0.897562, 0.10% dead features (per project notes).' },
   { title: 'Harvard CS50 Introduction to AI with Python', detail: 'Course certificate.', date: 'July 2026' },
   { title: 'Vizuara “Building LLMs from Scratch”', detail: 'Course certificate.', date: 'July to August 2026' },

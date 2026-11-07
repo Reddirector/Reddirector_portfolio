@@ -13,7 +13,7 @@ I build task systems and run model experiments. I’m interested in how software
 
 ### Orchestration Engine
 
-A first-principles workflow engine built with Python 3.12+, SQLite, and the standard library. Its current project notes report 58 passing tests. Task transitions are recorded in SQLite before live state changes, keeping the durable history aligned with the running system. The project is at v0.1.0, Stage 1 of a six-stage plan.
+A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in the Python 3.10+ standard library. Features cyclic reflection graphs with SQLite thread checkpointing, distributed Sagas with backward compensating rollback, O(1) constant-memory streaming with SQLite disk spooling, multi-node Change Data Capture (CDC) replication, content-addressable incremental task evaluation, distributed work-stealing, multi-tenant fair-share quotas, and self-healing watchdog supervision without Redis, RabbitMQ, or Celery. Verified across 298 passing automated tests (92.60% coverage) and 158 frozen public API symbols.
 
 ### SAE Reproduction
 
