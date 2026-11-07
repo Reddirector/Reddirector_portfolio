@@ -2394,7 +2394,7 @@ flutter build apk --release
 
 # Inspect and verify binary SHA-256 integrity hash
 sha256sum ../releases/valtsky-v2.1-release.apk
-# Target: fad2e6607edee2a2df4720159a0a41f5c644f8109ba0c2869d203a0dd6938407`}</pre>
+# Target: bae0bf29df105ab9fcf7c20327afb85ec526547ce6cff39f57cb927fbfb47059`}</pre>
               </div>
             </div>
           </div>
