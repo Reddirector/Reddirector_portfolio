@@ -8,7 +8,7 @@ export const content = {
     {
       id: '01',
       name: 'Orchestration Engine',
-      tag: 'Python 3.10+ · Zero Dependencies · Agentic Graphs · v0.9.0 Enterprise',
+      tag: 'Python 3.10+ · Zero Dependencies · Agentic Graphs · v1.0.0 Production',
       color: '#A40000',
       ink: 'light',
       short: 'A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in Python standard library.',
@@ -16,7 +16,7 @@ export const content = {
       link: 'https://github.com/Reddirector/Orchestration_Engine',
       pypi: 'https://pypi.org/project/orchestration-engine/',
       docs: 'https://reddirector.github.io/Orchestration_Engine/',
-      release: 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v0.9.0',
+      release: 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v1.0.0',
       install: 'pip install orchestration-engine',
     },
     { id: '02', name: 'SAE Reproduction', tag: 'Research paper reproduction · Interpretability', color: '#A40000', ink: 'light', short: 'An independent sparse autoencoder experiment based on Anthropic’s paper. The project notes report a 0.897562 validation cosine similarity and 0.10% dead features.', detail: 'The project notes list a GELU-1L model and an SAE with 2,048 input dimensions and 4,096 features. They report a validation cosine similarity of 0.897562 and 0.10% dead features. The training configuration and exact evaluation procedure still need documenting.' },
@@ -38,7 +38,7 @@ export const content = {
   metrics: [{ value: 301, suffix: '/301', label: 'orchestration tests passing (92.35% cov)' }, { value: 627, suffix: ' µs', label: 'coordinator scheduling latency per task' }, { value: 44730, suffix: '/s', label: 'SQLite WAL event write throughput' }, { value: 7.86, suffix: 'x', label: 'concurrency speedup (8 workers, 98.2% eff)' }],
   now: [
     { name: 'ValtSky Multiplatform v2.1.0', text: 'Certified v2.1.0 Airframe under ADE STD 100: O(1) bounded POSIX streaming (< 28 MB RAM on 1.8 GB files), 10-second MTProto 2.0 phone auth, dual-stack IPv4/IPv6 socket bridge, salted SHA-256 vault lock, and 38/38 passing flight test suites (100/100 security score).' },
-    { name: 'Orchestration Engine v0.9.0', text: 'Published v0.9.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing supervision across 301 passing tests and 158 frozen exports.' },
+    { name: 'Orchestration Engine v1.0.0', text: 'Published v1.0.0 on PyPI: zero-dependency distributed workflow and agentic graph orchestration system in Python standard library. Features cyclic reflection graphs, distributed Sagas with reverse rollback, multi-node CDC replication, work stealing, multi-tenant fair-share quotas, and self-healing supervision across 301 passing tests and 158 frozen exports.' },
     { name: 'Pentagon AI Workstation', text: 'Developing an enterprise-grade local-first AI workstation featuring zero-leak BYOK Fernet encryption, LangGraph deterministic state orchestration, ChromaDB vector RAG with CPU failover, and multi-tier autonomy governance across Web, Android APK, Electron, and ISO.' },
   ],
 }

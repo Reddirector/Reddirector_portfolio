@@ -712,7 +712,7 @@ function SAEResearchReport({ entranceDelay = 0, onBackToHome, onNavigateProject 
 const ORCHESTRATION_REPO = 'https://github.com/Reddirector/Orchestration_Engine'
 const ORCHESTRATION_PYPI = 'https://pypi.org/project/orchestration-engine/'
 const ORCHESTRATION_DOCS = 'https://reddirector.github.io/Orchestration_Engine/'
-const ORCHESTRATION_RELEASE = 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v0.9.0'
+const ORCHESTRATION_RELEASE = 'https://github.com/Reddirector/Orchestration_Engine/releases/tag/v1.0.0'
 const ORCHESTRATION_INSTALL_CMD = 'pip install orchestration-engine'
 const ORCHESTRATION_INSTALL_COMMANDS = [
   { id: 'pip', label: 'pip install', cmd: 'pip install orchestration-engine' },
@@ -1368,7 +1368,7 @@ function OeDecisionMatrix() {
           <thead>
             <tr>
               <th>Capability</th>
-              <th className="oe-matrix-highlight">Orchestration Engine (v0.9.0)</th>
+              <th className="oe-matrix-highlight">Orchestration Engine (v1.0.0)</th>
               <th>Apache Airflow</th>
               <th>Temporal.io</th>
               <th>Celery</th>
@@ -2620,7 +2620,7 @@ function OeTransformationGrid() {
         <div>
           <span className="oe-transform-badge oe-transform-badge--before">v0.1.0 Prototype</span>
           <span className="oe-transform-arrow"> → </span>
-          <span className="oe-transform-badge oe-transform-badge--after">v0.9.0 Production Beta</span>
+          <span className="oe-transform-badge oe-transform-badge--after">v1.0.0 Production</span>
         </div>
         <small style={{ color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'var(--font-mono)', fontSize: '0.62rem' }}>
           All 13 Architectural Gaps (G1–G13) Closed via ADRs
@@ -2636,7 +2636,7 @@ function OeTransformationGrid() {
                 <p>{gap.before}</p>
               </div>
               <div className="oe-transform-cell oe-transform-cell--after">
-                <span className="oe-transform-tag">v0.9.0 Beta</span>
+                <span className="oe-transform-tag">v1.0.0 Production</span>
                 <p>{gap.after}</p>
               </div>
             </div>
@@ -3526,7 +3526,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <header className="oe-report-hero">
         <p className="oe-report-kicker">Technical Master Specification & Production Case Study · Python 3.10+ Orchestration & Agentic Graphs</p>
         <CipherReveal id="project-title" as="h2" duration={1.4} scramble={0.35} order="left" hover="trail">
-          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span className="oe-hero-subtitle">PRODUCTION-READY BETA (v0.9.0)</span>
+          FAULT-TOLERANT ORCHESTRATION ENGINE<br /><span className="oe-hero-subtitle">PRODUCTION RELEASE (v1.0.0)</span>
         </CipherReveal>
         <p id="project-detail" className="oe-report-intro">A fault-tolerant, zero-dependency distributed workflow and agentic graph orchestration engine built entirely in the Python standard library. Engineered for AI agent loops, fintech transaction Sagas, high-volume streaming, and cloud infrastructure pipelines—featuring cyclic reflection graphs with state checkpointing, distributed backward compensating rollbacks, O(1) constant-RAM streaming with SQLite disk-spooling, and cluster worker execution without Redis, RabbitMQ, or Celery.</p>
 
@@ -3587,7 +3587,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
             onTap={() => window.open(ORCHESTRATION_RELEASE, '_blank')}
             onHold={() => window.open(ORCHESTRATION_RELEASE, '_blank')}
           >
-            v0.9.0 Notes ↗
+            v1.0.0 Notes ↗
           </HoldButton>
           <HoldButton
             size="sm"
@@ -3610,12 +3610,12 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
       <OeEventTicker />
 
       <section className="oe-report-metrics" aria-label="Project snapshot">
-        <article><span>Latest release</span><strong><GlyphLottery text="v0.9.0" accentColor="var(--color-interactive)" /></strong><small>Production Beta · PyPI package</small></article>
+        <article><span>Latest release</span><strong><GlyphLottery text="v1.0.0" accentColor="var(--color-interactive)" /></strong><small>Production Release · PyPI package</small></article>
         <article><span>Automated tests</span><strong><GlyphLottery text="301 / 301" accentColor="var(--color-interactive)" /></strong><small>100% pass · 0 flakes · 92.35% line cov</small></article>
         <article><span>Public API Surface</span><strong><GlyphLottery text="158 symbols" accentColor="var(--color-interactive)" /></strong><small>Strict Mypy · 0 Runtime Deps</small></article>
         <article><span>Scheduling latency</span><strong><GlyphLottery text="627 µs" accentColor="var(--color-interactive)" /></strong><small>1,594 tasks / second throughput</small></article>
       </section>
-      <p className="oe-report-note">Release v0.9.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
+      <p className="oe-report-note">Release v1.0.0 on PyPI eliminates all 13 prototype architectural gaps with dual MIT / Apache-2.0 licensing, pure Python 3.10+ stdlib, cyclic agent graphs, distributed Sagas, and zero-broker cluster execution.</p>
 
       <section className="oe-report-section" id="oe-pillars">
         <div className="oe-report-section-label"><span>00</span><p>Architectural pillars</p></div>
@@ -3689,7 +3689,7 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         <div className="oe-report-section-label"><span>04</span><p>Verification & benchmark record</p></div>
         <div className="oe-report-section-body">
           <h3>301 automated tests, 158 public exports, and quantitative performance profiling.</h3>
-          <p>The v0.9.0 test suite spans 301 passing tests across 35 test modules, achieving 92.35% line coverage across all 55 core engine modules with 0 flakes and 100% strict mypy compliance across 116 source files.</p>
+          <p>The v1.0.0 test suite spans 301 passing tests across 35 test modules, achieving 92.35% line coverage across all 55 core engine modules with 0 flakes and 100% strict mypy compliance across 116 source files.</p>
           <div className="oe-test-table" role="table" aria-label="Verification subjects and evidence"><div className="oe-test-table-head" role="row"><span role="columnheader">Subject</span><span role="columnheader">Empirical Evidence & Invariants</span></div>{testSubjects.map(([subject, evidence], index) => <div className="oe-test-row" role="row" key={subject}><span role="cell"><i>{String(index + 1).padStart(2, '0')}</i>{subject}</span><p role="cell">{evidence}</p></div>)}</div>
           <div className="oe-verification-strip">
             <p><b>01 / Clean Virtualenv Wheel</b><span>Installed into isolated environments; public API imports, 158 symbols, and packaging verified without side effects.</span></p>
@@ -3723,15 +3723,15 @@ function OrchestrationEngineReport({ entranceDelay = 0, onBackToHome, onNavigate
         <div className="oe-report-section-label"><span>07</span><p>Engineering transformation (G1–G13)</p></div>
         <div className="oe-report-section-body">
           <h3>Systematic elimination of all 13 architectural gaps from prototype to release.</h3>
-          <p>During the transition from v0.1.0 prototype to v0.9.0 production beta, every architectural gap—from thread timeout leaks and unhandled transitive cancellations to untyped data passing and process resumption—was systematically resolved and locked with formal Architectural Decision Records (ADRs).</p>
+          <p>During the transition from v0.1.0 prototype to v1.0.0 production release, every architectural gap—from thread timeout leaks and unhandled transitive cancellations to untyped data passing and process resumption—was systematically resolved and locked with formal Architectural Decision Records (ADRs).</p>
           <OeTransformationGrid />
         </div>
       </section>
 
       <footer className="oe-report-footer">
         <span>01 / Fault-Tolerant Orchestration Engine</span>
-        <span>v0.9.0 · Production-Ready Beta · Dual MIT / Apache-2.0</span>
-        <p>Source for this case file: Portfolio Master Specification v0.9.0, PyPI Package, Documentation Site, and Empirical Benchmarks.</p>
+        <span>v1.0.0 · Production Release · Dual MIT / Apache-2.0</span>
+        <p>Source for this case file: Portfolio Master Specification v1.0.0, PyPI Package, Documentation Site, and Empirical Benchmarks.</p>
         <div className="oe-report-btn-group mt-5">
           {onBackToHome && (
             <HoldButton

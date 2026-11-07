@@ -49,7 +49,7 @@ export default function ModernProjects({ onOpenDossier }) {
                       301/301 PASSING (92.35% COV)
                     </span>
                     <span className="font-mono text-[0.65rem] tracking-wider text-white/40">
-                      PyPI v0.9.0
+                      PyPI v1.0.0
                     </span>
                   </div>
 
