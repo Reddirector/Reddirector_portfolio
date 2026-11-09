@@ -12,13 +12,6 @@ import PentagonWorkstationReport from './components/Pentagon/PentagonReport'
 import ValtSkyVisual from './components/ValtSky/ValtSkyVisual'
 import ValtSkyReport from './components/ValtSky/ValtSkyReport'
 import BarbaTransitionOverlay from './components/BarbaTransition/BarbaTransitionOverlay'
-import ModernHUDNav from './components/Navigation/ModernHUDNav'
-import ModernHero from './components/Hero/ModernHero'
-import ModernProjects from './components/Projects/ModernProjects'
-import ModernMethod from './components/Method/ModernMethod'
-import ModernArsenal from './components/Arsenal/ModernArsenal'
-import ModernFooter from './components/Footer/ModernFooter'
-import ModernCommandPalette from './components/CommandPalette/ModernCommandPalette'
 import CircularCarousel from './CircularCarousel'
 import HoldButton from './HoldButton'
 import CipherReveal from './CipherReveal'
@@ -5022,106 +5015,20 @@ export default function PortfolioApp() {
   useSmoothScroll()
   const { playing, done } = useIntro()
   const contentRef = useRef(null)
-  const [activeModalProject, setActiveModalProject] = useState(null)
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
-
-  // Auto-open project if URL points to it on mount
-  useEffect(() => {
-    const route = parseCurrentRoute()
-    if (route.page === 'project' && route.project) {
-      setActiveModalProject(route.project)
-      document.title = `${route.project.name} | Reddirector`
-    }
-  }, [])
-
-  // Handle browser back / forward buttons
-  useEffect(() => {
-    const handlePopState = () => {
-      const route = parseCurrentRoute()
-      if (route.page === 'project' && route.project) {
-        setActiveModalProject(route.project)
-        document.title = `${route.project.name} | Reddirector`
-      } else {
-        setActiveModalProject(null)
-        document.title = 'Aditya Kumar Singh | Systems, ML & Engineering Portfolio'
-      }
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
-
-  const handleOpenDossier = (slugOrName) => {
-    const projName = SLUG_TO_PROJECT_NAME[slugOrName] || slugOrName
-    const proj = featuredProjects.find((p) => p.name === projName || p.id === slugOrName)
-    if (proj) {
-      setActiveModalProject(proj)
-      const slug = PROJECT_NAME_TO_SLUG[proj.name] || proj.id
-      const basePath = getAppBasePath()
-      window.history.pushState({ project: slug }, '', `${basePath}projects/${slug}`)
-      document.title = `${proj.name} | Reddirector`
-    }
-  }
-
-  const handleCloseModal = () => {
-    setActiveModalProject(null)
-    const basePath = getAppBasePath()
-    window.history.pushState(null, '', `${basePath}#work`)
-    document.title = 'Aditya Kumar Singh | Systems, ML & Engineering Portfolio'
-  }
-
-  const handleNavigateProject = (nextProject) => {
-    if (nextProject) {
-      setActiveModalProject(nextProject)
-      const slug = PROJECT_NAME_TO_SLUG[nextProject.name] || nextProject.id
-      const basePath = getAppBasePath()
-      window.history.pushState({ project: slug }, '', `${basePath}projects/${slug}`)
-      document.title = `${nextProject.name} | Reddirector`
-    }
-  }
 
   useEffect(() => {
     const cleanup = initBarba()
     return () => cleanup?.()
   }, [])
 
-  return (
-    <div
-      style={{ '--color-accent': content.accent }}
-      className="portfolio-root bg-black text-white selection:bg-red-600 selection:text-white min-h-screen"
-      inert={playing || undefined}
-      aria-hidden={playing || undefined}
-    >
-      <BarbaTransitionOverlay />
-      <Intro active={playing} onDone={done} contentRef={contentRef} />
-      <div className="portfolio-content" ref={contentRef}>
-        <a className="skip-link" href="#main">Skip to content</a>
-        <ModernHUDNav onOpenCommandPalette={() => setCommandPaletteOpen(true)} />
-        <main id="main" data-barba="container" data-barba-namespace="portfolio-home">
-          <ModernHero onExploreWork={() => {}} onOpenDossier={handleOpenDossier} />
-          <ModernProjects onOpenDossier={handleOpenDossier} />
-          <ModernMethod />
-          <ModernArsenal />
-        </main>
-        <ModernFooter />
-      </div>
-
-      <ModernCommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        onSelectAction={(type, payload) => {
-          if (type === 'dossier') handleOpenDossier(payload)
-          if (type === 'open-palette') setCommandPaletteOpen(true)
-        }}
-      />
-
-      {activeModalProject && (
-        <ProjectModal
-          key={activeModalProject.id}
-          project={activeModalProject}
-          close={handleCloseModal}
-          onNavigateProject={handleNavigateProject}
-        />
-      )}
+  return <div style={{ '--color-accent': content.accent }} className="portfolio-root" inert={playing || undefined} aria-hidden={playing || undefined}>
+    <BarbaTransitionOverlay />
+    <Intro active={playing} onDone={done} contentRef={contentRef} />
+    <div className="portfolio-content" ref={contentRef}>
+      <a className="skip-link" href="#main">Skip to content</a>
+      <Header shown={!playing} />
+      <main id="main" data-barba="container" data-barba-namespace="portfolio-home"><Hero shown={!playing} /><Work /><Method /><About /><Now /></main>
+      <Contact />
     </div>
-  )
+  </div>
 }
